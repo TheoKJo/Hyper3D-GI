@@ -11,7 +11,11 @@
 ###################
 *.user
 *.suo
-*.nsb
+*.ncb
+Release
+Release DLL
+Debug
+Debug DLL
 
 # Packages #
 ############
@@ -34,4 +38,6 @@
 
 # OS generated files #
 ######################
+# Windows
 *.db
+*.lnk
