@@ -1,3 +1,11 @@
+/*!
+ * \file		SphericalHarmonics.inl
+ * \brief		
+ * \author		Hybrid (creavol@gmail.com)
+ * \date		2011/11/22
+ * created:		2011/11/22 21:16
+ * copyright	Hybrid (creavol@gmail.com)
+ */
 template<unsigned int order>
 void SphericalHarmonics<order>::Reset()
 {
@@ -6,7 +14,7 @@ void SphericalHarmonics<order>::Reset()
 }
 
 template<unsigned int order>
-float SphericalHarmonics<order>::DotProduct( const SphericalHarmonics &SH ) const
+float SphericalHarmonics<order>::InnerProduct( const SphericalHarmonics &SH ) const
 {
 	unsigned int NumberOfCoefficients = GetNumberOfCoefficients()<SH.GetNumberOfCoefficients()?GetNumberOfCoefficients():SH.GetNumberOfCoefficients();
 
@@ -17,7 +25,7 @@ float SphericalHarmonics<order>::DotProduct( const SphericalHarmonics &SH ) cons
 }
 
 //template<unsigned int order, unsigned int order2>
-//float SphericalHarmonics<order>::DotProduct( const SphericalHarmonics<order2> &SH ) const
+//float SphericalHarmonics<order>::InnerProduct( const SphericalHarmonics<order2> &SH ) const
 //{
 //	unsigned int NumberOfCoefficients = GetNumberOfCoefficients()<SH.GetNumberOfCoefficients()?GetNumberOfCoefficients():SH.GetNumberOfCoefficients();
 //

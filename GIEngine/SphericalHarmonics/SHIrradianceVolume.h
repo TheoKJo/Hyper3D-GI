@@ -1,3 +1,11 @@
+/*!
+ * \file		SHIrradianceVolume.h
+ * \brief		
+ * \author		Hybrid (creavol@gmail.com)
+ * \date		2011/11/22
+ * created:		2011/11/22 21:16
+ * copyright	Hybrid (creavol@gmail.com)
+ */
 #include "SphericalHarmonics.h"
 #include "../IrradianceVolume.h"
 //#include "IrradianceVolume.h"

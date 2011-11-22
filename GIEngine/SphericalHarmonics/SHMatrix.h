@@ -1,3 +1,11 @@
+/*!
+ * \file		SHMatrix.h
+ * \brief		
+ * \author		Hybrid (creavol@gmail.com)
+ * \date		2011/11/22
+ * created:		2011/11/22 21:16
+ * copyright	Hybrid (creavol@gmail.com)
+ */
 #pragma once
 
 #ifndef SPHERICAL_HARMONICS_MATRIX_H

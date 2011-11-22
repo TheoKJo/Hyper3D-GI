@@ -1,11 +1,19 @@
+/*!
+ * \file		GIEngine.cpp
+ * \brief		
+ * \author		Hybrid (creavol@gmail.com)
+ * \date		2011/11/22
+ * created:		2011/11/22 21:13
+ * copyright	Hybrid (creavol@gmail.com)
+ */
 #include "GIEnginePCH.h"
 
 #include "GIScene.h"
 
 #include "SphericalHarmonics/SphericalHarmonics.h"
-#include "AmbientCube.h"
+#include "AmbientCube/AmbientCube.h"
 
-#include "AmbientCubeIrradianceVolume.h"
+#include "AmbientCube/AmbientCubeIrradianceVolume.h"
 
 #include "GIEngine.h"
 
@@ -13,7 +21,7 @@
 
 #include "Raytracer/KDTreeStructure.h"
 
-#include "RaytracerProcedure.h"
+#include "Raytracer/RaytracerProcedure.h"
 #include "IrradianceCalcThread.h"
 
 RtScene* RaytracerProcedure::mRtScene = NULL;

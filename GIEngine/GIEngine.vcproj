@@ -202,9 +202,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="squishd.lib"
 				OutputFile="$(OutDir)\$(ProjectName)D.lib"
-				AdditionalLibraryDirectories="squish-1.10\lib"
+				AdditionalLibraryDirectories=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -299,43 +298,19 @@
 			Name="AmbientCube"
 			>
 			<File
-				RelativePath=".\AmbientCube.cpp"
+				RelativePath=".\AmbientCube\AmbientCube.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\AmbientCube.h"
+				RelativePath=".\AmbientCube\AmbientCube.h"
 				>
 			</File>
 			<File
-				RelativePath=".\AmbientCubeIrradianceVolume.cpp"
+				RelativePath=".\AmbientCube\AmbientCubeIrradianceVolume.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\AmbientCubeIrradianceVolume.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Thread"
-			>
-			<File
-				RelativePath=".\IrradianceCalcThread.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IrradianceCalcThread.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="IrradianceVolume"
-			>
-			<File
-				RelativePath=".\IrradianceVolume.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IrradianceVolume.h"
+				RelativePath=".\AmbientCube\AmbientCubeIrradianceVolume.h"
 				>
 			</File>
 		</Filter>
@@ -434,26 +409,6 @@
 				RelativePath=".\GIScene.h"
 				>
 			</File>
-			<File
-				RelativePath=".\RaytracerProcedure.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Sampling"
-			>
-			<File
-				RelativePath=".\Sample.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SampleArray.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SampleFunction.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Raytracer"
@@ -472,6 +427,10 @@
 			</File>
 			<File
 				RelativePath=".\Raytracer\Raytracer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Raytracer\RaytracerProcedure.h"
 				>
 			</File>
 		</Filter>
@@ -527,6 +486,34 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\IrradianceCalcThread.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\IrradianceCalcThread.h"
+			>
+		</File>
+		<File
+			RelativePath=".\IrradianceVolume.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\IrradianceVolume.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Sample.h"
+			>
+		</File>
+		<File
+			RelativePath=".\SampleArray.h"
+			>
+		</File>
+		<File
+			RelativePath=".\SampleFunction.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
