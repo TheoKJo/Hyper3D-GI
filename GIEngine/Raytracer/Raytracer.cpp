@@ -92,6 +92,7 @@ GIHit Raytracer::ShootRay( RtScene *rtScene, const GIRay &Ray )
 	StackStruct RootStatkNode = { pKDTree->GetRootNode(), pKDTree->GetBoundingBox() };
 
 	std::vector<StackStruct> StackStorage;
+	// TODO: 500?? Àý´ë ¾ÈµÊ!!
 	StackStorage.reserve( 500 );
 	std::stack<StackStruct, std::vector<StackStruct> > Stack( StackStorage );
 	Stack.push( RootStatkNode );

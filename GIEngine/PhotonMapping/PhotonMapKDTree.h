@@ -20,33 +20,6 @@ namespace GIEngine {
 
 class GIPhoton;
 
-struct RtEdge
-{
-	/*RtEdge& operator=( const RtEdge &edge )
-	{
-		axis = edge.axis;
-		position = edge.position;
-		PhotonIndex = edge.PhotonIndex;
-		bIsLeft = edge.bIsLeft;
-		bIsPlanar = edge.bIsPlanar;
-		return *this;
-	}*/
-	int axis;		// k
-	float position;
-	unsigned int PhotonIndex;
-
-	bool bIsLeft;
-	bool bIsPlanar;
-
-	bool isPlanar() { return bIsPlanar; }
-	bool isLeft() { return bIsLeft; }
-	bool isRight() { return !bIsLeft; }
-
-	void setLeft() { bIsLeft = true; }
-	void setRight() { bIsLeft = false; }
-	void setPlanar( bool flag = true ) { bIsPlanar = flag; }
-};
-
 class GIPhotonMapKDTreeNode
 {
 public:
@@ -134,31 +107,30 @@ public:
 	GIPhotonMapKDTree();
 	virtual ~GIPhotonMapKDTree();
 
-	void ConstructKDTree( const GIPhoton *PhotonList, const int PhotonCount );
+	bool IsBuilt();
+	void SetBuildParameters( int MinimumPhotonCount, float MinimumNodeLength );
+
+	void ConstructKDTree( const std::vector<GIPhoton> &PhotonArray, unsigned int PhotonCount );
 	void DestructTree();
 
 	bool SaveToFile( const char *Filename );
 	bool LoadFromFile( const char *Filename );
 
-	bool IsBuilt();
-	void SetBuildParameters( const float &IntersectionCost, const float &TraversalCost, const int MinimumPhotonCount );
-
 	GIPhotonMapKDTreeNode* GetRootNode() { return mRootNode; }
 	int GetNodeSize() { return mNodeSize; }
 
-	GIBoundingBox GetBoundingBox() { return mSceneBoundingBox; }
+	GIBoundingBox GetBoundingBox() { return mPhotonMapBoundingBox; }
 	
 private:
 	//! ConstructKDTree 용 내부 함수
-	GIPhotonMapKDTreeNode* CreateNode( int StartEdgeIndex, const std::vector<unsigned int> &PhotonList, const int PhotonCount, const GIBoundingBox &BoundingBox );
-	void EvaluateCost( RtSAHCost &SAHCost, const std::vector<unsigned int> &PhotonList, const int PhotonCount, const GIBoundingBox &BoundingBox, int Axis );
-	int InitializeEdge( RtEdge *EdgeArray, const std::vector<unsigned int> &PhotonList, const int PhotonCount, int Axis );
+	GIPhotonMapKDTreeNode* CreateNode( const std::vector<unsigned int> &PhotonIndexList, const int PhotonCount, const GIBoundingBox &BoundingBox, int SplitAxis );
+	void EvaluateCost( RtSAHCost &SAHCost, const std::vector<unsigned int> &PhotonIndexList, const int PhotonCount, const GIBoundingBox &BoundingBox, int Axis );
 
 public:
 	// Build 용
 	int mMinimumPhotonCount;
-	float mIntersectionCost;
-	float mTraversalCost;
+	float mMinimumNodeLength;
+
 private:
 	int mCurNodePhotonIndex;	//!< 현재의 triangle index 들이 저장될 위치
 	int mCurNodeSize; //!< for mKDTreeNodeSize
@@ -166,15 +138,13 @@ private:
 private:
 	GIPhotonMapKDTreeNode *mRootNode;
 	int mNodeSize;
-	GIBoundingBox mSceneBoundingBox;
+	GIBoundingBox mPhotonMapBoundingBox;
 
 // Internal Use Only
 private:
-	void SortEdgeArray( RtEdge *EdgeArray, int EdgeSize );
-	void SortEdgeIndexArray();
-
-	int mPhotonCount;
+	unsigned int mPhotonCount;
 	GIPhotonMapKDTreeNode *mNodeArray;
+	const std::vector<GIPhoton> *mPhotonArray;
 };
 
 };};

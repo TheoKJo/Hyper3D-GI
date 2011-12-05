@@ -18,7 +18,7 @@ namespace GIEngine { namespace PhotonMapping {
 class GIPhoton
 {
 public:
-	GIPhoton() : mLivingProbability(0.1f), mLivingPhoton(true), mValidPhoton(true), mLastPass(0) {}
+	GIPhoton() : Color(1.0f, 1.0f, 1.0f), mLivingProbability(0.1f), mLivingPhoton(true), mValidPhoton(true), mLastPass(0) {}
 
 	GIVector3 Color;
 	//float mIntensity;
@@ -27,9 +27,9 @@ public:
 	GIVector3 Position;
 	GIVector3 Direction;
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	unsigned int mLastPass;
-#endif
+//#endif
 
 	void Initialize()
 	{

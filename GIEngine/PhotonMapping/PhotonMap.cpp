@@ -15,7 +15,7 @@
 using namespace GIEngine::PhotonMapping;
 
 GIPhotonMap::GIPhotonMap( GIEngine::GIScene *Scene, unsigned int ApproxPhotonSize )
-	: mScene(Scene)
+	: mScene(Scene), mPhotonMapKDTree(NULL)
 {
 	mPhotonArray.reserve( ApproxPhotonSize );
 }
@@ -31,10 +31,11 @@ bool GIPhotonMap::CreatePhotonKDTree()
 	if( GetPhotonCount() == 0 )
 		return false;
 
-	/*GIPhotonMapKDTree *PhotonMapKDTree = new GIPhotonMapKDTree();
-	PhotonMapKDTree->ConstructKDTree( GetPhotonArray(), GetPhotonCount() );*/
+	GIPhotonMapKDTree *PhotonMapKDTree = new GIPhotonMapKDTree();
+	PhotonMapKDTree->ConstructKDTree( GetPhotonArray(), GetPhotonCount() );
 
-	//PhotonMapKDTree->
+	SafeDelete( &mPhotonMapKDTree );
+	mPhotonMapKDTree = PhotonMapKDTree;
 
 	return true;
 }

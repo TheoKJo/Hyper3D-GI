@@ -9,13 +9,33 @@
 #include "GIEnginePCH.h"
 #include "../GIEnginePCH.h"
 
+#include "PhotonMapKDTree.h"
 #include "PhotonMapping.h"
 
 #include "GIEngine/GIEngine.h"
 #include "GIEngine/GIScene.h"
 #include "GIEngine/Raytracer/Raytracer.h"
 
+#include <vector>
+#include <stack>
+
 using namespace GIEngine;
+
+static PhotonMapping::PhotonMappingOption g_PhotonMappingOption;
+
+//namespace PhotonMapping {
+	void GatherPhotons( std::vector<unsigned int > &outPhoton, PhotonMapping::GIPhotonMapKDTree *pKDTree, const GIVector3 CenterPosition, float Radius, unsigned int MaximumPhotonCount = 0 );
+//};
+
+void PhotonMapping::SetPhotonMappingOption( const PhotonMappingOption &Option )
+{
+	g_PhotonMappingOption = Option;
+}
+
+PhotonMapping::PhotonMappingOption PhotonMapping::GetPhotonMappingOption()
+{
+	return g_PhotonMappingOption;
+}
 
 void PhotonMapping::GeneratePhotons( const GIVector3 &Position, const GIColor3 &Color, unsigned int PhotonCount, GIPhoton *outPhotonArray, SphericalCoordinateSamplingFunction pSphericalCoordinateSamplingFunction )
 {
@@ -24,7 +44,7 @@ void PhotonMapping::GeneratePhotons( const GIVector3 &Position, const GIColor3 &
 	for( unsigned int i = 0; i < PhotonCount; i++ )
 	{
 		outPhotonArray[i].Initialize();
-		outPhotonArray[i].Color = Color;
+		outPhotonArray[i].Color = Color * g_PhotonMappingOption.PhotonIntensity;
 		float theta, phi;
 		pSphericalCoordinateSamplingFunction( NormalizedRandom<true,false>(), NormalizedRandom<true,false>(), &theta, &phi );
 		outPhotonArray[i].Position = Position;
@@ -32,20 +52,16 @@ void PhotonMapping::GeneratePhotons( const GIVector3 &Position, const GIColor3 &
 	}
 }
 
-PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene, unsigned int MaxPhotonPass )
+PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene )
 {
-	if( MaxPhotonPass <= 1 )
-	{
-		// 최소 2번의 pass는 거쳐야함.
-		// TODO: Warning
+	if( !g_PhotonMappingOption.IsValid() )
 		return NULL;
-	}
 
 	/// 완점 임시 코드
-	unsigned int PhotonCount = 10000000;
-	GIPhotonMap *PhotonMap = new GIPhotonMap( inScene, PhotonCount * inScene->GetLightCount() );
+	unsigned int PhotonCount = g_PhotonMappingOption.PhotonCountPerLight * inScene->GetLightCount();
+	GIPhotonMap *PhotonMap = new GIPhotonMap( inScene, PhotonCount );
 
-	GIPhoton *PhotonArray = new GIPhoton[PhotonCount];
+	GIPhoton *PhotonArray = new GIPhoton[g_PhotonMappingOption.PhotonCountPerLight];
 	GILight **LightArray = inScene->GetLightArray();
 	for( unsigned int i = 0; i < inScene->GetLightCount(); i++ )
 	{
@@ -55,12 +71,12 @@ PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene, un
 		for( unsigned int samplingPass = 0; samplingPass < 2; samplingPass++ )
 		{
 			// TODO: DiffuseColor를 그대로 쓰는건 말도 안되는 방식
-			GeneratePhotons( PointLight->Position, PointLight->DiffuseColor.ToVector3(), PhotonCount, PhotonArray, &UniformSphericalCoordinateSamplingFunction );
+			GeneratePhotons( PointLight->Position, PointLight->DiffuseColor.ToVector3(), g_PhotonMappingOption.PhotonCountPerLight, PhotonArray, &UniformSphericalCoordinateSamplingFunction );
 
 			// TODO: Refactoring 해야함. 죽은 포톤을 계속 loop에서 관리함. 살아 있는 것들만 관리해야함.
-			for( unsigned int Pass = 0; Pass <= MaxPhotonPass; Pass++ )
+			for( unsigned int Pass = 0; Pass <= g_PhotonMappingOption.MaxPhotonPass; Pass++ )
 			{
-				if( ShootPhotons( Pass, inScene, PhotonArray, PhotonCount, NULL, NULL ) == false )
+				if( ShootPhotons( Pass, inScene, PhotonArray, g_PhotonMappingOption.PhotonCountPerLight, NULL, NULL ) == false )
 					break;
 
 				if( Pass == MAX_PHOTON_SHOOTING_PASS-1 )
@@ -69,11 +85,11 @@ PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene, un
 					break;
 				}
 			}
-			for( unsigned int i = 0; i < PhotonCount; i++ )
+			for( unsigned int i = 0; i < g_PhotonMappingOption.PhotonCountPerLight; i++ )
 			{
 				if( PhotonArray[i].IsValidPhoton() && PhotonArray[i].IsLivingPhoton() == false )
 					PhotonMap->InsertPhoton( PhotonArray[i] );
-				if( PhotonMap->GetPhotonCount() >= PhotonCount )
+				if( PhotonMap->GetPhotonCount() >= g_PhotonMappingOption.PhotonCountPerLight )
 				{
 					samplingPass = 100;
 					break;
@@ -93,6 +109,7 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene,
 				  GIPhoton *inPhotonArray, unsigned int inPhotonCount, 
 				  GIPhoton *outPhotonArray/* = NULL*/, unsigned int *outLivingPhotonCount/* = NULL*/ )
 {
+	assert( g_PhotonMappingOption.IsValid() );
 	unsigned int LivingPhotonCount = 0;
 
 	for( unsigned int i = 0; i < inPhotonCount; i++ )
@@ -138,15 +155,13 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene,
 				outPhoton->Position = inPhoton.Position + GIVector3( ray.dir ) * hitResult.dist + normal * inScene->GetSceneEpsilon();
 				//outPhoton->Color = outPhoton->Color * albedo.ToVector3();
 
-				if( Pass == 0 )
-					outPhoton->Color = albedo.ToVector3();//GIVector3( 0.0f, 0.0f, 0.0f );
-				//if( Pass == 1 )
-				//	outPhoton->Color = albedo.ToVector3();
+				//outPhoton->Color *= albedo.ToVector3();//GIVector3( 0.0f, 0.0f, 0.0f );
 
 				//
 				// Russian Roulette
 				// Pass가 0일 경우는 항상 죽지 않음.
-				bool live = Pass == 0 || NormalizedRandom<true,false>() < outPhoton->GetLivingProbability();
+				
+				bool live = (g_PhotonMappingOption.ExcludeDirectPhoton && Pass == 0) || NormalizedRandom<true,false>() < outPhoton->GetLivingProbability();
 				if( live )
 				{
 					// 원래 BRDF를 고려해야함
@@ -191,6 +206,14 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene,
 						tangent * sin(theta) * cos( phi ) + 
 						binormal * sin(theta) * cos( phi ) + 
 						normal * cos(theta);
+
+					// 살아 나갈 경우만 누적
+					outPhoton->Color.r *= albedo.ToVector3().r;
+					outPhoton->Color.g *= albedo.ToVector3().g;
+					outPhoton->Color.b *= albedo.ToVector3().b;
+
+					//if( Pass == 0 )
+					//	outPhoton->Color = albedo.ToVector3();
 				}
 				else
 				{
@@ -219,24 +242,50 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene,
 
 GIColor3 PhotonMapping::FinalGathering( GIScene *inScene, GIPhotonMap *inPhotonMap, const GIVector3 &Position, const GIVector3 &RayDirection/*, const GIHit &hitResult*/ )
 {
+	assert( g_PhotonMappingOption.IsValid() );
 	//assert( hitResult.isHit() );
+	assert( inPhotonMap != NULL );
 
 	//const GITriangle &hitTriangle = inScene->GetTriangle( hitResult.triNum );
 
 	// 가장 무식한 방법. KDTree도 없고, Sphere로 거리 계산.
-	const float SphereRadius = 10.0f;
+	const float SphereRadius = g_PhotonMappingOption.GatheringRadius;
 	const float SphereRadiusSquared = SphereRadius * SphereRadius;
-	const float SphereArea = 4.0f/3.0f*FLOAT_PI*SphereRadius*SphereRadius*SphereRadius;
+	const float SphereArea = 4.0f/3.0f*FLOAT_PI*SphereRadius*SphereRadius;
+	
+	std::vector<unsigned int> PhotonList;
+	PhotonList.reserve( g_PhotonMappingOption.MaximumGatheringPhotonCount );
+	GatherPhotons( PhotonList, inPhotonMap->GetPhotonMapKDTree(), Position, g_PhotonMappingOption.GatheringRadius, g_PhotonMappingOption.MaximumGatheringPhotonCount );
+
 	GIColor3 outColor( 0.0f, 0.0f, 0.0f );
-	for( unsigned int i = 0; i < inPhotonMap->GetPhotonCount(); i++ )
+	for( unsigned int i = 0; i < PhotonList.size(); i++ )
 	{
-		const GIPhoton &Photon = inPhotonMap->GetPhotonArray()[i];
+		const GIPhoton &Photon = inPhotonMap->GetPhotonArray()[PhotonList[i]];
 		assert( Photon.IsValidPhoton() && Photon.IsLivingPhoton() == false );
-		if( (Position - Photon.Position).GetLengthSquared() < SphereRadius )
+		GIVector3 distanceVector = Photon.Position - Position;
+		float distanceSqaured = (distanceVector).GetLengthSquared();
+
+		if( distanceSqaured < SphereRadiusSquared )
 		{
-			outColor += Photon.Color;
+			float distance = sqrt( distanceSqaured );
+			outColor += Photon.Color * (1.0f-distance/SphereRadius);
+			//outColor += Photon.Color;
 		}
 	}
+
+	//GIColor3 outColor( 0.0f, 0.0f, 0.0f );
+	//for( unsigned int i = 0; i < inPhotonMap->GetPhotonCount(); i++ )
+	//{
+	//	const GIPhoton &Photon = inPhotonMap->GetPhotonArray()[i];
+	//	assert( Photon.IsValidPhoton() && Photon.IsLivingPhoton() == false );
+	//	GIVector3 distanceVector = Photon.Position - Position;
+	//	if( (distanceVector).GetLengthSquared() < SphereRadiusSquared )
+	//	{
+	//		//float sigma_squred = 
+	//		outColor += Photon.Color;
+	//	}
+	//}
+
 	outColor /= SphereArea;
 	return outColor;
 }
@@ -251,6 +300,16 @@ void PhotonMappingShading( RtScene *rtScene, const GIRay &Ray, const GIHit &Hit,
 	if( Hit.isHit() )
 		IndirectIlluminationColor = PhotonMapping::FinalGathering( (GIScene*)rtScene, gPhotonMap, GIVector3( Ray.org ) + GIVector3( Ray.dir ) * Hit.dist, GIVector3( Ray.dir ) );;
 	
+	// TODO: Clamp
+	if( IndirectIlluminationColor.r > 1.0f )
+		IndirectIlluminationColor.r = 1.0;
+	if( IndirectIlluminationColor.g > 1.0f )
+		IndirectIlluminationColor.g = 1.0;
+	if( IndirectIlluminationColor.b > 1.0f )
+		IndirectIlluminationColor.b = 1.0;
+	//IndirectIlluminationColor.r = pow( IndirectIlluminationColor.r, 1.0f/2.2f );
+	//IndirectIlluminationColor.g = pow( IndirectIlluminationColor.g, 1.0f/2.2f );
+	//IndirectIlluminationColor.b = pow( IndirectIlluminationColor.b, 1.0f/2.2f );
 	*outColor = DirectIlluminationColor + GIVector4( IndirectIlluminationColor.r, IndirectIlluminationColor.g, IndirectIlluminationColor.b, 0.0f );
 }
 
@@ -267,4 +326,116 @@ void PhotonMapping::Render( unsigned int ThreadCount, GIScene *pScene, GIPhotonM
 
 	UserDefinedShading( ThreadCount, pScene, RayCount, RayArray, outPixelData, &PhotonMappingShading );
 	delete[] RayArray;
+}
+
+//////////////////////////////////////////////////////////////////////////
+void GatherPhotons( std::vector<unsigned int > &outPhoton, PhotonMapping::GIPhotonMapKDTree *pKDTree, const GIVector3 GatheringPosition, float GatheringRadius, unsigned int MaximumPhotonCount )
+{
+	assert( pKDTree->IsBuilt() );
+
+	//_CrtMemState s1, s2, difference;
+	//_CrtMemCheckpoint( &s1 );
+
+	// TODO: 속도 문제가 좀 있을 수 있음.
+	struct StackStruct {
+		PhotonMapping::GIPhotonMapKDTreeNode *pNode;
+		GIBoundingBox BoundingBox;
+	};
+
+	StackStruct RootStatkNode = { pKDTree->GetRootNode(), pKDTree->GetBoundingBox() };
+
+	std::vector<StackStruct> StackStorage;
+	StackStorage.reserve( pKDTree->GetNodeSize() * 2 );
+	std::stack<StackStruct, std::vector<StackStruct> > Stack( StackStorage );
+	Stack.push( RootStatkNode );
+
+	// assume Ray hit pNode
+
+	static int modulo[5] = { 0, 1, 2, 0, 1 };
+
+	while( Stack.empty() == false )
+	{
+		StackStruct CurStatkNode = Stack.top();
+		PhotonMapping::GIPhotonMapKDTreeNode *curNode = CurStatkNode.pNode;
+		const GIBoundingBox &BB = CurStatkNode.BoundingBox;
+		const GIVector3 &Bmin = BB.MinPositions;
+		const GIVector3 &Bmax = BB.MaxPositions;
+		Stack.pop();
+
+		assert( curNode != NULL );
+
+		float dmin = 0;
+		float r2 = GatheringRadius * GatheringRadius;
+		for( unsigned int i = 0; i < 3; i++ ) {
+			if( GatheringPosition.array[i] < Bmin.array[i] )
+			{
+				//dmin += sqrt( GatheringPosition.array[i] - Bmin.array[i] );
+				float a = Bmin.array[i] - GatheringPosition.array[i];
+				dmin += a * a;
+				
+			}
+			else if( GatheringPosition.array[i] > Bmax.array[i] )
+			{
+				//dmin += sqrt( GatheringPosition.array[i] - Bmax.array[i] );
+				float a = GatheringPosition.array[i] - Bmax.array[i];
+				dmin += a * a;
+			}
+		}
+
+		/*if( dmin <= r2 )
+			return TRUE;*/
+		if( dmin > r2 )
+			continue;
+
+		// GatheringPosition은 이 노드안에 들어왔음.
+		if( curNode->IsLeafNode() )
+		{
+			// 거리 비교를 안하고 일단 다 넣음.
+			for( unsigned int i = 0; i < curNode->PhotonCount && outPhoton.size() < MaximumPhotonCount; i++ )
+				outPhoton.push_back( curNode->PhotonIndexArray[i] );
+
+			if( MaximumPhotonCount <= outPhoton.size() )
+				return;
+
+			continue;
+		}
+		else
+		{
+			int k = curNode->SplitAxis;
+			int k1 = modulo[k+1];
+			int k2 = modulo[k+2];
+
+			enum ENodeType { 
+				FRONT_NODE = 1, 
+				BACK_NODE = 2
+			};
+
+			int Node = 0;
+			if( GatheringPosition.array[k] - GatheringRadius <= curNode->SplitPosition )
+				Node |= FRONT_NODE;
+			if( curNode->SplitPosition <= GatheringPosition.array[k] + GatheringRadius )
+				Node |= BACK_NODE;
+			assert( Node > 0 );
+
+			GIBoundingBox LeftBox = CurStatkNode.BoundingBox;
+			GIBoundingBox RightBox = CurStatkNode.BoundingBox;
+
+			LeftBox.MaxPositions.array[k] = curNode->SplitPosition;
+			RightBox.MinPositions.array[k] = curNode->SplitPosition;
+
+			// 왼쪽부터 Traverse : 오른쪽부터 Push
+			if( (Node & BACK_NODE) && curNode->RightNode != NULL )
+			{
+				StackStruct Child = { curNode->RightNode, RightBox };
+				Stack.push( Child );
+			}
+			if( (Node & FRONT_NODE) && curNode->LeftNode != NULL )
+			{
+				StackStruct Child = { curNode->LeftNode, LeftBox };
+				Stack.push( Child );
+			}
+			continue;
+		}
+	}
+	return;
 }

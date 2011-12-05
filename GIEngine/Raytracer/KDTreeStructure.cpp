@@ -51,9 +51,6 @@ void KDTreeStructure::ConstructKDTree( const GITriangle *TriangleList, const int
 		//TriangleToBoundingBox( BoxMin, BoxMax, &TriangleList[i] );
 	}
 
-// Sort Edges
-	//SortEdgeArray();
-
 // Build KD-Tree
 	std::vector<unsigned int> TriangleList;
 	TriangleList.reserve( TriangleCount );

@@ -20,7 +20,7 @@
 
 #define FLOAT_EPSILON 0.001f
 #define FLOAT_PI 3.141592f
-#define GI_INFINITY 1e15f;
+#define GI_INFINITY 1e15f
 
 #include <math.h>
 
@@ -307,10 +307,37 @@ typedef GIVector3 GIColor3;
 typedef GIVector4 GIColor4;
 
 //! Axis Aligned Bounding Box
-struct GIBoundingBox
+class GIBoundingBox
 {
+public:
 	GIVector3 MinPositions;
 	GIVector3 MaxPositions;
+
+	GIVector3 GetDiagonal() const
+	{
+		return MaxPositions - MinPositions;
+	}
+
+	int GetLongestAxis() const
+	{
+		int Axis = -1;
+		const GIVector3 distancePosition = GetDiagonal();
+		if( distancePosition.array[0] < distancePosition.array[1] )
+		{
+			if( distancePosition.array[1] < distancePosition.array[2] )
+				Axis = 2;
+			else
+				Axis = 1;
+		}
+		else
+		{
+			if( distancePosition.array[0] < distancePosition.array[2] )
+				Axis = 2;
+			else
+				Axis = 0;
+		}
+		return Axis;
+	}
 };
 
 // TODO: 정말 안좋은 방식. 안쓰이는 것까지 모두 들어감.

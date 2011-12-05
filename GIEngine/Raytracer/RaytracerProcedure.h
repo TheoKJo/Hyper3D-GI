@@ -11,7 +11,8 @@
 #include <windows.h>
 
 
-#include "Raytracer/Raytracer.h"
+#include "Raytracer.h"
+//#include <Raytracer/Raytracer.h>
 
 // TODO : 파일 삭제
 
