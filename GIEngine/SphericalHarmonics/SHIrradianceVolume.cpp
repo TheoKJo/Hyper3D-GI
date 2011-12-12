@@ -44,31 +44,31 @@ SHIrradianceVolume* SHIrradianceVolume::LoadFromFile( const char *strFilename )
 
 	SHIrradianceVolume *Volume = new SHIrradianceVolume;
 	
-	fs >> Volume->mSize;
-	fs >> Volume->mSizeX;
-	fs >> Volume->mSizeY;
-	fs >> Volume->mSizeZ;
+	fs >> Volume->m_Size;
+	fs >> Volume->m_SizeX;
+	fs >> Volume->m_SizeY;
+	fs >> Volume->m_SizeZ;
 
-	fs >> Volume->mBoundingBoxMinVector.x;
-	fs >> Volume->mBoundingBoxMinVector.y;
-	fs >> Volume->mBoundingBoxMinVector.z;
-	fs >> Volume->mCellLength;
+	fs >> Volume->m_BoundingBoxMinVector.x;
+	fs >> Volume->m_BoundingBoxMinVector.y;
+	fs >> Volume->m_BoundingBoxMinVector.z;
+	fs >> Volume->m_CellLength;
 
-	if( Volume->mSize == 0 )
+	if( Volume->m_Size == 0 )
 	{
 		delete Volume;
 		return NULL;
 	}
 
-	if( Volume->mSize != Volume->mSizeX*Volume->mSizeY*Volume->mSizeZ )
+	if( Volume->m_Size != Volume->m_SizeX*Volume->m_SizeY*Volume->m_SizeZ )
 	{
 		delete Volume;
 		return NULL;
 	}
 
-	Volume->mSHVolume = new SphericalHarmonicsRGB<3>[Volume->mSize];
+	Volume->mSH = new SphericalHarmonicsRGB<3>[Volume->m_Size];
 
-	for( int i = 0; i < Volume->mSize; i++ )
+	for( int i = 0; i < Volume->m_Size; i++ )
 	{
 		int index = 0;
 		fs >> index;
@@ -107,20 +107,20 @@ bool SHIrradianceVolume::SaveToFile( const char *strFilename )
 	if( !fs.is_open() )
 		return false;
 
-	if( mSize == 0 )
+	if( m_Size == 0 )
 		return false;
 
-	fs << mSize << '\t';
-	fs << mSizeX << '\t';
-	fs << mSizeY << '\t';
-	fs << mSizeZ << std::endl;
+	fs << m_Size << '\t';
+	fs << m_SizeX << '\t';
+	fs << m_SizeY << '\t';
+	fs << m_SizeZ << std::endl;
 
-	fs << mBoundingBoxMinVector.x << '\t';
-	fs << mBoundingBoxMinVector.y << '\t';
-	fs << mBoundingBoxMinVector.z << std::endl;
-	fs << mCellLength << std::endl;
+	fs << m_BoundingBoxMinVector.x << '\t';
+	fs << m_BoundingBoxMinVector.y << '\t';
+	fs << m_BoundingBoxMinVector.z << std::endl;
+	fs << m_CellLength << std::endl;
 
-	for( int i = 0; i < mSize; i++ )
+	for( int i = 0; i < m_Size; i++ )
 	{
 		fs << i << std::endl;
 		SphericalHarmonicsRGB<3> &sh_rgb = GetSH_RGB( i );
@@ -146,31 +146,31 @@ bool SHIrradianceVolume::SaveToFile( const char *strFilename )
 
 const SphericalHarmonicsRGB<3>& SHIrradianceVolume::GetSH_RGB( int index ) const
 {
-	return mSHVolume[index];
+	return mSH[index];
 }
 
 SphericalHarmonicsRGB<3> SHIrradianceVolume::GetSH_RGB( int index )
 {
-	return mSHVolume[index];
+	return mSH[index];
 }
 
 SphericalHarmonicsRGB<3>* SHIrradianceVolume::GetSH_RGBPtr( int index )
 {
-	return &mSHVolume[index];
+	return &mSH[index];
 }
 
 SHIrradianceVolume::SHIrradianceVolume()
-	: mSHVolume(NULL)
+	: mSH(NULL)
 {
 }
 
 SHIrradianceVolume::SHIrradianceVolume( int SizeX, int SizeY, int SizeZ, const GIVector3& BoundingBoxMinVector, float CellLength )
 	: IrradianceVolume<SphericalHarmonicsRGB<3> >( SizeX, SizeY, SizeZ, BoundingBoxMinVector, CellLength )
 {
-	mSHVolume = new SphericalHarmonicsRGB<3>[mSize];
+	mSH = new SphericalHarmonicsRGB<3>[m_Size];
 }
 
 SHIrradianceVolume::~SHIrradianceVolume()
 {
-	SafeDeleteArray( &mSHVolume );
+	SafeDeleteArray( &mSH );
 }

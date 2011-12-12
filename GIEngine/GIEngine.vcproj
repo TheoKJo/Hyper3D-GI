@@ -271,8 +271,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="squish.lib"
-				AdditionalLibraryDirectories="squish-1.10\lib"
+				AdditionalLibraryDirectories=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -447,6 +446,10 @@
 			</File>
 			<File
 				RelativePath=".\PhotonMapping\PhotonMap.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PhotonMapping\PhotonMapKDTree.cpp"
 				>
 			</File>
 			<File

@@ -21,36 +21,36 @@
 //
 //	IrradianceVolume *Volume = new IrradianceVolume<AmbientCube>;
 //
-//	fs >> Volume->mSize;
-//	fs >> Volume->mSizeX;
-//	fs >> Volume->mSizeY;
-//	fs >> Volume->mSizeZ;
+//	fs >> Volume->m_Size;
+//	fs >> Volume->m_SizeX;
+//	fs >> Volume->m_SizeY;
+//	fs >> Volume->m_SizeZ;
 //
-//	fs >> Volume->mBoundingBoxMinVector.x;
-//	fs >> Volume->mBoundingBoxMinVector.y;
-//	fs >> Volume->mBoundingBoxMinVector.z;
-//	fs >> Volume->mCellLength;
+//	fs >> Volume->m_BoundingBoxMinVector.x;
+//	fs >> Volume->m_BoundingBoxMinVector.y;
+//	fs >> Volume->m_BoundingBoxMinVector.z;
+//	fs >> Volume->m_CellLength;
 //
-//	if( Volume->mSize == 0 )
+//	if( Volume->m_Size == 0 )
 //	{
 //		delete Volume;
 //		return NULL;
 //	}
 //
-//	if( Volume->mSize != Volume->mSizeX*Volume->mSizeY*Volume->mSizeZ )
+//	if( Volume->m_Size != Volume->m_SizeX*Volume->m_SizeY*Volume->m_SizeZ )
 //	{
 //		delete Volume;
 //		return NULL;
 //	}
 //
-//	//Volume->mVolumeData = new AmbientCube[Volume->mSize];
+//	//Volume->mVolumeData = new AmbientCube[Volume->m_Size];
 //
 //#ifdef IRRADIANCE_VOLUME_PRECALCULATED_POSITION
 //	assert( false );
 //#else
 //
 //	// TODO : 완전 임시
-//	for( int i = 0; i < Volume->mSize; i++ )
+//	for( int i = 0; i < Volume->m_Size; i++ )
 //	{
 //		int index = 0;
 //		fs >> index;

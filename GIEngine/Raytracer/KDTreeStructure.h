@@ -73,32 +73,32 @@ class TriangleBox
 public:
 	void Initialize( const GITriangle *Triangle )
 	{
-		mBoxMin = GIVector3( 1e15f, 1e15f, 1e15f );
-		mBoxMax = GIVector3( -1e15f, -1e15f, -1e15f );
+		m_BoxMin = GIVector3( 1e15f, 1e15f, 1e15f );
+		m_BoxMax = GIVector3( -1e15f, -1e15f, -1e15f );
 
 		for( int i = 0; i < 3; i++ )
 		{
-			if( mBoxMin.array[i] > Triangle->vg0.Vertex.array[i] )
-				mBoxMin.array[i] = Triangle->vg0.Vertex.array[i];
-			if( mBoxMin.array[i] > Triangle->vg1.Vertex.array[i] )
-				mBoxMin.array[i] = Triangle->vg1.Vertex.array[i];
-			if( mBoxMin.array[i] > Triangle->vg2.Vertex.array[i] )
-				mBoxMin.array[i] = Triangle->vg2.Vertex.array[i];
+			if( m_BoxMin.array[i] > Triangle->vg0.Vertex.array[i] )
+				m_BoxMin.array[i] = Triangle->vg0.Vertex.array[i];
+			if( m_BoxMin.array[i] > Triangle->vg1.Vertex.array[i] )
+				m_BoxMin.array[i] = Triangle->vg1.Vertex.array[i];
+			if( m_BoxMin.array[i] > Triangle->vg2.Vertex.array[i] )
+				m_BoxMin.array[i] = Triangle->vg2.Vertex.array[i];
 
-			if( mBoxMax.array[i] < Triangle->vg0.Vertex.array[i] )
-				mBoxMax.array[i] = Triangle->vg0.Vertex.array[i];
-			if( mBoxMax.array[i] < Triangle->vg1.Vertex.array[i] )
-				mBoxMax.array[i] = Triangle->vg1.Vertex.array[i];
-			if( mBoxMax.array[i] < Triangle->vg2.Vertex.array[i] )
-				mBoxMax.array[i] = Triangle->vg2.Vertex.array[i];
-			assert( mBoxMin.array[i] <= mBoxMax.array[i] );
+			if( m_BoxMax.array[i] < Triangle->vg0.Vertex.array[i] )
+				m_BoxMax.array[i] = Triangle->vg0.Vertex.array[i];
+			if( m_BoxMax.array[i] < Triangle->vg1.Vertex.array[i] )
+				m_BoxMax.array[i] = Triangle->vg1.Vertex.array[i];
+			if( m_BoxMax.array[i] < Triangle->vg2.Vertex.array[i] )
+				m_BoxMax.array[i] = Triangle->vg2.Vertex.array[i];
+			assert( m_BoxMin.array[i] <= m_BoxMax.array[i] );
 
-			bPlanar[i] = mBoxMin.array[i] == mBoxMax.array[i];
+			bPlanar[i] = m_BoxMin.array[i] == m_BoxMax.array[i];
 		}
 	}
 
-	GIVector3 mBoxMin;
-	GIVector3 mBoxMax;
+	GIVector3 m_BoxMin;
+	GIVector3 m_BoxMax;
 	bool bPlanar[3];
 
 	bool isPlanar( int Axis ) { return bPlanar[Axis]; }
@@ -198,12 +198,12 @@ public:
 	bool LoadFromFile( const char *Filename );
 
 	bool IsBuilt();
-	void SetBuildParameters( const float &IntersectionCost, const float &TraversalCost, const int MinimumTriangleCount );
+	void SetBuildParameters( const float &IntersectionCost, const float &TraversalCost, const int Minimum_TriangleCount );
 
-	RtKDTreeNode* GetRootNode() { return mRootNode; }
-	int GetNodeSize() { return mNodeSize; }
+	RtKDTreeNode* GetRootNode() { return m_RootNode; }
+	int GetNodeSize() { return m_NodeSize; }
 
-	GIBoundingBox GetBoundingBox() { return mSceneBoundingBox; }
+	GIBoundingBox GetBoundingBox() { return m_SceneBoundingBox; }
 	
 private:
 	//! ConstructKDTree 용 내부 함수
@@ -213,17 +213,17 @@ private:
 
 public:
 	// Build 용
-	int mMinimumTriangleCount;
-	float mIntersectionCost;
+	int m_MinimumTriangleCount;
+	float m_IntersectionCost;
 	float mTraversalCost;
 private:
-	int mCurNodeTriangleIndex;	//!< 현재의 triangle index 들이 저장될 위치
-	int mCurNodeSize; //!< for mKDTreeNodeSize
+	int m_CurNodeTriangleIndex;	//!< 현재의 triangle index 들이 저장될 위치
+	int m_CurNodeSize; //!< for mKDTreeNodeSize
 
 private:
-	RtKDTreeNode *mRootNode;
-	int mNodeSize;
-	GIBoundingBox mSceneBoundingBox;
+	RtKDTreeNode *m_RootNode;
+	int m_NodeSize;
+	GIBoundingBox m_SceneBoundingBox;
 	
 	//unsigned int 
 
@@ -233,8 +233,8 @@ private:
 	void SortEdgeIndexArray();
 	void TriangleToBoundingBox( GIVector3 &BoxMin, GIVector3 &BoxMax, const GITriangle *Triangle );	
 
-	TriangleBox *mTriangleBoxArray;
+	TriangleBox *m_TriangleBoxArray;
 
-	int mTriangleCount;
-	RtKDTreeNode *mNodeArray;
+	int m_TriangleCount;
+	RtKDTreeNode *m_NodeArray;
 };

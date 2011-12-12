@@ -19,7 +19,15 @@ using namespace GIEngine;
 using namespace GIEngine::Radiosity;
 
 RadiosityScene::RadiosityScene()
-	: mScene(NULL)
+	: m_Scene(NULL), m_MaterialCount(0), m_LightMapMaterialList(NULL), 
+	m_QuadrangleCount(0), m_QuadrangleList(NULL), 
+
+	m_QuadranglePositionList(NULL), m_QuadrangleNormalList(NULL), m_QuadrangleColorList(NULL), 
+	m_QuadrangleAreaList(NULL), 
+
+	m_FormFactorCount(NULL), m_FormFactors(NULL), 
+
+	m_VertexCount(NULL), m_VertexPositionList(NULL), m_VertexNormalList(NULL)
 {
 }
 
@@ -32,22 +40,23 @@ bool RadiosityScene::Initialize( GIScene *pScene )
 {
 	assert( pScene != NULL );
 
-	mMaterialCount = pScene->GetMaterialCount();
+	m_MaterialCount = pScene->GetMaterialCount();
 	GIMaterial **MaterialArray = pScene->GetMaterialArray();
-	SafeDeleteArray( &mLightMapMaterialList );
-	mLightMapMaterialList = new RadiosityLightMapMaterial*[mMaterialCount];
+	SafeDeleteArray( &m_LightMapMaterialList );
+	m_LightMapMaterialList = new RadiosityLightMapMaterial*[m_MaterialCount];
 	
-	for( unsigned int i = 0; i < mMaterialCount; i++ )
+	for( unsigned int i = 0; i < m_MaterialCount; i++ )
 	{
 		GITexture *pTexture = MaterialArray[i]->GetAlbedoTexture();
-		mLightMapMaterialList[i] = new RadiosityLightMapMaterial( pTexture->GetWidth(), pTexture->GetHeight() );
+		m_LightMapMaterialList[i] = new RadiosityLightMapMaterial( pTexture->GetWidth(), pTexture->GetHeight() );
 	}
 	return true;
 }
 
 void RadiosityScene::InitializeQuadrangle( unsigned int QuadrangleCount )
 {
-	mQuadrangleCount = QuadrangleCount;
+	assert( m_QuadrangleCount == 0 );
+	m_QuadrangleCount = QuadrangleCount;
 }
 
 void RadiosityScene::InitializeVertex( unsigned int VertexCount )
@@ -59,60 +68,60 @@ void RadiosityScene::InitializeVertex( unsigned int VertexCount )
 
 bool RadiosityScene::InitializeFormFactor()
 {
-	if( mQuadrangleCount == 0 )
+	if( m_QuadrangleCount == 0 )
 		return false;
-	//mFormFactorCount = mQuadrangleCount * (1+mQuadrangleCount) / 2; // sum_{i=1}^n i, n = QuadrangleCount
-	mFormFactorCount = mQuadrangleCount * mQuadrangleCount; // sum_{i=1}^n i, n = QuadrangleCount
+	//m_FormFactorCount = m_QuadrangleCount * (1+m_QuadrangleCount) / 2; // sum_{i=1}^n i, n = QuadrangleCount
+	m_FormFactorCount = m_QuadrangleCount * m_QuadrangleCount; // sum_{i=1}^n i, n = QuadrangleCount
 	// row-major order
-	mFormFactors = new float[mFormFactorCount];
+	m_FormFactors = new float[m_FormFactorCount];
 	return true;
 }
 
 bool RadiosityScene::IsFormFactorInitialize()
 {
-	return mFormFactorCount > 0 && mFormFactors != NULL;
+	return m_FormFactorCount > 0 && m_FormFactors != NULL;
 }
 
 void RadiosityScene::FinalizeFormFactor()
 {
-	SafeDeleteArray( &mFormFactors );
-	mFormFactorCount = 0;
+	SafeDeleteArray( &m_FormFactors );
+	m_FormFactorCount = 0;
 }
 
-void RadiosityScene::SetFormFactor( unsigned int fromQuadNum/*column*/, unsigned int toQuadNum/*row*/, float FormFactor )
+void RadiosityScene::SetFormFactor( unsigned int from_QuadNum/*column*/, unsigned int toQuadNum/*row*/, float FormFactor )
 {
-	assert( mFormFactorCount > 0 );
-	if( fromQuadNum < toQuadNum )
+	assert( m_FormFactorCount > 0 );
+	if( from_QuadNum < toQuadNum )
 	{
-		unsigned int temp = fromQuadNum;
-		fromQuadNum = toQuadNum;
+		unsigned int temp = from_QuadNum;
+		from_QuadNum = toQuadNum;
 		toQuadNum = temp;
 	}
 
 	// row-major order
 	// TODO: ASSERT
-	mFormFactors[toQuadNum * mQuadrangleCount + fromQuadNum] = FormFactor;
+	m_FormFactors[toQuadNum * m_QuadrangleCount + from_QuadNum] = FormFactor;
 }
 
-float RadiosityScene::GetFormFactor( unsigned int fromQuadNum/*column*/, unsigned int toQuadNum/*row*/ )
+float RadiosityScene::GetFormFactor( unsigned int from_QuadNum/*column*/, unsigned int toQuadNum/*row*/ )
 {
-	assert( mFormFactorCount > 0 );
-	if( fromQuadNum < toQuadNum )
+	assert( m_FormFactorCount > 0 );
+	if( from_QuadNum < toQuadNum )
 	{
-		unsigned int temp = fromQuadNum;
-		fromQuadNum = toQuadNum;
+		unsigned int temp = from_QuadNum;
+		from_QuadNum = toQuadNum;
 		toQuadNum = temp;
 	}
 
 	// row-major order
 	// TODO: ASSERT
-	return mFormFactors[toQuadNum * mQuadrangleCount + fromQuadNum];
+	return m_FormFactors[toQuadNum * m_QuadrangleCount + from_QuadNum];
 }
 
 bool RadiosityScene::BuildWavelet()
 {
 	bool BuildFormFactor = false;
-	if( mFormFactorCount == 0 || mFormFactors == NULL )
+	if( m_FormFactorCount == 0 || m_FormFactors == NULL )
 	{
 		if( InitializeFormFactor() == false )
 			return false;

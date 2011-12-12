@@ -24,19 +24,19 @@ public:
 	~GIPhotonMap();
 
 	void InsertPhoton( const GIPhoton &Photon );
-	unsigned int GetPhotonCount() const { return mPhotonArray.size(); }
+	unsigned int GetPhotonCount() const { return m_PhotonArray.size(); }
 
 	bool CreatePhotonKDTree();
-	GIPhotonMapKDTree* GetPhotonMapKDTree() { return mPhotonMapKDTree; }
+	GIPhotonMapKDTree* GetPhotonMapKDTree() { return m_PhotonMapKDTree; }
 
-	const std::vector<GIPhoton>& GetPhotonArray() const { return mPhotonArray; }
-	std::vector<GIPhoton>& GetPhotonArray() { return mPhotonArray; }
+	const std::vector<GIPhoton>& GetPhotonArray() const { return m_PhotonArray; }
+	std::vector<GIPhoton>& GetPhotonArray() { return m_PhotonArray; }
 
 private:
 	//mKDTree
-	GIScene *mScene;
-	std::vector<GIPhoton> mPhotonArray;
-	GIPhotonMapKDTree *mPhotonMapKDTree;
+	GIScene *m_Scene;
+	std::vector<GIPhoton> m_PhotonArray;
+	GIPhotonMapKDTree *m_PhotonMapKDTree;
 };
 
 };};

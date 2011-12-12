@@ -33,6 +33,6 @@ private:
 	SHIrradianceVolume( int SizeX, int SizeY, int SizeZ, const GIVector3& BoundingBoxMinVector, float CellLength );	
 
 private:
-	unsigned int mMaxSHOrder;
-	SphericalHarmonicsRGB<3> *mSHVolume;
+	unsigned int m_MaxSHOrder;
+	SphericalHarmonicsRGB<3> *mSH;
 };

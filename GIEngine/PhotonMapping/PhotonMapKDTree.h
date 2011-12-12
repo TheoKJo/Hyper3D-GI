@@ -108,7 +108,7 @@ public:
 	virtual ~GIPhotonMapKDTree();
 
 	bool IsBuilt();
-	void SetBuildParameters( int MinimumPhotonCount, float MinimumNodeLength );
+	void SetBuildParameters( int Minimum_PhotonCount, float MinimumNodeLength );
 
 	void ConstructKDTree( const std::vector<GIPhoton> &PhotonArray, unsigned int PhotonCount );
 	void DestructTree();
@@ -116,10 +116,10 @@ public:
 	bool SaveToFile( const char *Filename );
 	bool LoadFromFile( const char *Filename );
 
-	GIPhotonMapKDTreeNode* GetRootNode() { return mRootNode; }
-	int GetNodeSize() { return mNodeSize; }
+	GIPhotonMapKDTreeNode* GetRootNode() { return m_RootNode; }
+	int GetNodeSize() { return m_NodeSize; }
 
-	GIBoundingBox GetBoundingBox() { return mPhotonMapBoundingBox; }
+	GIBoundingBox GetBoundingBox() { return m_PhotonMapBoundingBox; }
 	
 private:
 	//! ConstructKDTree 용 내부 함수
@@ -128,23 +128,23 @@ private:
 
 public:
 	// Build 용
-	int mMinimumPhotonCount;
+	int mMinimum_PhotonCount;
 	float mMinimumNodeLength;
 
 private:
-	int mCurNodePhotonIndex;	//!< 현재의 triangle index 들이 저장될 위치
-	int mCurNodeSize; //!< for mKDTreeNodeSize
+	int m_CurNodePhotonIndex;	//!< 현재의 triangle index 들이 저장될 위치
+	int m_CurNodeSize; //!< for mKDTreeNodeSize
 
 private:
-	GIPhotonMapKDTreeNode *mRootNode;
-	int mNodeSize;
-	GIBoundingBox mPhotonMapBoundingBox;
+	GIPhotonMapKDTreeNode *m_RootNode;
+	int m_NodeSize;
+	GIBoundingBox m_PhotonMapBoundingBox;
 
 // Internal Use Only
 private:
-	unsigned int mPhotonCount;
-	GIPhotonMapKDTreeNode *mNodeArray;
-	const std::vector<GIPhoton> *mPhotonArray;
+	unsigned int m_PhotonCount;
+	GIPhotonMapKDTreeNode *m_NodeArray;
+	const std::vector<GIPhoton> *m_PhotonArray;
 };
 
 };};

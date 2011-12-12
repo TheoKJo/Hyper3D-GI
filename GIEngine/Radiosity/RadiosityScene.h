@@ -28,7 +28,7 @@ public:
 	virtual ~RadiosityScene();
 
 	bool Initialize( GIScene *pScene );
-	GIScene* GetScene() { return mScene; }
+	GIScene* GetScene() { return m_Scene; }
 
 	void InitializeQuadrangle( unsigned int QuadrangleCount );
 	void InitializeVertex( unsigned int VertexCount );
@@ -39,15 +39,15 @@ public:
 	bool InitializeFormFactor();
 	bool IsFormFactorInitialize();
 	void FinalizeFormFactor();
-	void SetFormFactor( unsigned int fromQuadNum/*column*/, unsigned int toQuadNum/*row*/, float FormFactor );
-	float GetFormFactor( unsigned int fromQuadNum/*column*/, unsigned int toQuadNum/*row*/ );
+	void SetFormFactor( unsigned int from_QuadNum/*column*/, unsigned int toQuadNum/*row*/, float FormFactor );
+	float GetFormFactor( unsigned int from_QuadNum/*column*/, unsigned int toQuadNum/*row*/ );
 
 	bool BuildWavelet();
 
 private:
 	// row-major order
-	unsigned int mFormFactorCount;
-	float *mFormFactors;
+	unsigned int m_FormFactorCount;
+	float *m_FormFactors;
 
 	// wavelets
 
@@ -56,16 +56,19 @@ public:
 
 public:
 	// (Refined) Quadrangles
-	unsigned int GetQuadrangleCount() { return mQuadrangleCount; }
-	GIQuadrangle GetQuadrangle( unsigned int QuadrangleIndex ) { return mQuadrangleList[QuadrangleIndex]; }
-	bool GetQuadrangle( unsigned int *outQuadrangleNum, int TriangleNum, float u, float v );
-	const GIQuadrangle& GetQuadrangle( unsigned int QuadrangleIndex ) const { return mQuadrangleList[QuadrangleIndex]; }
-	GIQuadrangle* GetQuadrangleList() { return mQuadrangleList; }
+	unsigned int GetQuadrangleCount() { return m_QuadrangleCount; }
+	GIQuadrangle GetQuadrangle( unsigned int QuadrangleIndex ) { return m_QuadrangleList[QuadrangleIndex]; }
+	bool GetQuadrangle( unsigned int *outQuadrangleNum, int TriangleNum, float u, float v )
+	{
+		return false;
+	}
+	const GIQuadrangle& GetQuadrangle( unsigned int QuadrangleIndex ) const { return m_QuadrangleList[QuadrangleIndex]; }
+	GIQuadrangle* GetQuadrangleList() { return m_QuadrangleList; }
 
 	// Vertices (not-refined)
-	unsigned int GetVertexCount() { return mVertexCount; }
-	GIVector3* GetVertexPositionList() { return mVertexPositionList; }
-	GIVector3* GetVertexNormalList() { return mVertexNormalList; }
+	unsigned int GetVertexCount() { return m_VertexCount; }
+	GIVector3* GetVertexPositionList() { return m_VertexPositionList; }
+	GIVector3* GetVertexNormalList() { return m_VertexNormalList; }
 
 	/*GIVector3 GetPosition( unsigned int QuadrangleNum, float u, float v );
 	GIVector4 GetColor( unsigned int QuadrangleNum, float u, float v );
@@ -78,27 +81,27 @@ private:
 	void Destroy();
 
 private:
-	GIScene *mScene;
-	unsigned int mMaterialCount;
+	GIScene *m_Scene;
+	unsigned int m_MaterialCount;
 	// TODO: double pointer 인데 네이밍이 엉망
-	RadiosityLightMapMaterial **mLightMapMaterialList;
+	RadiosityLightMapMaterial **m_LightMapMaterialList;
 
 
-	unsigned int mQuadrangleCount;
-	GIQuadrangle *mQuadrangleList; // 필요 없을지도?
+	unsigned int m_QuadrangleCount;
+	GIQuadrangle *m_QuadrangleList; // 필요 없을지도?
 
-	GIVector3 *mQuadranglePositionList;
-	GIVector3 *mQuadrangleNormalList;
-	GIColor3 *mQuadrangleColorList;
+	GIVector3 *m_QuadranglePositionList;
+	GIVector3 *m_QuadrangleNormalList;
+	GIColor3 *m_QuadrangleColorList;
 
-	float *mQuadrangleAreaList; // 사이즈? 비율?
+	float *m_QuadrangleAreaList; // 사이즈? 비율?
 
-	unsigned int mVertexCount;
-	GIVector3 *mVertexPositionList;
-	GIVector3 *mVertexNormalList;
+	unsigned int m_VertexCount;
+	GIVector3 *m_VertexPositionList;
+	GIVector3 *m_VertexNormalList;
 
-	/*SphericalHarmonicsAbs *mSHList;
-	SphericalHarmonicsAbsRGB *mSH_RGBList;*/
+	/*SphericalHarmonicsAbs *m_SHList;
+	SphericalHarmonicsAbsRGB *m_SH_RGBList;*/
 
 };
 

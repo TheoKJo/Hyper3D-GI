@@ -24,16 +24,16 @@ class IrradianceVolume
 {
 public:
 	IrradianceVolume()
-		: mSize(0), mSizeX(0), mSizeY(0), mSizeZ(0), mBoundingBoxMinVector(0.0f, 0.0f, 0.0f), mCellLength(0.0f)
+		: m_Size(0), m_SizeX(0), m_SizeY(0), m_SizeZ(0), m_BoundingBoxMinVector(0.0f, 0.0f, 0.0f), m_CellLength(0.0f)
 	{}
 	IrradianceVolume( int SizeX, int SizeY, int SizeZ, 
 		GIVector3 BoundingBoxMinVector, float CellLength )
-		: mSizeX(SizeX), mSizeY(SizeY), mSizeZ(SizeZ), 
-		mBoundingBoxMinVector(BoundingBoxMinVector), mCellLength(CellLength)
+		: m_SizeX(SizeX), m_SizeY(SizeY), m_SizeZ(SizeZ), 
+		m_BoundingBoxMinVector(BoundingBoxMinVector), m_CellLength(CellLength)
 	{
-		mSize = mSizeX*mSizeY*mSizeZ;
+		m_Size = m_SizeX*m_SizeY*m_SizeZ;
 
-		//mVolumeData = new T[mSize];
+		//mVolumeData = new T[m_Size];
 	}
 
 	virtual ~IrradianceVolume()
@@ -43,20 +43,20 @@ public:
 
 	bool IsInside( const GIVector3 &Position ) const
 	{
-		int IndexX = int( (Position.x - mBoundingBoxMinVector.x)/mCellLength );
+		int IndexX = int( (Position.x - m_BoundingBoxMinVector.x)/m_CellLength );
 		if( IndexX < 0 )
 			return false;
-		else if( mSizeX <= IndexX )
+		else if( m_SizeX <= IndexX )
 			return false;
-		int IndexY = int( (Position.y - mBoundingBoxMinVector.y)/mCellLength );
+		int IndexY = int( (Position.y - m_BoundingBoxMinVector.y)/m_CellLength );
 		if( IndexY < 0 )
 			return false;
-		else if( mSizeY <= IndexY )
+		else if( m_SizeY <= IndexY )
 			return false;
-		int IndexZ = int( (Position.z - mBoundingBoxMinVector.z)/mCellLength );
+		int IndexZ = int( (Position.z - m_BoundingBoxMinVector.z)/m_CellLength );
 		if( IndexZ < 0 )
 			return false;
-		else if( mSizeZ <= IndexZ )
+		else if( m_SizeZ <= IndexZ )
 			return false;
 
 		return true;
@@ -65,21 +65,21 @@ public:
 	//! 반올림
 	int GetNearestCell( const GIVector3 &Position ) const
 	{
-		int IndexX = int( (Position.x - mBoundingBoxMinVector.x)/mCellLength + 0.5f );
+		int IndexX = int( (Position.x - m_BoundingBoxMinVector.x)/m_CellLength + 0.5f );
 		if( IndexX < 0 )
 			IndexX = 0;
-		else if( mSizeX <= IndexX )
-			IndexX = mSizeX-1;
-		int IndexY = int( (Position.y - mBoundingBoxMinVector.y)/mCellLength + 0.5f );
+		else if( m_SizeX <= IndexX )
+			IndexX = m_SizeX-1;
+		int IndexY = int( (Position.y - m_BoundingBoxMinVector.y)/m_CellLength + 0.5f );
 		if( IndexY < 0 )
 			IndexY = 0;
-		else if( mSizeY <= IndexY )
-			IndexY = mSizeY-1;
-		int IndexZ = int( (Position.z - mBoundingBoxMinVector.z)/mCellLength + 0.5f );
+		else if( m_SizeY <= IndexY )
+			IndexY = m_SizeY-1;
+		int IndexZ = int( (Position.z - m_BoundingBoxMinVector.z)/m_CellLength + 0.5f );
 		if( IndexZ < 0 )
 			IndexZ = 0;
-		else if( mSizeZ <= IndexZ )
-			IndexZ = mSizeZ-1;
+		else if( m_SizeZ <= IndexZ )
+			IndexZ = m_SizeZ-1;
 
 		return GetIndex( IndexX, IndexY, IndexZ );
 	}
@@ -87,54 +87,54 @@ public:
 	//! 반올림 아님
 	void GetIntegerIndex( const GIVector3 &Position, int *outX, int *outY, int *outZ ) const
 	{
-		*outX = int((Position.x - mBoundingBoxMinVector.x)/mCellLength);
-		*outY = int((Position.y - mBoundingBoxMinVector.y)/mCellLength);
-		*outZ = int((Position.z - mBoundingBoxMinVector.z)/mCellLength);
+		*outX = int((Position.x - m_BoundingBoxMinVector.x)/m_CellLength);
+		*outY = int((Position.y - m_BoundingBoxMinVector.y)/m_CellLength);
+		*outZ = int((Position.z - m_BoundingBoxMinVector.z)/m_CellLength);
 	}
 
 	void GetFloatIndex( const GIVector3 &Position, float *outX, float *outY, float *outZ ) const
 	{
-		*outX = (Position.x - mBoundingBoxMinVector.x)/mCellLength;
-		*outY = (Position.y - mBoundingBoxMinVector.y)/mCellLength;
-		*outZ = (Position.z - mBoundingBoxMinVector.z)/mCellLength;
+		*outX = (Position.x - m_BoundingBoxMinVector.x)/m_CellLength;
+		*outY = (Position.y - m_BoundingBoxMinVector.y)/m_CellLength;
+		*outZ = (Position.z - m_BoundingBoxMinVector.z)/m_CellLength;
 	}
 
 	int GetIndex( int x, int y, int z ) const
 	{
-		assert( 0 <= x && x < mSizeX );
-		assert( 0 <= y && y < mSizeY );
-		assert( 0 <= z && z < mSizeZ );
-		return x + y * mSizeX + z * mSizeX * mSizeY;
+		assert( 0 <= x && x < m_SizeX );
+		assert( 0 <= y && y < m_SizeY );
+		assert( 0 <= z && z < m_SizeZ );
+		return x + y * m_SizeX + z * m_SizeX * m_SizeY;
 	}
 
 	//! 중간
 	GIVector3 GetPosition( int x, int y, int z ) const
 	{
 		return GIVector3( 
-			mBoundingBoxMinVector.x + (float(x)+0.5f) * mCellLength, 
-			mBoundingBoxMinVector.y + (float(y)+0.5f) * mCellLength, 
-			mBoundingBoxMinVector.z + (float(z)+0.5f) * mCellLength );
+			m_BoundingBoxMinVector.x + (float(x)+0.5f) * m_CellLength, 
+			m_BoundingBoxMinVector.y + (float(y)+0.5f) * m_CellLength, 
+			m_BoundingBoxMinVector.z + (float(z)+0.5f) * m_CellLength );
 	}
 
 	static IrradianceVolume<T>* LoadFromFile( const char *strFilename );
 	bool SaveToFile( const char *strFilename );
 
-	int GetSize() const { return mSize; }
-	int GetSizeX() const { return mSizeX; }
-	int GetSizeY() const { return mSizeY; }
-	int GetSizeZ() const { return mSizeZ; }
+	int GetSize() const { return m_Size; }
+	int GetSizeX() const { return m_SizeX; }
+	int GetSizeY() const { return m_SizeY; }
+	int GetSizeZ() const { return m_SizeZ; }
 
 	T* GetVolumeArray() { return mVolumeData; }
 
 protected:
-	int mSize;
-	int mSizeX;
-	int mSizeY;
-	int mSizeZ;
+	int m_Size;
+	int m_SizeX;
+	int m_SizeY;
+	int m_SizeZ;
 
 protected:
-	GIVector3 mBoundingBoxMinVector;
-	float mCellLength;
+	GIVector3 m_BoundingBoxMinVector;
+	float m_CellLength;
 
 	//T *mVolumeData;
 };
@@ -150,36 +150,36 @@ protected:
 //
 //	IrradianceVolume *Volume = new IrradianceVolume<T>;
 //
-//	fs >> Volume->mSize;
-//	fs >> Volume->mSizeX;
-//	fs >> Volume->mSizeY;
-//	fs >> Volume->mSizeZ;
+//	fs >> Volume->m_Size;
+//	fs >> Volume->m_SizeX;
+//	fs >> Volume->m_SizeY;
+//	fs >> Volume->m_SizeZ;
 //
-//	fs >> Volume->mBoundingBoxMinVector.x;
-//	fs >> Volume->mBoundingBoxMinVector.y;
-//	fs >> Volume->mBoundingBoxMinVector.z;
-//	fs >> Volume->mCellLength;
+//	fs >> Volume->m_BoundingBoxMinVector.x;
+//	fs >> Volume->m_BoundingBoxMinVector.y;
+//	fs >> Volume->m_BoundingBoxMinVector.z;
+//	fs >> Volume->m_CellLength;
 //
-//	if( Volume->mSize == 0 )
+//	if( Volume->m_Size == 0 )
 //	{
 //		delete Volume;
 //		return NULL;
 //	}
 //
-//	if( Volume->mSize != Volume->mSizeX*Volume->mSizeY*Volume->mSizeZ )
+//	if( Volume->m_Size != Volume->m_SizeX*Volume->m_SizeY*Volume->m_SizeZ )
 //	{
 //		delete Volume;
 //		return NULL;
 //	}
 //
-//	Volume->mVolumeData = new T[Volume->mSize];
+//	Volume->mVolumeData = new T[Volume->m_Size];
 //
 //#ifdef IRRADIANCE_VOLUME_PRECALCULATED_POSITION
 //	assert( false );
 //#else
 //
 //	// TODO : 완전 임시
-//	for( int i = 0; i < Volume->mSize; i++ )
+//	for( int i = 0; i < Volume->m_Size; i++ )
 //	{
 //		int index = 0;
 //		fs >> index;
@@ -208,16 +208,16 @@ protected:
 //	if( !fs.is_open() )
 //		return false;
 //
-//	fs << mSize << '\t' << mSizeX << '\t' << mSizeY << '\t' << mSizeZ << std::endl;
-//	fs << mBoundingBoxMinVector.x << '\t' << mBoundingBoxMinVector.y << '\t' << mBoundingBoxMinVector.z << std::endl;
-//	fs << mCellLength << std::endl;
+//	fs << m_Size << '\t' << m_SizeX << '\t' << m_SizeY << '\t' << m_SizeZ << std::endl;
+//	fs << m_BoundingBoxMinVector.x << '\t' << m_BoundingBoxMinVector.y << '\t' << m_BoundingBoxMinVector.z << std::endl;
+//	fs << m_CellLength << std::endl;
 //
 //#ifdef IRRADIANCE_VOLUME_PRECALCULATED_POSITION
 //	assert( false );
 //#else
 //
 //	// TODO : 완전 임시
-//	for( int i = 0; i < mSize; i++ )
+//	for( int i = 0; i < m_Size; i++ )
 //	{
 //		T *ac = &mVolumeData[i];
 //		fs << i << std::endl;

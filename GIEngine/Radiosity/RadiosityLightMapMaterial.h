@@ -14,22 +14,22 @@ class RadiosityLightMapMaterial
 {
 public:
 	RadiosityLightMapMaterial( unsigned TextureWidth, unsigned int TextureHeight )
-		: mWidth(TextureWidth), mHeight(TextureHeight)
+		: m_Width(TextureWidth), m_Height(TextureHeight)
 	{
-		mQuadrangleNumList = new int[mWidth*mHeight];
-		// TODO: assert mQuadrangleNumList != NULL
+		m_QuadrangleNumList = new int[m_Width*m_Height];
+		// TODO: assert m_QuadrangleNumList != NULL
 
-		for( unsigned int i = 0; i < mWidth*mHeight; i++ )
-			mQuadrangleNumList[i] = -1;
+		for( unsigned int i = 0; i < m_Width*m_Height; i++ )
+			m_QuadrangleNumList[i] = -1;
 	}
 
-	unsigned int GetWidth() { return mWidth; }
-	unsigned int GetHeight() { return mHeight; }
+	unsigned int GetWidth() { return m_Width; }
+	unsigned int GetHeight() { return m_Height; }
 
 private:
-	int *mQuadrangleNumList;
-	unsigned int mWidth;
-	unsigned int mHeight;
+	int *m_QuadrangleNumList;
+	unsigned int m_Width;
+	unsigned int m_Height;
 };
 
 };};

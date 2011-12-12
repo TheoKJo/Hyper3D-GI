@@ -24,20 +24,20 @@ public:
 		ETF_RGBA
 	};
 
-	GITexture() : mWidth(0), mHeight(0), mTextureFormat(ETF_RGBA), mData(NULL)
+	GITexture() : m_Width(0), m_Height(0), mTextureFormat(ETF_RGBA), m_Data(NULL)
 	{
 	}
 
 	void Initialize( unsigned int Width, unsigned int Height, ETextureFormat TextureFormat )
 	{
-		mWidth = Width;
-		mHeight = Height;
+		m_Width = Width;
+		m_Height = Height;
 		mTextureFormat = TextureFormat;
 		unsigned int PixelSize = PixelByte( mTextureFormat );
-		mData = new unsigned char[Width*Height*PixelSize];
+		m_Data = new unsigned char[Width*Height*PixelSize];
 	}
 
-	unsigned char* GetData() { return mData; }
+	unsigned char* GetData() { return m_Data; }
 
 	// SAMPLE TYPE?
 	// NEAREST, 
@@ -77,26 +77,26 @@ public:
 		assert( 0.0f <= s && s <= 1.0f && 0.0f <= t && t <= 1.0f );
 
 		// nearest
-		unsigned int uix = unsigned int(s * float(mWidth-1) + 0.5f);
-		unsigned int uiy = unsigned int(t * float(mHeight-1) + 0.5f);
+		unsigned int uix = unsigned int(s * float(m_Width-1) + 0.5f);
+		unsigned int uiy = unsigned int(t * float(m_Height-1) + 0.5f);
 
-		assert( 0.0f <= uix && uix < mWidth && 0.0f <= uiy && uiy < mHeight );
+		assert( 0.0f <= uix && uix < m_Width && 0.0f <= uiy && uiy < m_Height );
 	
 		switch( mTextureFormat )
 		{
 		case ETF_GRAY:
-			return GIVector4( mData[(uix + mWidth * uiy)], mData[(uix + mWidth * uiy)], mData[(uix + mWidth * uiy)] );
+			return GIVector4( m_Data[(uix + m_Width * uiy)], m_Data[(uix + m_Width * uiy)], m_Data[(uix + m_Width * uiy)] );
 		case ETF_RGB:
-			return GIVector4( mData[(uix + mWidth * uiy)*3+0], mData[(uix + mWidth * uiy)*3+1], mData[(uix + mWidth * uiy)*3+2], 1.0f );
+			return GIVector4( m_Data[(uix + m_Width * uiy)*3+0], m_Data[(uix + m_Width * uiy)*3+1], m_Data[(uix + m_Width * uiy)*3+2], 1.0f );
 		case ETF_RGBA:
-			return GIVector4( mData[(uix + mWidth * uiy)*3+0], mData[(uix + mWidth * uiy)*3+1], mData[(uix + mWidth * uiy)*3+2], mData[(uix + mWidth * uiy)*3+3] );
+			return GIVector4( m_Data[(uix + m_Width * uiy)*3+0], m_Data[(uix + m_Width * uiy)*3+1], m_Data[(uix + m_Width * uiy)*3+2], m_Data[(uix + m_Width * uiy)*3+3] );
 		}
 		assert( false );
 		return GIVector4( 0.0f, 0.0f, 0.0f, 1.0f );
 	}
 
-	unsigned int GetWidth() { return mWidth; }
-	unsigned int GetHeight() { return mHeight; }
+	unsigned int GetWidth() { return m_Width; }
+	unsigned int GetHeight() { return m_Height; }
 
 	void GetTextureIndex( int &x, int &y, const GIVector2 &Texcoords, bool bClamp )
 	{
@@ -104,8 +104,8 @@ public:
 	}
 
 private:
-	unsigned int mWidth;
-	unsigned int mHeight;
+	unsigned int m_Width;
+	unsigned int m_Height;
 	ETextureFormat mTextureFormat;
 
 	static unsigned int PixelByte( ETextureFormat TextureFormat )
@@ -122,50 +122,50 @@ private:
 		return 0;
 	}
 
-	unsigned char *mData;
+	unsigned char *m_Data;
 };
 
 class GIMaterial
 {
 public:
-	GIMaterial() : mAlbedoTexture(NULL), mMaterialName(NULL), mTexturingType(ETT_COLOR) {}
+	GIMaterial() : m_AlbedoTexture(NULL), m_MaterialName(NULL), m_TexturingType(ETT_COLOR) {}
 
 	void SetMaterialName( const char *MaterialName )
 	{
-		SafeDeleteArray( &mMaterialName );
+		SafeDeleteArray( &m_MaterialName );
 		if( MaterialName == NULL )
 			return;
-		mMaterialName = new char[strlen(MaterialName)+1];
-		strcpy( mMaterialName, MaterialName );
+		m_MaterialName = new char[strlen(MaterialName)+1];
+		strcpy( m_MaterialName, MaterialName );
 	}
-	char* GetMaterialName() { return mMaterialName; }
+	char* GetMaterialName() { return m_MaterialName; }
 
-	void SetAlbedoTexture( GITexture *pTexture ) { mAlbedoTexture = pTexture; }
-	GITexture* GetAlbedoTexture() { return mAlbedoTexture; }
+	void SetAlbedoTexture( GITexture *pTexture ) { m_AlbedoTexture = pTexture; }
+	GITexture* GetAlbedoTexture() { return m_AlbedoTexture; }
 
-	void SetAmbientColor( GIVector4 AmbientColor ) { mAmbientColor = AmbientColor; }
-	void SetDiffuseColor( GIVector4 DiffuseColor ) { mDiffuseColor = DiffuseColor; }
-	void SetSpecularColor( GIVector4 SpecularColor ) { mSpecularColor = SpecularColor; }
-	void SetShininess( float Shininess ) { mShininess = Shininess; }
+	void SetAmbientColor( GIVector4 AmbientColor ) { m_AmbientColor = AmbientColor; }
+	void SetDiffuseColor( GIVector4 DiffuseColor ) { m_DiffuseColor = DiffuseColor; }
+	void SetSpecularColor( GIVector4 SpecularColor ) { m_SpecularColor = SpecularColor; }
+	void SetShininess( float Shininess ) { m_Shininess = Shininess; }
 
-	GIVector4 GetAmbientColor() { return mAmbientColor; }
-	GIVector4 GetDiffuseColor() { return mDiffuseColor; }
-	GIVector4 GetSpecularColor() { return mSpecularColor; }
-	float GetShininess() { return mShininess; }
+	GIVector4 GetAmbientColor() { return m_AmbientColor; }
+	GIVector4 GetDiffuseColor() { return m_DiffuseColor; }
+	GIVector4 GetSpecularColor() { return m_SpecularColor; }
+	float GetShininess() { return m_Shininess; }
 
 	
 	enum ETexturingType {
 		ETT_REPLACE, ETT_MODULATE, ETT_COLOR, ETT_VERTEX_COLOR
 	};
 
-	ETexturingType mTexturingType;
+	ETexturingType m_TexturingType;
 
 private:
-	GITexture *mAlbedoTexture;
-	char *mMaterialName;
+	GITexture *m_AlbedoTexture;
+	char *m_MaterialName;
 
-	GIVector4 mAmbientColor;
-	GIVector4 mDiffuseColor;
-	GIVector4 mSpecularColor;
-	float mShininess;
+	GIVector4 m_AmbientColor;
+	GIVector4 m_DiffuseColor;
+	GIVector4 m_SpecularColor;
+	float m_Shininess;
 };

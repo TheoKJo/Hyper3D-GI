@@ -18,29 +18,29 @@
 class AmbientCube
 {
 public:
-	void SetPosX( GIVector3 Irradiance ) { mIrradiances[0] = Irradiance; }
-	void SetNegX( GIVector3 Irradiance ) { mIrradiances[1] = Irradiance; }
-	void SetPosY( GIVector3 Irradiance ) { mIrradiances[2] = Irradiance; }
-	void SetNegY( GIVector3 Irradiance ) { mIrradiances[3] = Irradiance; }
-	void SetPosZ( GIVector3 Irradiance ) { mIrradiances[4] = Irradiance; }
-	void SetNegZ( GIVector3 Irradiance ) { mIrradiances[5] = Irradiance; }
+	void SetPosX( GIVector3 Irradiance ) { m_Irradiances[0] = Irradiance; }
+	void SetNegX( GIVector3 Irradiance ) { m_Irradiances[1] = Irradiance; }
+	void SetPosY( GIVector3 Irradiance ) { m_Irradiances[2] = Irradiance; }
+	void SetNegY( GIVector3 Irradiance ) { m_Irradiances[3] = Irradiance; }
+	void SetPosZ( GIVector3 Irradiance ) { m_Irradiances[4] = Irradiance; }
+	void SetNegZ( GIVector3 Irradiance ) { m_Irradiances[5] = Irradiance; }
 
-	GIVector3 GetPosX() { return mIrradiances[0]; }
-	GIVector3 GetNegX() { return mIrradiances[1]; }
-	GIVector3 GetPosY() { return mIrradiances[2]; }
-	GIVector3 GetNegY() { return mIrradiances[3]; }
-	GIVector3 GetPosZ() { return mIrradiances[4]; }
-	GIVector3 GetNegZ() { return mIrradiances[5]; }
+	GIVector3 GetPosX() { return m_Irradiances[0]; }
+	GIVector3 GetNegX() { return m_Irradiances[1]; }
+	GIVector3 GetPosY() { return m_Irradiances[2]; }
+	GIVector3 GetNegY() { return m_Irradiances[3]; }
+	GIVector3 GetPosZ() { return m_Irradiances[4]; }
+	GIVector3 GetNegZ() { return m_Irradiances[5]; }
 
-	const GIVector3& GetIrradiance( int index ) const { return mIrradiances[index]; }
-	GIVector3* GetIrradianceArray() { return &mIrradiances[0]; }
+	const GIVector3& GetIrradiance( int index ) const { return m_Irradiances[index]; }
+	GIVector3* GetIrradianceArray() { return &m_Irradiances[0]; }
 
 	void ResetToBlack()
 	{
-		mIrradiances[0] = GIVector3( 0.0f, 0.0f, 0.0f ); mIrradiances[1] = GIVector3( 0.0f, 0.0f, 0.0f ); mIrradiances[2] = GIVector3( 0.0f, 0.0f, 0.0f );
-		mIrradiances[3] = GIVector3( 0.0f, 0.0f, 0.0f ); mIrradiances[4] = GIVector3( 0.0f, 0.0f, 0.0f ); mIrradiances[5] = GIVector3( 0.0f, 0.0f, 0.0f );
+		m_Irradiances[0] = GIVector3( 0.0f, 0.0f, 0.0f ); m_Irradiances[1] = GIVector3( 0.0f, 0.0f, 0.0f ); m_Irradiances[2] = GIVector3( 0.0f, 0.0f, 0.0f );
+		m_Irradiances[3] = GIVector3( 0.0f, 0.0f, 0.0f ); m_Irradiances[4] = GIVector3( 0.0f, 0.0f, 0.0f ); m_Irradiances[5] = GIVector3( 0.0f, 0.0f, 0.0f );
 	}
 
 private:
-	GIVector3 mIrradiances[6];
+	GIVector3 m_Irradiances[6];
 };

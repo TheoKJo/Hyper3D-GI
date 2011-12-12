@@ -10,6 +10,8 @@
 
 #include "RtScene.h"
 
+#include <fstream>
+
 static const unsigned int modulo[] = {0,1,2,0,1};
 
 void TriangleToTriAceel( GITriangle &Triangle, RtTriAccel &TriAccel )
@@ -70,15 +72,15 @@ void TriangleToTriAceel( GITriangle &Triangle, RtTriAccel &TriAccel )
 }
 
 RtScene::RtScene()
-	: mTriangleCount(0), mTriangleList(NULL), mTriAccelList(NULL), mAccelStructure(NULL), 
-	mVertexCount(0), mVertexPositionList(NULL), mVertexNormalList(NULL), 
-	mSHList(NULL), mSH_RGBList(NULL), 
-	mLightCount(0), mLightArray(NULL), 
-	mMaterialCount(0), mMaterialArray(NULL), 
-	mBackgroundColor(0.0f, 0.0f, 0.0f, 1.0f ), 
-	mSceneEpsilon(0.01f)
+	: m_TriangleCount(0), m_TriangleList(NULL), m_TriAccelList(NULL), m_AccelStructure(NULL), 
+	m_VertexCount(0), m_VertexPositionList(NULL), m_VertexNormalList(NULL), 
+	m_SHList(NULL), m_SH_RGBList(NULL), 
+	m_LightCount(0), m_LightArray(NULL), 
+	m_MaterialCount(0), m_MaterialArray(NULL), 
+	m_BackgroundColor(0.0f, 0.0f, 0.0f, 1.0f ), 
+	m_SceneEpsilon(0.01f)
 {
-	mSceneName[0] = 0;
+	m_SceneName[0] = 0;
 }
 
 RtScene::~RtScene()
@@ -88,21 +90,21 @@ RtScene::~RtScene()
 
 void RtScene::SetName( const char *SceneName )
 {
-	strcpy_s( mSceneName, 255, SceneName );
+	strcpy_s( m_SceneName, 255, SceneName );
 }
 
 const char* RtScene::GetName()
 {
-	//strcpy_s( mSceneName, 255, SceneName );
-	return mSceneName;
+	//strcpy_s( m_SceneName, 255, SceneName );
+	return m_SceneName;
 }
 
 void RtScene::InitializeTriangle( unsigned int TriangleCount )
 {
 	assert( TriangleCount > 0 );
-	mTriangleCount = TriangleCount;
-	mTriangleList = new GITriangle[mTriangleCount];
-	mTriAccelList = new RtTriAccel[mTriangleCount];
+	m_TriangleCount = TriangleCount;
+	m_TriangleList = new GITriangle[m_TriangleCount];
+	m_TriAccelList = new RtTriAccel[m_TriangleCount];
 
 	// TODO : 초기화
 }
@@ -110,60 +112,60 @@ void RtScene::InitializeTriangle( unsigned int TriangleCount )
 void RtScene::InitializeVertex( unsigned int VertexCount )
 {
 	assert( VertexCount > 0 );
-	mVertexCount = VertexCount;
+	m_VertexCount = VertexCount;
 
-	mVertexPositionList = new GIVector3[mVertexCount];
-	mVertexNormalList = new GIVector3[mVertexCount];
+	m_VertexPositionList = new GIVector3[m_VertexCount];
+	m_VertexNormalList = new GIVector3[m_VertexCount];
 }
 
 void RtScene::InitializeTriangleSH( unsigned int order )
 {
-	assert( mVertexCount > 0 && mSHList == NULL );
+	assert( m_VertexCount > 0 && m_SHList == NULL );
 	switch( order )
 	{
 	case 1:
-		mSHList = new SphericalHarmonics<1>[mVertexCount];
+		m_SHList = new SphericalHarmonics<1>[m_VertexCount];
 		break;
 	case 2:
-		mSHList = new SphericalHarmonics<2>[mVertexCount];
+		m_SHList = new SphericalHarmonics<2>[m_VertexCount];
 		break;
 	case 3:
-		mSHList = new SphericalHarmonics<3>[mVertexCount];
+		m_SHList = new SphericalHarmonics<3>[m_VertexCount];
 		break;
 	case 4:
-		mSHList = new SphericalHarmonics<4>[mVertexCount];
+		m_SHList = new SphericalHarmonics<4>[m_VertexCount];
 		break;
 	case 5:
-		mSHList = new SphericalHarmonics<5>[mVertexCount];
+		m_SHList = new SphericalHarmonics<5>[m_VertexCount];
 		break;
 	case 6:
-		mSHList = new SphericalHarmonics<6>[mVertexCount];
+		m_SHList = new SphericalHarmonics<6>[m_VertexCount];
 		break;
 	}
 }
 
 void RtScene::InitializeTriangleSH_RGB( unsigned int order )
 {
-	assert( mVertexCount > 0 && mSH_RGBList == NULL );
+	assert( m_VertexCount > 0 && m_SH_RGBList == NULL );
 	switch( order )
 	{
 	case 1:
-		mSH_RGBList = new SphericalHarmonicsRGB<1>[mVertexCount];
+		m_SH_RGBList = new SphericalHarmonicsRGB<1>[m_VertexCount];
 		break;
 	case 2:
-		mSH_RGBList = new SphericalHarmonicsRGB<2>[mVertexCount];
+		m_SH_RGBList = new SphericalHarmonicsRGB<2>[m_VertexCount];
 		break;
 	case 3:
-		mSH_RGBList = new SphericalHarmonicsRGB<3>[mVertexCount];
+		m_SH_RGBList = new SphericalHarmonicsRGB<3>[m_VertexCount];
 		break;
 	case 4:
-		mSH_RGBList = new SphericalHarmonicsRGB<4>[mVertexCount];
+		m_SH_RGBList = new SphericalHarmonicsRGB<4>[m_VertexCount];
 		break;
 	case 5:
-		mSH_RGBList = new SphericalHarmonicsRGB<5>[mVertexCount];
+		m_SH_RGBList = new SphericalHarmonicsRGB<5>[m_VertexCount];
 		break;
 	case 6:
-		mSH_RGBList = new SphericalHarmonicsRGB<6>[mVertexCount];
+		m_SH_RGBList = new SphericalHarmonicsRGB<6>[m_VertexCount];
 		break;
 	}
 }
@@ -172,35 +174,94 @@ void RtScene::InitializeLight( unsigned int LightCount )
 {
 	if( LightCount == 0 )
 		return;
-	assert( mLightArray == NULL );
-	mLightCount = LightCount;
-	mLightArray = new GILight*[LightCount];
+	assert( m_LightArray == NULL );
+	m_LightCount = LightCount;
+	m_LightArray = new GILight*[LightCount];
 
 	for( unsigned int i = 0; i < LightCount; i++ )
-		mLightArray[i] = NULL;
+		m_LightArray[i] = NULL;
 }
 
 void RtScene::InitializeMaterial( unsigned int MaterialCount )
 {
 	if( MaterialCount == 0 )
 		return;
-	assert( mMaterialArray == NULL );
-	mMaterialCount = MaterialCount;
-	mMaterialArray = new GIMaterial*[MaterialCount];
+	assert( m_MaterialArray == NULL );
+	m_MaterialCount = MaterialCount;
+	m_MaterialArray = new GIMaterial*[MaterialCount];
 
 	for( unsigned int i = 0; i < MaterialCount; i++ )
-		mMaterialArray[i] = NULL;
+		m_MaterialArray[i] = NULL;
+}
+
+bool RtScene::SaveToFile( const char *filename )
+{
+	int memNULL = NULL;
+	std::fstream fs( filename, std::ios::out | std::ios::binary );
+	if( !fs.is_open() )
+		return false;
+	fs << m_SceneName;
+	fs.write( (char*)&m_TriangleCount, sizeof(m_TriangleCount) );
+	if( m_TriangleList == NULL )
+	{
+		// ERROR
+		return false;
+	}
+	fs.write( (char*)m_TriangleList, sizeof(GITriangle) * m_TriangleCount );
+
+	fs.write( (char*)&m_VertexCount, sizeof(m_VertexCount) );
+	fs.write( (char*)&m_VertexPositionList, sizeof(GIVector3) * m_VertexCount );
+	if( m_VertexNormalList == NULL )
+		fs.write( (char*)&memNULL, sizeof(memNULL) );
+	else
+		fs.write( (char*)&m_VertexNormalList, sizeof(GIVector3) * m_VertexCount );
+
+	if( m_SHList == NULL )
+		fs.write( (char*)&memNULL, sizeof(memNULL) );
+	else
+		fs.write( (char*)&m_SHList, sizeof(SphericalHarmonicsAbs) * m_VertexCount );
+	if( m_SH_RGBList == NULL )
+		fs.write( (char*)&memNULL, sizeof(memNULL) );
+	else
+		fs.write( (char*)&m_SH_RGBList, sizeof(SphericalHarmonicsAbsRGB) * m_VertexCount );
+
+	fs.write( (char*)&m_BoundingBox, sizeof(GIBoundingBox) );
+	//RtAccelStructure *m_AccelStructure;
+
+	fs.write( (char*)&m_LightCount, sizeof(m_TriangleCount) );
+	// 현재는 다 point light라 가정.
+	for( unsigned int i = 0; i < m_LightCount; i++ )
+	{
+		//m_LightArray[i]->ToBinaryDataStream( 
+	}
+	//fs
+	return false;
+	
+	/*m_LightArray->
+	GILight **m_LightArray;
+
+	unsigned int m_MaterialCount;
+	GIMaterial **m_MaterialArray;
+
+	GIVector4 m_BackgroundColor;
+	float m_SceneEpsilon*/;
+	return true;
+}
+
+bool RtScene::LoadFromFile( const char *filename )
+{
+	return false;
 }
 
 GIMaterial* RtScene::FindMaterial( const char *strMaterialName )
 {
 	int foundIndex = -1;
-	for( unsigned int i = 0; i < mMaterialCount; i++ )
+	for( unsigned int i = 0; i < m_MaterialCount; i++ )
 	{
-		if( mMaterialArray[i] != NULL &&
-			strcmp( mMaterialArray[i]->GetMaterialName(), strMaterialName ) == 0 )
+		if( m_MaterialArray[i] != NULL &&
+			strcmp( m_MaterialArray[i]->GetMaterialName(), strMaterialName ) == 0 )
 		{
-			return mMaterialArray[i];
+			return m_MaterialArray[i];
 		}
 	}
 	return NULL;
@@ -208,10 +269,10 @@ GIMaterial* RtScene::FindMaterial( const char *strMaterialName )
 
 int RtScene::FindMaterialIndex( const char *strMaterialName )
 {
-	for( unsigned int i = 0; i < mMaterialCount; i++ )
+	for( unsigned int i = 0; i < m_MaterialCount; i++ )
 	{
-		if( mMaterialArray[i] != NULL &&
-			strcmp( mMaterialArray[i]->GetMaterialName(), strMaterialName ) == 0 )
+		if( m_MaterialArray[i] != NULL &&
+			strcmp( m_MaterialArray[i]->GetMaterialName(), strMaterialName ) == 0 )
 		{
 			return i;
 		}
@@ -221,42 +282,42 @@ int RtScene::FindMaterialIndex( const char *strMaterialName )
 
 void RtScene::SetAccStructure( RtAccelStructure *AccelStructure )
 {
-	mAccelStructure = AccelStructure;
+	m_AccelStructure = AccelStructure;
 }
 
 RtAccelStructure* RtScene::GetAccStructure()
 {
-	return mAccelStructure;
+	return m_AccelStructure;
 }
 
 void RtScene::ConvertAll()
 {
-	for( unsigned int i = 0; i < mTriangleCount; i++ )
+	for( unsigned int i = 0; i < m_TriangleCount; i++ )
 	{
-		mTriangleList[i].TriangleNumber = i;
-		TriangleToTriAceel( mTriangleList[i], mTriAccelList[i] );
+		m_TriangleList[i].TriangleNumber = i;
+		TriangleToTriAceel( m_TriangleList[i], m_TriAccelList[i] );
 	}
 	EvaluateBoundingBox();
 }
 
 void RtScene::SetBackgroundColor( const GIVector4 &BackgroundColor )
 {
-	mBackgroundColor = BackgroundColor;
+	m_BackgroundColor = BackgroundColor;
 }
 
 const GIVector4& RtScene::GetBackgroundColor()
 {
-	return mBackgroundColor;
+	return m_BackgroundColor;
 }
 
 void RtScene::SetSceneEpsilon( float Epslion )
 {
-	mSceneEpsilon = Epslion;
+	m_SceneEpsilon = Epslion;
 }
 
 float RtScene::GetSceneEpsilon()
 {
-	return mSceneEpsilon;
+	return m_SceneEpsilon;
 }
 
 
@@ -265,9 +326,9 @@ void RtScene::EvaluateBoundingBox()
 	GIVector3 MinPositions = GIVector3( 1e15f, 1e15f, 1e15f );
 	GIVector3 MaxPositions = GIVector3( -1e15f, -1e15f, -1e15f );
 
-	for( unsigned int i = 0; i < mTriangleCount; i++ )
+	for( unsigned int i = 0; i < m_TriangleCount; i++ )
 	{
-		GITriangle *Triangle = &mTriangleList[i];
+		GITriangle *Triangle = &m_TriangleList[i];
 		for( int Axis = 0; Axis < 3; Axis++ )
 		{
 			if( Triangle->vg0.Vertex.array[Axis] < MinPositions.array[Axis] )
@@ -286,19 +347,19 @@ void RtScene::EvaluateBoundingBox()
 		}
 	}
 
-	mBoundingBox.MinPositions = MinPositions;
-	mBoundingBox.MaxPositions = MaxPositions;
+	m_BoundingBox.MinPositions = MinPositions;
+	m_BoundingBox.MaxPositions = MaxPositions;
 }
 
 GIBoundingBox RtScene::GetBoundingBox()
 {
-	return mBoundingBox;
+	return m_BoundingBox;
 }
 
 GIVector3 RtScene::GetPosition( unsigned int TriangleNum, float u, float v )
 {
-	assert( 0 <= TriangleNum && TriangleNum < mTriangleCount );
-	GITriangle &Triangle = mTriangleList[TriangleNum];
+	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
+	GITriangle &Triangle = m_TriangleList[TriangleNum];
 
 	return Triangle.vg0.Vertex * (1.0f - u - v) + 
 		Triangle.vg1.Vertex * u + 
@@ -307,8 +368,8 @@ GIVector3 RtScene::GetPosition( unsigned int TriangleNum, float u, float v )
 
 GIVector4 RtScene::GetColor( unsigned int TriangleNum, float u, float v )
 {
-	assert( 0 <= TriangleNum && TriangleNum < mTriangleCount );
-	GITriangle &Triangle = mTriangleList[TriangleNum];
+	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
+	GITriangle &Triangle = m_TriangleList[TriangleNum];
 
 	return Triangle.vg0.Color * (1.0f - u - v) + 
 		Triangle.vg1.Color * u + 
@@ -317,8 +378,8 @@ GIVector4 RtScene::GetColor( unsigned int TriangleNum, float u, float v )
 
 GIVector3 RtScene::GetNormal( unsigned int TriangleNum, float u, float v )
 {
-	assert( 0 <= TriangleNum && TriangleNum < mTriangleCount );
-	GITriangle &Triangle = mTriangleList[TriangleNum];
+	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
+	GITriangle &Triangle = m_TriangleList[TriangleNum];
 	assert( Triangle.HasNormal() );
 
 	return Triangle.vg0.Normal * (1.0f - u - v) + 
@@ -328,8 +389,8 @@ GIVector3 RtScene::GetNormal( unsigned int TriangleNum, float u, float v )
 
 GIVector3 RtScene::GetTangent( unsigned int TriangleNum, float u, float v )
 {
-	assert( 0 <= TriangleNum && TriangleNum < mTriangleCount );
-	GITriangle &Triangle = mTriangleList[TriangleNum];
+	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
+	GITriangle &Triangle = m_TriangleList[TriangleNum];
 	assert( Triangle.HasTangent() );
 
 	return Triangle.vg0.Tangent * (1.0f - u - v) + 
@@ -339,8 +400,8 @@ GIVector3 RtScene::GetTangent( unsigned int TriangleNum, float u, float v )
 
 GIVector2 RtScene::GetTexCoords( unsigned int TriangleNum, float u, float v )
 {
-	assert( 0 <= TriangleNum && TriangleNum < mTriangleCount );
-	GITriangle &Triangle = mTriangleList[TriangleNum];
+	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
+	GITriangle &Triangle = m_TriangleList[TriangleNum];
 
 	return Triangle.vg0.TexCoords * (1.0f - u - v) + 
 		Triangle.vg1.TexCoords * u + 
@@ -349,8 +410,8 @@ GIVector2 RtScene::GetTexCoords( unsigned int TriangleNum, float u, float v )
 
 GIVector4 RtScene::GetAlbedo( unsigned int TriangleNum, float u, float v )
 {
-	assert( 0 <= TriangleNum && TriangleNum < mTriangleCount );
-	GITriangle &Triangle = mTriangleList[TriangleNum];
+	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
+	GITriangle &Triangle = m_TriangleList[TriangleNum];
 
 	if( Triangle.HasMaterial() )
 	{
@@ -358,7 +419,7 @@ GIVector4 RtScene::GetAlbedo( unsigned int TriangleNum, float u, float v )
 			Triangle.vg1.TexCoords * u + 
 			Triangle.vg2.TexCoords * v;
 
-		GIMaterial *pMaterial = mMaterialArray[Triangle.MaterialIndex];
+		GIMaterial *pMaterial = m_MaterialArray[Triangle.MaterialIndex];
 		if( pMaterial == NULL )
 			return GIVector4( 0.0f, 0.0f, 0.0f, 0.0f );
 		// TODO: Material 속 Texture 마다 (eg. texture instance?) 각기 다른 속성을 가지고 있어야함)
@@ -379,9 +440,9 @@ template<unsigned int order>
 SphericalHarmonics<order> RtScene::GetSH( unsigned int TriangleNum, float u, float v )
 {
 	assert( GetSHList<order>() != NULL );
-	assert( 0 <= TriangleNum && TriangleNum < mTriangleCount );
+	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
 
-	GITriangle &Triangle = mTriangleList[TriangleNum];
+	GITriangle &Triangle = m_TriangleList[TriangleNum];
 	SphericalHarmonics<order> SH0 = GetSHList<order>()[Triangle.vg0.VertexNum];
 	SphericalHarmonics<order> SH1 = GetSHList<order>()[Triangle.vg1.VertexNum];
 	SphericalHarmonics<order> SH2 = GetSHList<order>()[Triangle.vg2.VertexNum];
@@ -396,9 +457,9 @@ template<unsigned int order>
 SphericalHarmonicsRGB<order> RtScene::GetSH_RGB( unsigned int TriangleNum, float u, float v )
 {
 	assert( GetSH_RGBList<order>() != NULL );
-	assert( 0 <= TriangleNum && TriangleNum < mTriangleCount );
+	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
 
-	GITriangle &Triangle = mTriangleList[TriangleNum];
+	GITriangle &Triangle = m_TriangleList[TriangleNum];
 
 	return
 		GetSH_RGBList<order>()[Triangle.vg0.VertexNum] * (1.0f - u - v) + 
@@ -408,11 +469,11 @@ SphericalHarmonicsRGB<order> RtScene::GetSH_RGB( unsigned int TriangleNum, float
 
 void RtScene::Destroy()
 {
-	mTriangleCount = 0;
-	SafeDeleteArray( &mTriangleList );
-	SafeDeleteArray( &mTriAccelList );
-	SafeDeleteArray( &mMaterialArray );
-	SafeDeleteArray( &mLightArray );
-	SafeDeleteArray( &mSHList );
-	SafeDeleteArray( &mSH_RGBList );
+	m_TriangleCount = 0;
+	SafeDeleteArray( &m_TriangleList );
+	SafeDeleteArray( &m_TriAccelList );
+	SafeDeleteArray( &m_MaterialArray );
+	SafeDeleteArray( &m_LightArray );
+	SafeDeleteArray( &m_SHList );
+	SafeDeleteArray( &m_SH_RGBList );
 }

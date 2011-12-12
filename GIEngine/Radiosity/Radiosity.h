@@ -8,18 +8,21 @@
  */
 #pragma once
 
-#include "RadiosityScene.h"
-
 namespace GIEngine { namespace Radiosity {
+
+	class RadiosityScene;
 
 	struct RadiosityOption
 	{
+		RadiosityOption() : NumberOfThread(4), RaySamplingPerQuad(100), RayEpsilon(0.001f)
+		{}
+
 		unsigned int NumberOfThread;
 		unsigned int RaySamplingPerQuad;
 		float RayEpsilon;
 	};
 	extern const RadiosityOption DefaultRadiosityOption;
 
-	bool BuildFormFactors( RadiosityScene *pRadiosityScene, const RadiosityOption &Option = DefaultRadiosityOption );
+	bool BuildFormFactors( RadiosityScene *pRadiosityScene, const RadiosityOption &Option /*= DefaultRadiosityOption*/ );
 
 };};

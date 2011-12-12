@@ -12,9 +12,11 @@
 #include "../SampleArray.h"
 #include "Radiosity.h"
 
+#include "RadiosityScene.h"
+
 using namespace GIEngine;
 
-const Radiosity::RadiosityOption Radiosity::DefaultRadiosityOption = { 4, 1000, 0.0001f };
+//const Radiosity::RadiosityOption Radiosity::DefaultRadiosityOption = { 4, 1000, 0.0001f };
 
 bool Radiosity::BuildFormFactors( RadiosityScene *pRadiosityScene, const RadiosityOption &Option )
 {

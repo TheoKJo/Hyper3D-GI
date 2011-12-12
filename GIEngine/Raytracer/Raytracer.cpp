@@ -25,7 +25,7 @@ bool Raytracer::BuildStructure( RtScene *pScene, const char *strStructureFilenam
 {
 	KDTreeStructure* KDTree = new KDTreeStructure;
 
-	KDTree->mIntersectionCost = 20.0f;
+	KDTree->m_IntersectionCost = 20.0f;
 	KDTree->mTraversalCost = 1.5f;
 
 	bool Loaded = false;

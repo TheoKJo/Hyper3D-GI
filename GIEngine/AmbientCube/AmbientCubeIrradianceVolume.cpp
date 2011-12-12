@@ -65,7 +65,7 @@ AmbientCubeIrradianceVolume* AmbientCubeIrradianceVolume::LoadFromFile( const ch
 
 	AmbientCubeIrradianceVolume *Volume = new AmbientCubeIrradianceVolume( SizeX, SizeY, SizeZ, BoundingBoxMinVector, CellLength );
 
-	for( int i = 0; i < Volume->mSize; i++ )
+	for( int i = 0; i < Volume->m_Size; i++ )
 	{
 		int index = 0;
 		fs >> index;
@@ -92,20 +92,20 @@ bool AmbientCubeIrradianceVolume::SaveToFile( const char *strFilename )
 	if( !fs.is_open() )
 		return false;
 
-	if( mSize == 0 || mSizeX*mSizeY*mSizeZ != mSize )
+	if( m_Size == 0 || m_SizeX*m_SizeY*m_SizeZ != m_Size )
 		return false;
 
-	fs << mSize << '\t';
-	fs << mSizeX << '\t';
-	fs << mSizeY << '\t';
-	fs << mSizeZ << std::endl;
+	fs << m_Size << '\t';
+	fs << m_SizeX << '\t';
+	fs << m_SizeY << '\t';
+	fs << m_SizeZ << std::endl;
 
-	fs << mBoundingBoxMinVector.x << '\t';
-	fs << mBoundingBoxMinVector.y << '\t';
-	fs << mBoundingBoxMinVector.z << '\t';
-	fs << mCellLength << std::endl;
+	fs << m_BoundingBoxMinVector.x << '\t';
+	fs << m_BoundingBoxMinVector.y << '\t';
+	fs << m_BoundingBoxMinVector.z << '\t';
+	fs << m_CellLength << std::endl;
 
-	for( int i = 0; i < mSize; i++ )
+	for( int i = 0; i < m_Size; i++ )
 	{
 		fs << i << '\t';
 		const AmbientCube &ac = GetAmbientCube( i );
@@ -130,8 +130,8 @@ AmbientCube& AmbientCubeIrradianceVolume::GetAmbientCube( int indexX, int indexY
 
 AmbientCube& AmbientCubeIrradianceVolume::GetAmbientCube( int index )
 {
-	assert( index < mSize );
-	return mAmbientCubeArray[index];
+	assert( index < m_Size );
+	return m_AmbientCubeArray[index];
 }
 
 const AmbientCube& AmbientCubeIrradianceVolume::GetAmbientCube( int indexX, int indexY, int indexZ ) const
@@ -141,6 +141,6 @@ const AmbientCube& AmbientCubeIrradianceVolume::GetAmbientCube( int indexX, int 
 
 const AmbientCube& AmbientCubeIrradianceVolume::GetAmbientCube( int index ) const
 {
-	assert( index < mSize );
-	return mAmbientCubeArray[index];
+	assert( index < m_Size );
+	return m_AmbientCubeArray[index];
 }

@@ -18,13 +18,13 @@ class AmbientCubeIrradianceVolume : public IrradianceVolume<AmbientCube>
 {
 public:
 	AmbientCubeIrradianceVolume( int SizeX, int SizeY, int SizeZ, GIVector3 BoundingBoxMinVector, float CellLength )
-		: IrradianceVolume<AmbientCube>( SizeX, SizeY, SizeZ, BoundingBoxMinVector, CellLength ), mAmbientCubeArray(NULL)
+		: IrradianceVolume<AmbientCube>( SizeX, SizeY, SizeZ, BoundingBoxMinVector, CellLength ), m_AmbientCubeArray(NULL)
 	{
-		mAmbientCubeArray = new AmbientCube[mSize];
+		m_AmbientCubeArray = new AmbientCube[m_Size];
 	}
 	~AmbientCubeIrradianceVolume()
 	{
-		SafeDeleteArray( &mAmbientCubeArray );
+		SafeDeleteArray( &m_AmbientCubeArray );
 	}
 
 	static AmbientCubeIrradianceVolume* CreateIrradianceVolume( float CellLength, const GIVector3 &MinVector, const GIVector3 &MaxVector );
@@ -39,5 +39,5 @@ public:
 	const AmbientCube& GetAmbientCube( int index ) const;
 
 private:
-	AmbientCube *mAmbientCubeArray;
+	AmbientCube *m_AmbientCubeArray;
 };

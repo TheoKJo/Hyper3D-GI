@@ -16,8 +16,8 @@ using namespace GIEngine;
 using namespace PhotonMapping;
 
 GIPhotonMapKDTree::GIPhotonMapKDTree()
-	: mMinimumPhotonCount(5), mMinimumNodeLength(0), mCurNodePhotonIndex(0), mCurNodeSize(0), 
-	mRootNode(NULL), mNodeSize(0), mPhotonCount(0), mNodeArray(NULL), mPhotonArray(NULL)
+	: mMinimum_PhotonCount(5), mMinimumNodeLength(0), m_CurNodePhotonIndex(0), m_CurNodeSize(0), 
+	m_RootNode(NULL), m_NodeSize(0), m_PhotonCount(0), m_NodeArray(NULL), m_PhotonArray(NULL)
 {
 	
 	
@@ -25,57 +25,57 @@ GIPhotonMapKDTree::GIPhotonMapKDTree()
 
 GIPhotonMapKDTree::~GIPhotonMapKDTree()
 {
-	mRootNode = NULL;
-	SafeDeleteArray( &mNodeArray );
-	mPhotonArray = NULL;
+	m_RootNode = NULL;
+	SafeDeleteArray( &m_NodeArray );
+	m_PhotonArray = NULL;
 }
 
 bool GIPhotonMapKDTree::IsBuilt()
 {
-	return mPhotonCount > 0 && mPhotonArray != NULL;
+	return m_PhotonCount > 0 && m_PhotonArray != NULL;
 }
 
-void GIPhotonMapKDTree::SetBuildParameters( int MinimumPhotonCount, float MinimumNodeLength )
+void GIPhotonMapKDTree::SetBuildParameters( int Minimum_PhotonCount, float MinimumNodeLength )
 {
-	mMinimumPhotonCount = MinimumPhotonCount;
+	mMinimum_PhotonCount = Minimum_PhotonCount;
 	mMinimumNodeLength = MinimumNodeLength;
 }
 
 void GIPhotonMapKDTree::ConstructKDTree( const std::vector<GIPhoton> &PhotonArray, unsigned int PhotonCount )
 {
-	mPhotonCount = PhotonCount;
+	m_PhotonCount = PhotonCount;
 
-	mPhotonArray = &PhotonArray;
+	m_PhotonArray = &PhotonArray;
 
-	//mPhotonMapBoundingBox.MaxPositions = GIVector3( -GI_INFINITY, -GI_INFINITY, -GI_INFINITY );
-	mPhotonMapBoundingBox.MaxPositions = GIVector3( -GI_INFINITY,  -GI_INFINITY,  -GI_INFINITY );
-	mPhotonMapBoundingBox.MinPositions = GIVector3(  GI_INFINITY,  GI_INFINITY,  GI_INFINITY );
+	//m_PhotonMapBoundingBox.MaxPositions = GIVector3( -GI_INFINITY, -GI_INFINITY, -GI_INFINITY );
+	m_PhotonMapBoundingBox.MaxPositions = GIVector3( -GI_INFINITY,  -GI_INFINITY,  -GI_INFINITY );
+	m_PhotonMapBoundingBox.MinPositions = GIVector3(  GI_INFINITY,  GI_INFINITY,  GI_INFINITY );
 
 	// Build KD-Tree
 	std::vector<unsigned int> PhotonIndexList;
-	PhotonIndexList.reserve( mPhotonCount );
-	for( unsigned int i = 0; i < mPhotonCount; i++ )
+	PhotonIndexList.reserve( m_PhotonCount );
+	for( unsigned int i = 0; i < m_PhotonCount; i++ )
 	{
-		if( mPhotonMapBoundingBox.MaxPositions.x < PhotonArray[i].Position.x )
-			mPhotonMapBoundingBox.MaxPositions.x = PhotonArray[i].Position.x;
-		if( mPhotonMapBoundingBox.MaxPositions.y < PhotonArray[i].Position.y )
-			mPhotonMapBoundingBox.MaxPositions.y = PhotonArray[i].Position.y;
-		if( mPhotonMapBoundingBox.MaxPositions.z < PhotonArray[i].Position.z )
-			mPhotonMapBoundingBox.MaxPositions.z = PhotonArray[i].Position.z;
+		if( m_PhotonMapBoundingBox.MaxPositions.x < PhotonArray[i].Position.x )
+			m_PhotonMapBoundingBox.MaxPositions.x = PhotonArray[i].Position.x;
+		if( m_PhotonMapBoundingBox.MaxPositions.y < PhotonArray[i].Position.y )
+			m_PhotonMapBoundingBox.MaxPositions.y = PhotonArray[i].Position.y;
+		if( m_PhotonMapBoundingBox.MaxPositions.z < PhotonArray[i].Position.z )
+			m_PhotonMapBoundingBox.MaxPositions.z = PhotonArray[i].Position.z;
 
-		if( mPhotonMapBoundingBox.MinPositions.x > PhotonArray[i].Position.x )
-			mPhotonMapBoundingBox.MinPositions.x = PhotonArray[i].Position.x;
-		if( mPhotonMapBoundingBox.MinPositions.y > PhotonArray[i].Position.y )
-			mPhotonMapBoundingBox.MinPositions.y = PhotonArray[i].Position.y;
-		if( mPhotonMapBoundingBox.MinPositions.z > PhotonArray[i].Position.z )
-			mPhotonMapBoundingBox.MinPositions.z = PhotonArray[i].Position.z;
+		if( m_PhotonMapBoundingBox.MinPositions.x > PhotonArray[i].Position.x )
+			m_PhotonMapBoundingBox.MinPositions.x = PhotonArray[i].Position.x;
+		if( m_PhotonMapBoundingBox.MinPositions.y > PhotonArray[i].Position.y )
+			m_PhotonMapBoundingBox.MinPositions.y = PhotonArray[i].Position.y;
+		if( m_PhotonMapBoundingBox.MinPositions.z > PhotonArray[i].Position.z )
+			m_PhotonMapBoundingBox.MinPositions.z = PhotonArray[i].Position.z;
 
 		PhotonIndexList.push_back(i);
 	}
 
-	mCurNodeSize = 0;
-	mRootNode = CreateNode( PhotonIndexList, mPhotonCount, mPhotonMapBoundingBox, mPhotonMapBoundingBox.GetLongestAxis() );
-	mNodeSize = mCurNodeSize;
+	m_CurNodeSize = 0;
+	m_RootNode = CreateNode( PhotonIndexList, m_PhotonCount, m_PhotonMapBoundingBox, m_PhotonMapBoundingBox.GetLongestAxis() );
+	m_NodeSize = m_CurNodeSize;
 }
 
 GIPhotonMapKDTreeNode* GIPhotonMapKDTree::CreateNode( const std::vector<unsigned int> &PhotonIndexList, const int PhotonCount, const GIBoundingBox &BoundingBox, int SplitAxis )
@@ -89,7 +89,7 @@ GIPhotonMapKDTreeNode* GIPhotonMapKDTree::CreateNode( const std::vector<unsigned
 	RightPhotonIndexList.reserve( PhotonCount );
 
 	GIPhotonMapKDTreeNode *NewNode = new GIPhotonMapKDTreeNode;
-	NewNode->NodeNum = mCurNodeSize++;
+	NewNode->NodeNum = m_CurNodeSize++;
 
 	const float fPhotonCount = float(PhotonCount);
 
@@ -97,7 +97,7 @@ GIPhotonMapKDTreeNode* GIPhotonMapKDTree::CreateNode( const std::vector<unsigned
 	float BoxMaxPos = BoundingBox.MaxPositions.array[SplitAxis];
 	float BoxLength = BoxMaxPos - BoxMinPos;
 
-	bool bSplit = mMinimumPhotonCount < PhotonCount && mMinimumNodeLength < BoxMaxPos - BoxMinPos;
+	bool bSplit = mMinimum_PhotonCount < PhotonCount && mMinimumNodeLength < BoxMaxPos - BoxMinPos;
 
 	NewNode->LeftNode = NULL;
 	NewNode->RightNode = NULL;
@@ -126,7 +126,7 @@ GIPhotonMapKDTreeNode* GIPhotonMapKDTree::CreateNode( const std::vector<unsigned
 		for( int i = 0; i < PhotonCount; i++ )
 		{
 			unsigned int PhotonIndex = PhotonIndexList[i];
-			float PhotonPosition = (*mPhotonArray)[PhotonIndex].Position.array[SplitAxis];
+			float PhotonPosition = (*m_PhotonArray)[PhotonIndex].Position.array[SplitAxis];
 
 			bool leftFlag = false, rightFlag = false;
 			if( PhotonPosition <= SplitPosition )

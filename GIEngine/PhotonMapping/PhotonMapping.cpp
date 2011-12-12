@@ -24,7 +24,7 @@ using namespace GIEngine;
 static PhotonMapping::PhotonMappingOption g_PhotonMappingOption;
 
 //namespace PhotonMapping {
-	void GatherPhotons( std::vector<unsigned int > &outPhoton, PhotonMapping::GIPhotonMapKDTree *pKDTree, const GIVector3 CenterPosition, float Radius, unsigned int MaximumPhotonCount = 0 );
+	void GatherPhotons( std::vector<unsigned int > &outPhoton, PhotonMapping::GIPhotonMapKDTree *pKDTree, const GIVector3 CenterPosition, float Radius, unsigned int Maximum_PhotonCount = 0 );
 //};
 
 void PhotonMapping::SetPhotonMappingOption( const PhotonMappingOption &Option )
@@ -329,7 +329,7 @@ void PhotonMapping::Render( unsigned int ThreadCount, GIScene *pScene, GIPhotonM
 }
 
 //////////////////////////////////////////////////////////////////////////
-void GatherPhotons( std::vector<unsigned int > &outPhoton, PhotonMapping::GIPhotonMapKDTree *pKDTree, const GIVector3 GatheringPosition, float GatheringRadius, unsigned int MaximumPhotonCount )
+void GatherPhotons( std::vector<unsigned int > &outPhoton, PhotonMapping::GIPhotonMapKDTree *pKDTree, const GIVector3 GatheringPosition, float GatheringRadius, unsigned int Maximum_PhotonCount )
 {
 	assert( pKDTree->IsBuilt() );
 
@@ -391,10 +391,10 @@ void GatherPhotons( std::vector<unsigned int > &outPhoton, PhotonMapping::GIPhot
 		if( curNode->IsLeafNode() )
 		{
 			// 거리 비교를 안하고 일단 다 넣음.
-			for( unsigned int i = 0; i < curNode->PhotonCount && outPhoton.size() < MaximumPhotonCount; i++ )
+			for( unsigned int i = 0; i < curNode->PhotonCount && outPhoton.size() < Maximum_PhotonCount; i++ )
 				outPhoton.push_back( curNode->PhotonIndexArray[i] );
 
-			if( MaximumPhotonCount <= outPhoton.size() )
+			if( Maximum_PhotonCount <= outPhoton.size() )
 				return;
 
 			continue;

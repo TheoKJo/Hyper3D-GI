@@ -40,6 +40,9 @@ public:
 	void InitializeLight( unsigned int LightCount );
 	void InitializeMaterial( unsigned int MaterialCount );
 
+	bool SaveToFile( const char *filename );
+	bool LoadFromFile( const char *filename );
+
 	GIMaterial* FindMaterial( const char *strMaterialName );
 	//! TODO: 이 함수는 안쓰이는게 좋음. 쓸 필요가 없으면 나중에 삭제.
 	//! @return 찾은 Material의 Index, 찾는 material이 없으면 음수를 반환.
@@ -64,16 +67,16 @@ public:
 	GIBoundingBox GetBoundingBox();
 
 	// (Refined) Triangles
-	unsigned int GetTriangleCount() { return mTriangleCount; }
-	GITriangle GetTriangle( unsigned int TriangleIndex ) { return mTriangleList[TriangleIndex]; }
-	const GITriangle& GetTriangle( unsigned int TriangleIndex ) const { return mTriangleList[TriangleIndex]; }
-	GITriangle* GetTriangleList() { return mTriangleList; }
-	RtTriAccel* GetTriAccelList() { return mTriAccelList; }
+	unsigned int GetTriangleCount() { return m_TriangleCount; }
+	GITriangle GetTriangle( unsigned int TriangleIndex ) { return m_TriangleList[TriangleIndex]; }
+	const GITriangle& GetTriangle( unsigned int TriangleIndex ) const { return m_TriangleList[TriangleIndex]; }
+	GITriangle* GetTriangleList() { return m_TriangleList; }
+	RtTriAccel* GetTriAccelList() { return m_TriAccelList; }
 
 	// Vertices (not-refined)
-	unsigned int GetVertexCount() { return mVertexCount; }
-	GIVector3* GetVertexPositionList() { return mVertexPositionList; }
-	GIVector3* GetVertexNormalList() { return mVertexNormalList; }
+	unsigned int GetVertexCount() { return m_VertexCount; }
+	GIVector3* GetVertexPositionList() { return m_VertexPositionList; }
+	GIVector3* GetVertexNormalList() { return m_VertexNormalList; }
 
 	GIVector3 GetPosition( unsigned int TriangleNum, float u, float v );
 	GIVector4 GetColor( unsigned int TriangleNum, float u, float v );
@@ -82,8 +85,8 @@ public:
 	GIVector2 GetTexCoords( unsigned int TriangleNum, float u, float v );
 	GIVector4 GetAlbedo( unsigned int TriangleNum, float u, float v );
 
-	/*SphericalHarmonicsAbs* GetSHList() { return mSHList; }
-	SphericalHarmonicsAbsRGB* GetSH_RGBList() { mSH_RGBList; }*/
+	/*SphericalHarmonicsAbs* GetSHList() { return m_SHList; }
+	SphericalHarmonicsAbsRGB* GetSH_RGBList() { m_SH_RGBList; }*/
 
 	template<unsigned int order>
 	SphericalHarmonics<order> GetSH( unsigned int TriangleNum, float u, float v );
@@ -93,61 +96,61 @@ public:
 	template<unsigned int order>
 	SphericalHarmonics<order>* GetSHList()
 	{
-		if( mSHList == NULL )
+		if( m_SHList == NULL )
 			return NULL;
-		assert( order == mSHList->GetOrder() );
-		if( order != mSHList->GetOrder() )
+		assert( order == m_SHList->GetOrder() );
+		if( order != m_SHList->GetOrder() )
 			return NULL;
-		return (SphericalHarmonics<order>*)mSHList;
+		return (SphericalHarmonics<order>*)m_SHList;
 	}
 	template<unsigned int order>
 	SphericalHarmonicsRGB<order>* GetSH_RGBList()
 	{
-		if( mSH_RGBList == NULL )
+		if( m_SH_RGBList == NULL )
 			return NULL;
-		assert( order == mSH_RGBList->GetOrder() );
-		if( order != mSH_RGBList->GetOrder() )
+		assert( order == m_SH_RGBList->GetOrder() );
+		if( order != m_SH_RGBList->GetOrder() )
 			return NULL;
-		return (SphericalHarmonicsRGB<order>*)mSH_RGBList;
+		return (SphericalHarmonicsRGB<order>*)m_SH_RGBList;
 	}
 
 	// Lights
-	unsigned int GetLightCount() { return mLightCount; }
-	GILight* GetLight( unsigned int i ) { return mLightArray[i]; }
-	GILight** GetLightArray() { return mLightArray; }
+	unsigned int GetLightCount() { return m_LightCount; }
+	GILight* GetLight( unsigned int i ) { return m_LightArray[i]; }
+	GILight** GetLightArray() { return m_LightArray; }
 
 	// Materials
-	unsigned int GetMaterialCount() { return mMaterialCount; }
-	GIMaterial** GetMaterialArray() { return mMaterialArray; }
+	unsigned int GetMaterialCount() { return m_MaterialCount; }
+	GIMaterial** GetMaterialArray() { return m_MaterialArray; }
 
 private:
 	void Destroy();
 
 private:
-	char mSceneName[255];
-	unsigned int mTriangleCount;
-	GITriangle *mTriangleList;
-	RtTriAccel *mTriAccelList;
+	char m_SceneName[255];
+	unsigned int m_TriangleCount;
+	GITriangle *m_TriangleList;
+	RtTriAccel *m_TriAccelList;
 
 	// 
-	unsigned int mVertexCount;
-	GIVector3 *mVertexPositionList;
-	GIVector3 *mVertexNormalList;
+	unsigned int m_VertexCount;
+	GIVector3 *m_VertexPositionList;
+	GIVector3 *m_VertexNormalList;
 
-	SphericalHarmonicsAbs *mSHList;
-	SphericalHarmonicsAbsRGB *mSH_RGBList;
+	SphericalHarmonicsAbs *m_SHList;
+	SphericalHarmonicsAbsRGB *m_SH_RGBList;
 
-	GIBoundingBox mBoundingBox;
-	RtAccelStructure *mAccelStructure;
+	GIBoundingBox m_BoundingBox;
+	RtAccelStructure *m_AccelStructure;
 
-	unsigned int mLightCount;
-	GILight **mLightArray;
+	unsigned int m_LightCount;
+	GILight **m_LightArray;
 
-	unsigned int mMaterialCount;
-	GIMaterial **mMaterialArray;
+	unsigned int m_MaterialCount;
+	GIMaterial **m_MaterialArray;
 
-	GIVector4 mBackgroundColor;
-	float mSceneEpsilon;
+	GIVector4 m_BackgroundColor;
+	float m_SceneEpsilon;
 };
 
 template SphericalHarmonics<1> RtScene::GetSH<1>( unsigned int TriangleNum, float u, float v );

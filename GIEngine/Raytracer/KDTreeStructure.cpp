@@ -18,14 +18,14 @@
 #include <stack>
 
 KDTreeStructure::KDTreeStructure()
-	: mRootNode(NULL), mNodeSize(0), mNodeArray(NULL), 
+	: m_RootNode(NULL), m_NodeSize(0), m_NodeArray(NULL), 
 	// For Build
-	mTriangleCount(0), mTriangleBoxArray(NULL), 
-	mCurNodeTriangleIndex(0),  mCurNodeSize(0)
+	m_TriangleCount(0), m_TriangleBoxArray(NULL), 
+	m_CurNodeTriangleIndex(0),  m_CurNodeSize(0)
 {
-	mIntersectionCost = 20.0f;
+	m_IntersectionCost = 20.0f;
 	mTraversalCost = 1.5f;
-	mMinimumTriangleCount = 10;
+	m_MinimumTriangleCount = 10;
 }
 
 KDTreeStructure::~KDTreeStructure()
@@ -35,19 +35,19 @@ KDTreeStructure::~KDTreeStructure()
 
 void KDTreeStructure::ConstructKDTree( const GITriangle *TriangleList, const int TriangleCount, const GIBoundingBox &BoundingBox )
 {
-	mTriangleCount = TriangleCount;
+	m_TriangleCount = TriangleCount;
 
 	unsigned int *TriangleArray = new unsigned int[TriangleCount];
 	for( int i = 0; i < 3; i++ )
 	{
-		mTriangleBoxArray = new TriangleBox[TriangleCount];
+		m_TriangleBoxArray = new TriangleBox[TriangleCount];
 	}
 
 // Initialize Edges
 	for( int i = 0; i < TriangleCount; i++ )
 	{
 		TriangleArray[i] = i;
-		mTriangleBoxArray[i].Initialize( &TriangleList[i] );
+		m_TriangleBoxArray[i].Initialize( &TriangleList[i] );
 		//TriangleToBoundingBox( BoxMin, BoxMax, &TriangleList[i] );
 	}
 
@@ -57,10 +57,10 @@ void KDTreeStructure::ConstructKDTree( const GITriangle *TriangleList, const int
 	for( int i = 0; i < TriangleCount; i++ )
 		TriangleList.push_back(i);
 
-	mCurNodeSize = 0;
-	mRootNode = CreateNode( 0, TriangleList, TriangleCount, BoundingBox );
-	mNodeSize = mCurNodeSize;
-	mSceneBoundingBox = BoundingBox;
+	m_CurNodeSize = 0;
+	m_RootNode = CreateNode( 0, TriangleList, TriangleCount, BoundingBox );
+	m_NodeSize = m_CurNodeSize;
+	m_SceneBoundingBox = BoundingBox;
 
 	delete[] TriangleArray;
 }
@@ -71,14 +71,14 @@ void KDTreeStructure::DestructTree()
 
 bool KDTreeStructure::IsBuilt()
 {
-	return mRootNode != NULL;
+	return m_RootNode != NULL;
 }
 
-void KDTreeStructure::SetBuildParameters( const float &IntersectionCost, const float &TraversalCost, const int MinimumTriangleCount )
+void KDTreeStructure::SetBuildParameters( const float &IntersectionCost, const float &TraversalCost, const int Minimum_TriangleCount )
 {
-	mIntersectionCost = IntersectionCost;
+	m_IntersectionCost = IntersectionCost;
 	mTraversalCost = TraversalCost;
-	mMinimumTriangleCount = MinimumTriangleCount;
+	m_MinimumTriangleCount = Minimum_TriangleCount;
 }
 
 #define BEGIN_KDTREE_HEADER "BEGIN_KD-TREE_HEADER" 
@@ -103,12 +103,12 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 		{
 			if( strcmp( name, "NodeSize" ) == 0 )
 			{
-				fs >> mNodeSize;
+				fs >> m_NodeSize;
 			}
 			else if( strcmp( name, "SceneBoundaryBox" ) == 0 )
 			{
-				fs >> mSceneBoundingBox.MinPositions.x; fs >> mSceneBoundingBox.MinPositions.y; fs >> mSceneBoundingBox.MinPositions.z;
-				fs >> mSceneBoundingBox.MaxPositions.x; fs >> mSceneBoundingBox.MaxPositions.y; fs >> mSceneBoundingBox.MaxPositions.z;
+				fs >> m_SceneBoundingBox.MinPositions.x; fs >> m_SceneBoundingBox.MinPositions.y; fs >> m_SceneBoundingBox.MinPositions.z;
+				fs >> m_SceneBoundingBox.MaxPositions.x; fs >> m_SceneBoundingBox.MaxPositions.y; fs >> m_SceneBoundingBox.MaxPositions.z;
 			}
 			else if( strcmp( name, "%" ) == 0 )
 			{
@@ -120,36 +120,36 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 	else
 		return false;
 
-	if( mNodeSize <= 0 )
+	if( m_NodeSize <= 0 )
 		return false;
 
-	mNodeArray = new RtKDTreeNode[mNodeSize];
-	for( int i = 0; i < mNodeSize; i++ )
+	m_NodeArray = new RtKDTreeNode[m_NodeSize];
+	for( int i = 0; i < m_NodeSize; i++ )
 	{
-		fs >> mNodeArray[i].NodeNum;
+		fs >> m_NodeArray[i].NodeNum;
 		int NodeType;
 		fs >> NodeType;
 		if( NodeType < 0 || 3 < NodeType )
 			return false;
 
-		mNodeArray[i].NodeNum = i;
-		mNodeArray[i].bLeafNode = NodeType == 0;
+		m_NodeArray[i].NodeNum = i;
+		m_NodeArray[i].bLeafNode = NodeType == 0;
 
 		if( NodeType == 0 )
 		{
-			fs >> mNodeArray[i].TriangleCount;
+			fs >> m_NodeArray[i].TriangleCount;
 
-			if( mNodeArray[i].TriangleCount != 0 )
+			if( m_NodeArray[i].TriangleCount != 0 )
 			{
 				char ch;
 				fs >> ch;
 				if( ch != '[' )
 					return false;
 
-				mNodeArray[i].TriangleIndexArray = new unsigned int[mNodeArray[i].TriangleCount];
+				m_NodeArray[i].TriangleIndexArray = new unsigned int[m_NodeArray[i].TriangleCount];
 
-				for( int j = 0; j < mNodeArray[i].TriangleCount; j++ )
-					fs >> mNodeArray[i].TriangleIndexArray[j];
+				for( int j = 0; j < m_NodeArray[i].TriangleCount; j++ )
+					fs >> m_NodeArray[i].TriangleIndexArray[j];
 
 				fs >> ch;
 				if( ch != ']' )
@@ -158,11 +158,11 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 		}
 		else
 		{
-			fs >> mNodeArray[i].TriangleCount;
-			fs >> mNodeArray[i].SplitAxis;
-			fs >> mNodeArray[i].MinPosition;
-			fs >> mNodeArray[i].SplitPosition;
-			fs >> mNodeArray[i].MaxPosition;
+			fs >> m_NodeArray[i].TriangleCount;
+			fs >> m_NodeArray[i].SplitAxis;
+			fs >> m_NodeArray[i].MinPosition;
+			fs >> m_NodeArray[i].SplitPosition;
+			fs >> m_NodeArray[i].MaxPosition;
 
 			char ch;
 			fs >> ch;
@@ -173,13 +173,13 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 			{
 				int LeftIndex;
 				fs >> LeftIndex;
-				mNodeArray[i].LeftNode = &mNodeArray[LeftIndex];
+				m_NodeArray[i].LeftNode = &m_NodeArray[LeftIndex];
 			}
 			if( NodeType & 2 )
 			{
 				int RightIndex;
 				fs >> RightIndex;
-				mNodeArray[i].RightNode = &mNodeArray[RightIndex];
+				m_NodeArray[i].RightNode = &m_NodeArray[RightIndex];
 			}
 
 			fs >> ch;
@@ -187,7 +187,7 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 				return false;
 		}
 	}
-	mRootNode = &mNodeArray[0];
+	m_RootNode = &m_NodeArray[0];
 	return true;
 }
 
@@ -202,10 +202,10 @@ bool KDTreeStructure::SaveToFile( const char *Filename )
 		return false;
 
 	fs << BEGIN_KDTREE_HEADER << std::endl;
-		fs << "NodeSize"  << '\t' << mNodeSize << std::endl;
+		fs << "NodeSize"  << '\t' << m_NodeSize << std::endl;
 		fs << "SceneBoundaryBox"  << '\t' << 
-			mSceneBoundingBox.MinPositions.x << '\t' << mSceneBoundingBox.MinPositions.y << '\t' << mSceneBoundingBox.MinPositions.z << '\t' <<
-			mSceneBoundingBox.MaxPositions.x << '\t' << mSceneBoundingBox.MaxPositions.y << '\t' << mSceneBoundingBox.MaxPositions.z << std::endl;
+			m_SceneBoundingBox.MinPositions.x << '\t' << m_SceneBoundingBox.MinPositions.y << '\t' << m_SceneBoundingBox.MinPositions.z << '\t' <<
+			m_SceneBoundingBox.MaxPositions.x << '\t' << m_SceneBoundingBox.MaxPositions.y << '\t' << m_SceneBoundingBox.MaxPositions.z << std::endl;
 		// Scene Name, KD-Tree Name
 
 		// Comments
@@ -297,17 +297,17 @@ RtKDTreeNode* KDTreeStructure::CreateNode( int StartEdgeIndex, const std::vector
 	RightTriangleList.reserve( TriangleCount );
 
 	RtKDTreeNode *NewNode = new RtKDTreeNode;
-	NewNode->NodeNum = mCurNodeSize++;
+	NewNode->NodeNum = m_CurNodeSize++;
 
 	RtSAHCost SAHCost;
 	//ResetInvalid();
 
 	const float fTriangleCount = float(TriangleCount);
 
-	const float NonSplitSAHCost = fTriangleCount * mIntersectionCost;
+	const float NonSplitSAHCost = fTriangleCount * m_IntersectionCost;
 	SAHCost.SplitCost = NonSplitSAHCost;
 
-	if( mMinimumTriangleCount <= TriangleCount )
+	if( m_MinimumTriangleCount <= TriangleCount )
 	{
 		for( int Axis = 0; Axis < 3; Axis++ )
 			EvaluateCost( SAHCost, TriangleList, TriangleCount, BoundingBox, Axis );
@@ -343,8 +343,8 @@ RtKDTreeNode* KDTreeStructure::CreateNode( int StartEdgeIndex, const std::vector
 		{
 			unsigned int TriangleIndex = TriangleList[i];
 
-			const float &LeftEdgePosition = mTriangleBoxArray[TriangleIndex].mBoxMin.array[Axis];
-			const float &RightEdgePosition = mTriangleBoxArray[TriangleIndex].mBoxMax.array[Axis];
+			const float &LeftEdgePosition = m_TriangleBoxArray[TriangleIndex].m_BoxMin.array[Axis];
+			const float &RightEdgePosition = m_TriangleBoxArray[TriangleIndex].m_BoxMax.array[Axis];
 			const bool isPlanar = LeftEdgePosition == SplitPosition && LeftEdgePosition == RightEdgePosition;
 
 			if( isPlanar )
@@ -538,7 +538,7 @@ void KDTreeStructure::EvaluateCost( RtSAHCost &SAHCost, const std::vector<unsign
 
 		// Plane 는 무조건 왼쪽으로 가정.
 		// TODO: [2] 로 두번 계산해서 비교해야함.
-		float SAH = mTraversalCost + mIntersectionCost * float(leftTriangleCount) * leftProbability + mIntersectionCost * float(rightTriangleCount) * rightProbability;
+		float SAH = mTraversalCost + m_IntersectionCost * float(leftTriangleCount) * leftProbability + m_IntersectionCost * float(rightTriangleCount) * rightProbability;
 		if( SAH < SAHCost.SplitCost )
 		{
 			SAHCost.IsSplit = true;
@@ -575,34 +575,34 @@ int KDTreeStructure::InitializeEdge( RtEdge *EdgeArray, const std::vector<unsign
 		assert( EdgeIndex < TriangleCount*2 );
 		unsigned int TriangleIndex = TriangleList[i];
 		
-		bool bPlanar = mTriangleBoxArray[TriangleIndex].isPlanar( Axis );
+		bool bPlanar = m_TriangleBoxArray[TriangleIndex].isPlanar( Axis );
 		if( bPlanar )
 		{
-			assert( mTriangleBoxArray[TriangleIndex].mBoxMin.array[Axis] == mTriangleBoxArray[TriangleIndex].mBoxMax.array[Axis] );
+			assert( m_TriangleBoxArray[TriangleIndex].m_BoxMin.array[Axis] == m_TriangleBoxArray[TriangleIndex].m_BoxMax.array[Axis] );
 
 			EdgeArray[EdgeIndex].axis = Axis;
 			EdgeArray[EdgeIndex].TriangleIndex = TriangleIndex;
 			EdgeArray[EdgeIndex].setPlanar();
 			EdgeArray[EdgeIndex].setLeft();
-			EdgeArray[EdgeIndex].position = mTriangleBoxArray[TriangleIndex].mBoxMin.array[Axis];
+			EdgeArray[EdgeIndex].position = m_TriangleBoxArray[TriangleIndex].m_BoxMin.array[Axis];
 			EdgeIndex++;
 		}
 		else
 		{
-			assert( mTriangleBoxArray[TriangleIndex].mBoxMin.array[Axis] != mTriangleBoxArray[TriangleIndex].mBoxMax.array[Axis] );
+			assert( m_TriangleBoxArray[TriangleIndex].m_BoxMin.array[Axis] != m_TriangleBoxArray[TriangleIndex].m_BoxMax.array[Axis] );
 
 			EdgeArray[EdgeIndex].axis = Axis;
 			EdgeArray[EdgeIndex].TriangleIndex = TriangleIndex;
 			EdgeArray[EdgeIndex].setPlanar( false );
 			EdgeArray[EdgeIndex].setLeft();
-			EdgeArray[EdgeIndex].position = mTriangleBoxArray[TriangleIndex].mBoxMin.array[Axis];
+			EdgeArray[EdgeIndex].position = m_TriangleBoxArray[TriangleIndex].m_BoxMin.array[Axis];
 			EdgeIndex++;
 
 			EdgeArray[EdgeIndex].axis = Axis;
 			EdgeArray[EdgeIndex].TriangleIndex = TriangleIndex;
 			EdgeArray[EdgeIndex].setPlanar( false );
 			EdgeArray[EdgeIndex].setRight();
-			EdgeArray[EdgeIndex].position = mTriangleBoxArray[TriangleIndex].mBoxMax.array[Axis];
+			EdgeArray[EdgeIndex].position = m_TriangleBoxArray[TriangleIndex].m_BoxMax.array[Axis];
 			EdgeIndex++;
 		}
 	}
