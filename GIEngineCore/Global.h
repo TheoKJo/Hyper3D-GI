@@ -384,6 +384,7 @@ struct GITriangle
 		const GIVector2 &TexCoords1 = vg1.TexCoords;
 		const GIVector2 &TexCoords2 = vg2.TexCoords;
 
+		// TODO: u2가 안쓰임. 제대로 이해했는지 확인 할 것.
 		// vertex0 to vertex1
 		float u1 = TexCoords1.u - TexCoords0.u;
 		float v1 = TexCoords1.v - TexCoords0.v;

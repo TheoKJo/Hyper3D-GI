@@ -61,6 +61,7 @@ namespace GIEngine
 	void Render( unsigned int ThreadCount, GIScene *pScene, GICamera *pCamera, GIVector3 *outPixelData );
 
 // Sampling
+	// TODO: CPU, GPU 같이 사용할 함수로 바꿔야함
 	void SampleColor( unsigned int ThreadCount, GIScene *pScene, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray );
 	void SampleDistance( unsigned int ThreadCount, GIScene *pScene, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray );
 	void SampleHit( unsigned int ThreadCount, GIScene *pScene, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray );

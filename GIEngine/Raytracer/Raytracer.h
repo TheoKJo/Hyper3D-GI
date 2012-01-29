@@ -8,11 +8,11 @@
  */
 #pragma once
 
-#include "RtScene.h"
-#include "Camera.h"
-#include "Structures.h"
-#include "Utility.h"
-#include "../GIEngine/SampleArray.h"
+#include <RtScene.h>
+#include <Camera.h>
+#include <Structures.h>
+#include <Utility.h>
+#include "../SampleArray.h"
 
 #include "KDTreeStructure.h"
 

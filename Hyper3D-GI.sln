@@ -8,6 +8,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GIEngine", "GIEngine\GIEngi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GIEngineCore", "GIEngineCore\GIEngineCore.vcproj", "{10DD6C1D-D9C1-45B6-8108-5BA02EE21AC7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GIEngineCUDA", "GIEngineCUDA\GIEngineCUDA.vcproj", "{200DE59A-09EF-4EC6-A24A-EC1A36D4D2C8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6FC7C717-8B9C-464A-AA2E-C8E0EE5776D4} = {6FC7C717-8B9C-464A-AA2E-C8E0EE5776D4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GIEngineOpenCL", "GIEngineOpenCL\GIEngineOpenCL.vcproj", "{79058051-CC66-4C30-B917-1C7FF3350E52}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6FC7C717-8B9C-464A-AA2E-C8E0EE5776D4} = {6FC7C717-8B9C-464A-AA2E-C8E0EE5776D4}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug DLL|Win32 = Debug DLL|Win32
@@ -32,6 +42,22 @@ Global
 		{10DD6C1D-D9C1-45B6-8108-5BA02EE21AC7}.Release DLL|Win32.Build.0 = Release DLL|Win32
 		{10DD6C1D-D9C1-45B6-8108-5BA02EE21AC7}.Release|Win32.ActiveCfg = Release|Win32
 		{10DD6C1D-D9C1-45B6-8108-5BA02EE21AC7}.Release|Win32.Build.0 = Release|Win32
+		{200DE59A-09EF-4EC6-A24A-EC1A36D4D2C8}.Debug DLL|Win32.ActiveCfg = Debug|Win32
+		{200DE59A-09EF-4EC6-A24A-EC1A36D4D2C8}.Debug DLL|Win32.Build.0 = Debug|Win32
+		{200DE59A-09EF-4EC6-A24A-EC1A36D4D2C8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{200DE59A-09EF-4EC6-A24A-EC1A36D4D2C8}.Debug|Win32.Build.0 = Debug|Win32
+		{200DE59A-09EF-4EC6-A24A-EC1A36D4D2C8}.Release DLL|Win32.ActiveCfg = Release|Win32
+		{200DE59A-09EF-4EC6-A24A-EC1A36D4D2C8}.Release DLL|Win32.Build.0 = Release|Win32
+		{200DE59A-09EF-4EC6-A24A-EC1A36D4D2C8}.Release|Win32.ActiveCfg = Release|Win32
+		{200DE59A-09EF-4EC6-A24A-EC1A36D4D2C8}.Release|Win32.Build.0 = Release|Win32
+		{79058051-CC66-4C30-B917-1C7FF3350E52}.Debug DLL|Win32.ActiveCfg = Debug|Win32
+		{79058051-CC66-4C30-B917-1C7FF3350E52}.Debug DLL|Win32.Build.0 = Debug|Win32
+		{79058051-CC66-4C30-B917-1C7FF3350E52}.Debug|Win32.ActiveCfg = Debug|Win32
+		{79058051-CC66-4C30-B917-1C7FF3350E52}.Debug|Win32.Build.0 = Debug|Win32
+		{79058051-CC66-4C30-B917-1C7FF3350E52}.Release DLL|Win32.ActiveCfg = Release|Win32
+		{79058051-CC66-4C30-B917-1C7FF3350E52}.Release DLL|Win32.Build.0 = Release|Win32
+		{79058051-CC66-4C30-B917-1C7FF3350E52}.Release|Win32.ActiveCfg = Release|Win32
+		{79058051-CC66-4C30-B917-1C7FF3350E52}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
