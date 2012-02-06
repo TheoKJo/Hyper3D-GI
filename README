@@ -10,6 +10,7 @@ Less General Public License(LGPL) License
 * Precomputed Radiance Transfer(PRT) shadowed-diffuse sample (using irrlicht open source engine)
 * GPU Raytracer (CUDA first, then OpenCL)
 * Real-time radiosity (without lightmap-baking)
+* Test cases using gtest (Google C++ Testing Framework)
 
 ## And.. later...
 
