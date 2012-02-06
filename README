@@ -3,10 +3,16 @@ Less General Public License(LGPL) License
 ## Implemented
 
 * CPU Raytracer (not fully optimized)
-* Sherical Harmonics Calculating Functions
+* Sherical harmonics calculation functions
 
 ## Working on...
 
-* Precomputed Radiance Transfer(PRT) Shadowed-Diffuse Method Sample
+* Precomputed Radiance Transfer(PRT) shadowed-diffuse sample (using irrlicht open source engine)
 * GPU Raytracer (CUDA first, then OpenCL)
-* Real-time Radiosity (without lightmap-baking)
+* Real-time radiosity (without lightmap-baking)
+
+## And.. later...
+
+* Lightmap baking
+* Many interesting techniques mainly about spherical harmonics
+* Interactive photon mapping
