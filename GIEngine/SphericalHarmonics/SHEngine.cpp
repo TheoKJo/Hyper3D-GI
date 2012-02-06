@@ -138,7 +138,7 @@ SHMatrix<3, 3> SHEngine::MakeSHRotateMatrix33( float alpha, float beta, float ga
 }
 
 template<unsigned int order>
-void SHEngine::CalcSH_RGB( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *Scene, const GIVector3 &Position, 
+void SHEngine::CalcSH_RGB( unsigned int SamplingCount, GIScene *Scene, SceneAccelStructure *AccelStructure, const GIVector3 &Position, 
 						  SphericalHarmonics<order> *outSHRed, SphericalHarmonics<order> *outSHGreen, SphericalHarmonics<order> *outSHBlue )
 {
 	assert( outSHRed->GetOrder() == outSHBlue->GetOrder() && outSHBlue->GetOrder() == outSHGreen->GetOrder() );
@@ -161,7 +161,7 @@ void SHEngine::CalcSH_RGB( unsigned int SamplingCount, unsigned int ThreadCount,
 	// TODO: Coordinate 확인???
 
 	// Depth 설정
-	SampleColor( ThreadCount, Scene, RayCount, SampleArray.GetRayArray(), RenderedColor );
+	SampleColor( Scene, AccelStructure, RayCount, SampleArray.GetRayArray(), RenderedColor );
 
 	int l = 0;
 	int m = 0;
@@ -192,7 +192,8 @@ void SHEngine::CalcSH_RGB( unsigned int SamplingCount, unsigned int ThreadCount,
 }
 
 template<unsigned int order>
-void SHEngine::CalcAmbientOcclusionSH( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *Scene, const GIVector3 &Position, const GIVector3 &Normal, const float LimitDistance, SphericalHarmonics<order> *outSH )
+void SHEngine::CalcAmbientOcclusionSH( unsigned int SamplingCount, GIScene *Scene, SceneAccelStructure *AccelStructure, const GIVector3 &Position, const GIVector3 &Normal, 
+									  const float LimitDistance, SphericalHarmonics<order> *outSH )
 {
 	
 	assert( outSH != NULL && outSH->GetOrder() < 6 );
@@ -214,7 +215,7 @@ void SHEngine::CalcAmbientOcclusionSH( unsigned int SamplingCount, unsigned int 
 		//SampleArray.GetWeightArray()[i] = dot>0.0f?dot:0.0f;
 	}
 
-	SampleDistance( ThreadCount, Scene, RayCount, SampleArray.GetRayArray(), SampledDistanceArray );
+	SampleDistance( Scene, AccelStructure, RayCount, SampleArray.GetRayArray(), SampledDistanceArray );
 
 	const float WeightFactor = 4.0f * FLOAT_PI / float(SamplingCount);
 
@@ -256,11 +257,12 @@ void SHEngine::CalcAmbientOcclusionSH( unsigned int SamplingCount, unsigned int 
 }
 
 template<unsigned int order>
-void SHEngine::CalcDiffuseShadowedSH( unsigned int SamplingCount, unsigned int ThreadCount, 
-						   GIScene *Scene, 
+void SHEngine::CalcDiffuseShadowedSH( unsigned int SamplingCount, 
+						   GIScene *Scene, SceneAccelStructure *AccelStructure, 
 						   SphericalHarmonics<order> *outSHArray /*= NULL*/ )
 {
-	
+	unsigned int ThreadCount = GetGlobalOption().NumberOfThreads;
+
 	assert( outSHArray->GetOrder() < SH_MAX_ORDER );
 	assert( Scene->GetVertexCount() > 0 );
 
@@ -295,7 +297,7 @@ void SHEngine::CalcDiffuseShadowedSH( unsigned int SamplingCount, unsigned int T
 		//GenerateHemisphericalSampleArray( origin, normal, &SampleArray );
 		GenerateSphericalSampleArray( origin, normal, &SampleArray );
 
-		SampleDistance( ThreadCount, Scene, RayCount, SampleArray.GetRayArray(), SampledDistanceArray );
+		SampleDistance( Scene, AccelStructure, RayCount, SampleArray.GetRayArray(), SampledDistanceArray );
 
 		int l = 0;
 		int m = 0;
@@ -327,18 +329,21 @@ void SHEngine::CalcDiffuseShadowedSH( unsigned int SamplingCount, unsigned int T
 }
 
 template<unsigned int order>
-void SHEngine::CalcDiffuseInterrefelctionSH( unsigned int SamplingCount, unsigned int ThreadCount, unsigned int PathCount, GIScene *Scene, 
-											 float ReductionFactor/* = 1.0f*/, 
-											 SphericalHarmonicsRGB<order> *outSH_RGBArray /*= NULL*/ )
+void SHEngine::CalcDiffuseInterrefelctionSH( unsigned int SamplingCount, unsigned int PathCount, 
+											GIScene *Scene, SceneAccelStructure *AccelStructure, 
+											float ReductionFactor/* = 1.0f*/, 
+											SphericalHarmonicsRGB<order> *outSH_RGBArray /*= NULL*/ )
 {
 	
+	unsigned int ThreadCount = GetGlobalOption().NumberOfThreads;
+
 	assert( Scene->GetVertexCount() > 0 );
 	assert( PathCount > 0 );
 
 	if( Scene->GetSHList<order>() == NULL )
 	{
 		Scene->InitializeTriangleSH( order );
-		CalcDiffuseShadowedSH<order>( SamplingCount, ThreadCount, Scene/*, Scene->GetSHList()*/ );
+		CalcDiffuseShadowedSH<order>( SamplingCount, Scene, AccelStructure/*, Scene->GetSHList()*/ );
 	}
 	if( Scene->GetSH_RGBList<order>() == NULL )
 		Scene->InitializeTriangleSH_RGB( order );
@@ -385,7 +390,7 @@ void SHEngine::CalcDiffuseInterrefelctionSH( unsigned int SamplingCount, unsigne
 
 			GenerateHemisphericalSampleArray( origin, normal, &SampleArray );
 
-			SampleHit( ThreadCount, Scene, RayCount, SampleArray.GetRayArray(), HitArray );
+			SampleHit( Scene, AccelStructure, RayCount, SampleArray.GetRayArray(), HitArray );
 
 			//DI_Dest[vertex_i].Reset();
 

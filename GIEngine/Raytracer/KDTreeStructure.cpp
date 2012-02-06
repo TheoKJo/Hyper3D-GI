@@ -20,7 +20,7 @@
 KDTreeStructure::KDTreeStructure()
 	: m_RootNode(NULL), m_NodeSize(0), m_NodeArray(NULL), 
 	// For Build
-	m_TriangleCount(0), m_TriangleBoxArray(NULL), 
+	m_TriangleCount(0), m_TriangleIndexCount(0), m_TriangleBoxArray(NULL), 
 	m_CurNodeTriangleIndex(0),  m_CurNodeSize(0)
 {
 	m_IntersectionCost = 20.0f;
@@ -58,6 +58,7 @@ void KDTreeStructure::ConstructKDTree( const GITriangle *TriangleList, const int
 		TriangleList.push_back(i);
 
 	m_CurNodeSize = 0;
+	m_TriangleIndexCount = 0;
 	m_RootNode = CreateNode( 0, TriangleList, TriangleCount, BoundingBox );
 	m_NodeSize = m_CurNodeSize;
 	m_SceneBoundingBox = BoundingBox;
@@ -92,6 +93,8 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 	fs.open( Filename, std::ios::in );
 	if( !fs )
 		return false;
+
+	unsigned int TriangleIndexCount = 0;
 
 	char name[255];
 
@@ -137,7 +140,9 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 
 		if( NodeType == 0 )
 		{
+			// Leaf Node
 			fs >> m_NodeArray[i].TriangleCount;
+			TriangleIndexCount += m_NodeArray[i].TriangleCount;
 
 			if( m_NodeArray[i].TriangleCount != 0 )
 			{
@@ -158,6 +163,7 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 		}
 		else
 		{
+			// Internal Node
 			fs >> m_NodeArray[i].TriangleCount;
 			fs >> m_NodeArray[i].SplitAxis;
 			fs >> m_NodeArray[i].MinPosition;
@@ -188,6 +194,8 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 		}
 	}
 	m_RootNode = &m_NodeArray[0];
+	m_TriangleIndexCount = TriangleIndexCount;
+	m_TriangleCount = m_RootNode->TriangleCount;
 	return true;
 }
 
@@ -203,6 +211,8 @@ bool KDTreeStructure::SaveToFile( const char *Filename )
 
 	fs << BEGIN_KDTREE_HEADER << std::endl;
 		fs << "NodeSize"  << '\t' << m_NodeSize << std::endl;
+		fs << "Triangle Count" << "\t" << m_TriangleCount << std::endl;
+		fs << "Triangle Index Count" << "\t" << m_TriangleIndexCount << std::endl;
 		fs << "SceneBoundaryBox"  << '\t' << 
 			m_SceneBoundingBox.MinPositions.x << '\t' << m_SceneBoundingBox.MinPositions.y << '\t' << m_SceneBoundingBox.MinPositions.z << '\t' <<
 			m_SceneBoundingBox.MaxPositions.x << '\t' << m_SceneBoundingBox.MaxPositions.y << '\t' << m_SceneBoundingBox.MaxPositions.z << std::endl;
@@ -423,6 +433,8 @@ RtKDTreeNode* KDTreeStructure::CreateNode( int StartEdgeIndex, const std::vector
 		NewNode->SplitAxis = -1;
 		NewNode->bLeafNode = true;
 		//NewNode->MaxPosition = BoundingBox.MinPositions.array
+
+		m_TriangleIndexCount += TriangleCount;
 		
 		NewNode->TriangleIndexArray = new unsigned int[TriangleCount];
 		for( int i = 0; i < TriangleCount; i++ )
@@ -813,18 +825,18 @@ void KDTreeStructure::TriangleToBoundingBox( GIVector3 &BoxMin, GIVector3 &BoxMa
 
 	for( int i = 0; i < 3; i++ )
 	{
-		if( BoxMin.array[i] > Triangle->vg0.Vertex.array[i] )
-			BoxMin.array[i] = Triangle->vg0.Vertex.array[i];
-		if( BoxMin.array[i] > Triangle->vg1.Vertex.array[i] )
-			BoxMin.array[i] = Triangle->vg1.Vertex.array[i];
-		if( BoxMin.array[i] > Triangle->vg2.Vertex.array[i] )
-			BoxMin.array[i] = Triangle->vg2.Vertex.array[i];
+		if( BoxMin.array[i] > Triangle->vg0.Position.array[i] )
+			BoxMin.array[i] = Triangle->vg0.Position.array[i];
+		if( BoxMin.array[i] > Triangle->vg1.Position.array[i] )
+			BoxMin.array[i] = Triangle->vg1.Position.array[i];
+		if( BoxMin.array[i] > Triangle->vg2.Position.array[i] )
+			BoxMin.array[i] = Triangle->vg2.Position.array[i];
 
-		if( BoxMax.array[i] < Triangle->vg0.Vertex.array[i] )
-			BoxMax.array[i] = Triangle->vg0.Vertex.array[i];
-		if( BoxMax.array[i] < Triangle->vg1.Vertex.array[i] )
-			BoxMax.array[i] = Triangle->vg1.Vertex.array[i];
-		if( BoxMax.array[i] < Triangle->vg2.Vertex.array[i] )
-			BoxMax.array[i] = Triangle->vg2.Vertex.array[i];
+		if( BoxMax.array[i] < Triangle->vg0.Position.array[i] )
+			BoxMax.array[i] = Triangle->vg0.Position.array[i];
+		if( BoxMax.array[i] < Triangle->vg1.Position.array[i] )
+			BoxMax.array[i] = Triangle->vg1.Position.array[i];
+		if( BoxMax.array[i] < Triangle->vg2.Position.array[i] )
+			BoxMax.array[i] = Triangle->vg2.Position.array[i];
 	}
 }

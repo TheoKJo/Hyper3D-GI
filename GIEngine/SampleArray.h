@@ -8,6 +8,8 @@
  */
 #pragma once
 
+#include "Global.h"
+
 #include "../GIEngine/SphericalHarmonics/SphericalHarmonics.h"
 
 class SampleArray

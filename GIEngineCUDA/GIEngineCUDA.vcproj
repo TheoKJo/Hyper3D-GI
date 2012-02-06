@@ -24,6 +24,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
+			UseOfMFC="0"
 			CharacterSet="1"
 			>
 			<Tool
@@ -68,6 +69,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				IgnoreDefaultLibraryNames="libdmt libdmtd"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -115,6 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="..\GIEngineCore"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -160,7 +163,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\AllocateKDTree.cu"
+				>
+			</File>
+			<File
 				RelativePath=".\GIEngineCUDA.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\KDTreeStructureCUDA.cpp"
 				>
 			</File>
 		</Filter>
@@ -170,6 +181,14 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\cuKDTree.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cuKDTreeNode.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GIEngineCUDA.h"
 				>
 			</File>
@@ -178,7 +197,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\KDTreeGPU.h"
+				RelativePath=".\KDTreeStructureCUDA.h"
 				>
 			</File>
 			<File

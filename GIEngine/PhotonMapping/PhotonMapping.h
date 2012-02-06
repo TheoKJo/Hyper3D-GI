@@ -18,6 +18,8 @@
 #define MAX_PHOTON_SHOOTING_PASS 10
 
 class GICamera;
+class SceneAccelStructure;
+class KDTreeStructure;
 
 /*! \namespace  PhotonMapping
  * \brief 
@@ -69,15 +71,15 @@ PhotonMappingOption GetPhotonMappingOption();
 void GeneratePhotons( const GIVector3 &Position, const GIColor3 &Color, unsigned int PhotonCount, GIPhoton *outPhotonArray, SphericalCoordinateSamplingFunction pSphericalCoordinateSamplingFunction );
 
 // TODO: Option 을 매번 받아야함.
-GIPhotonMap* CreatePhotonMap( GIScene *inScene );
+GIPhotonMap* CreatePhotonMap( GIScene *inScene, SceneAccelStructure *AccelStructure );
 
 //! \return living photon이 한개라도 존재한다면 true, 모두 죽은 포톤일 경우 false.
-bool ShootPhotons( unsigned int Pass, GIScene *inScene, 
+bool ShootPhotons( unsigned int Pass, GIScene *inScene, KDTreeStructure *KDTree, 
 	GIPhoton *inPhotonArray, unsigned int inPhotonCount, 
 	GIPhoton *outPhotonArray = NULL, unsigned int *outLivingPhotonCount = NULL );
 
 //! 직접 조명은 계산하지 않음.
-GIColor3 FinalGathering( GIScene *inScene, GIPhotonMap *inPhotonMap, const GIVector3 &Position, const GIVector3 &RayDirection/*, const GIHit &hitResult*/ );
-void Render( unsigned int ThreadCount, GIScene *pScene, GIPhotonMap *pPhotonMap, GICamera *pCamera, GIVector3 *outPixelData );
+GIColor3 FinalGatheringCPU( GIScene *inScene, KDTreeStructure *KDTree, GIPhotonMap *inPhotonMap, const GIVector3 &Position, const GIVector3 &RayDirection/*, const GIHit &hitResult*/ );
+void Render( unsigned int ThreadCount, GIScene *pScene, SceneAccelStructure *AccelStructure, GIPhotonMap *pPhotonMap, GICamera *pCamera, GIVector3 *outPixelData );
 
 };};

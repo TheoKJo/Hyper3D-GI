@@ -6,3 +6,5 @@
  * created:		2012/01/22 13:12
  * copyright	Hybrid (creavol@gmail.com)
  */
+
+#include "../GIEngineCore/Global.h"

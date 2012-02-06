@@ -59,9 +59,9 @@ public:
 		for( unsigned int i = 0; i < pRaytracerProcedure->mRayCount; i++ )
 		{
 			GIVector4 RenderedColor;
-			GIHit Hit = GIEngine::Raytracer::ShootRay( mRtScene, pRaytracerProcedure->mRayArray[i] );
+			GIHit Hit = GIEngine::Raytracer::ShootRay( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
 
-			GIEngine::Raytracer::Shading( mRtScene, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
+			GIEngine::Raytracer::Shading( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
 			ColorData[i] = RenderedColor.ToVector3();
 		}
 		return 0;
@@ -75,7 +75,7 @@ public:
 		for( unsigned int i = 0; i < pRaytracerProcedure->mRayCount; i++ )
 		{
 			GIVector4 RenderedColor;
-			HitData[i] = GIEngine::Raytracer::ShootRay( mRtScene, pRaytracerProcedure->mRayArray[i] );
+			HitData[i] = GIEngine::Raytracer::ShootRay( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
 		}
 		return 0;
 	}
@@ -88,10 +88,10 @@ public:
 		for( unsigned int i = 0; i < pRaytracerProcedure->mRayCount; i++ )
 		{
 			GIVector4 RenderedColor;
-			GIHit Hit = GIEngine::Raytracer::ShootRay( mRtScene, pRaytracerProcedure->mRayArray[i] );
+			GIHit Hit = GIEngine::Raytracer::ShootRay( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
 
 			assert( pRaytracerProcedure->mShadingFunction != NULL );
-			pRaytracerProcedure->mShadingFunction( mRtScene, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
+			pRaytracerProcedure->mShadingFunction( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
 			ColorData[i] = RenderedColor.ToVector3();
 		}
 		return 0;

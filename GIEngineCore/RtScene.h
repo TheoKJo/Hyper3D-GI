@@ -48,8 +48,8 @@ public:
 	//! @return 찾은 Material의 Index, 찾는 material이 없으면 음수를 반환.
 	int FindMaterialIndex( const char *strMaterialName );
 
-	void SetAccStructure( RtAccelStructure *AccelStructure );
-	RtAccelStructure* GetAccStructure();
+	/*void SetAccStructure( RtAccelStructure *AccelStructure );
+	RtAccelStructure* GetAccStructure();*/
 
 	void ConvertAll();
 	
@@ -141,7 +141,7 @@ private:
 	SphericalHarmonicsAbsRGB *m_SH_RGBList;
 
 	GIBoundingBox m_BoundingBox;
-	RtAccelStructure *m_AccelStructure;
+	//RtAccelStructure *m_AccelStructure;
 
 	unsigned int m_LightCount;
 	GILight **m_LightArray;

@@ -12,6 +12,7 @@
 *.user
 *.suo
 *.ncb
+*.pdb
 Release
 Release DLL
 Debug
@@ -41,3 +42,5 @@ Debug DLL
 # Windows
 *.db
 *.lnk
+# OS X
+.DS_Store

@@ -16,6 +16,12 @@
 #include "GIEngine/GIScene.h"
 #include "GIEngine/Raytracer/Raytracer.h"
 
+#include "GIEngine/Raytracer/SceneAccelStructure.h"
+#include "GIEngine/Raytracer/KDTreeStructure.h"
+
+//#include <RtScene.h>
+#include <Camera.h>
+
 #include <vector>
 #include <stack>
 
@@ -52,9 +58,12 @@ void PhotonMapping::GeneratePhotons( const GIVector3 &Position, const GIColor3 &
 	}
 }
 
-PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene )
+PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene, SceneAccelStructure *AccelStructure )
 {
 	if( !g_PhotonMappingOption.IsValid() )
+		return NULL;
+
+	if( AccelStructure->GetKDTree() != NULL || !AccelStructure->GetKDTree()->IsBuilt() )
 		return NULL;
 
 	/// 완점 임시 코드
@@ -76,7 +85,7 @@ PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene )
 			// TODO: Refactoring 해야함. 죽은 포톤을 계속 loop에서 관리함. 살아 있는 것들만 관리해야함.
 			for( unsigned int Pass = 0; Pass <= g_PhotonMappingOption.MaxPhotonPass; Pass++ )
 			{
-				if( ShootPhotons( Pass, inScene, PhotonArray, g_PhotonMappingOption.PhotonCountPerLight, NULL, NULL ) == false )
+				if( ShootPhotons( Pass, inScene, AccelStructure->GetKDTree(), PhotonArray, g_PhotonMappingOption.PhotonCountPerLight, NULL, NULL ) == false )
 					break;
 
 				if( Pass == MAX_PHOTON_SHOOTING_PASS-1 )
@@ -105,7 +114,7 @@ PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene )
 	//outPhotonMap->HasKDTree()
 }
 
-bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene, 
+bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene, KDTreeStructure *KDTree, 
 				  GIPhoton *inPhotonArray, unsigned int inPhotonCount, 
 				  GIPhoton *outPhotonArray/* = NULL*/, unsigned int *outLivingPhotonCount/* = NULL*/ )
 {
@@ -126,7 +135,7 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene,
 			ray.NearDistance = 0.0f;
 			ray.FarDistance = GI_INFINITY;
 			
-			GIHit hitResult = Raytracer::ShootRay( inScene, ray );
+			GIHit hitResult = Raytracer::ShootRay( inScene, KDTree, ray );
 
 			GIPhoton *outPhoton = NULL;
 
@@ -240,7 +249,7 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene,
 	return LivingPhotonCount>0;
 }
 
-GIColor3 PhotonMapping::FinalGathering( GIScene *inScene, GIPhotonMap *inPhotonMap, const GIVector3 &Position, const GIVector3 &RayDirection/*, const GIHit &hitResult*/ )
+GIColor3 PhotonMapping::FinalGatheringCPU( GIScene *inScene, KDTreeStructure *KDTree, GIPhotonMap *inPhotonMap, const GIVector3 &Position, const GIVector3 &RayDirection/*, const GIHit &hitResult*/ )
 {
 	assert( g_PhotonMappingOption.IsValid() );
 	//assert( hitResult.isHit() );
@@ -292,13 +301,13 @@ GIColor3 PhotonMapping::FinalGathering( GIScene *inScene, GIPhotonMap *inPhotonM
 
 PhotonMapping::GIPhotonMap *gPhotonMap = NULL;
 
-void PhotonMappingShading( RtScene *rtScene, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor )
+void PhotonMappingShading( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor )
 {
 	GIColor4 DirectIlluminationColor;
-	Raytracer::Shading( rtScene, Ray, Hit, MaxDepth, &DirectIlluminationColor );
+	Raytracer::Shading( rtScene, KDTree, Ray, Hit, MaxDepth, &DirectIlluminationColor );
 	GIColor3 IndirectIlluminationColor( 0.0f, 0.0f, 0.0f );
 	if( Hit.isHit() )
-		IndirectIlluminationColor = PhotonMapping::FinalGathering( (GIScene*)rtScene, gPhotonMap, GIVector3( Ray.org ) + GIVector3( Ray.dir ) * Hit.dist, GIVector3( Ray.dir ) );;
+		IndirectIlluminationColor = PhotonMapping::FinalGatheringCPU( (GIScene*)rtScene, KDTree, gPhotonMap, GIVector3( Ray.org ) + GIVector3( Ray.dir ) * Hit.dist, GIVector3( Ray.dir ) );;
 	
 	// TODO: Clamp
 	if( IndirectIlluminationColor.r > 1.0f )
@@ -313,7 +322,7 @@ void PhotonMappingShading( RtScene *rtScene, const GIRay &Ray, const GIHit &Hit,
 	*outColor = DirectIlluminationColor + GIVector4( IndirectIlluminationColor.r, IndirectIlluminationColor.g, IndirectIlluminationColor.b, 0.0f );
 }
 
-void PhotonMapping::Render( unsigned int ThreadCount, GIScene *pScene, GIPhotonMap *pPhotonMap, GICamera *pCamera, GIVector3 *outPixelData )
+void PhotonMapping::Render( unsigned int ThreadCount, GIScene *pScene, SceneAccelStructure *AccelStructure, GIPhotonMap *pPhotonMap, GICamera *pCamera, GIVector3 *outPixelData )
 {
 	gPhotonMap = pPhotonMap;
 
@@ -324,7 +333,8 @@ void PhotonMapping::Render( unsigned int ThreadCount, GIScene *pScene, GIPhotonM
 	GIRay *RayArray = new GIRay[RayCount];
 	GenerateRays( pCamera, RayArray );
 
-	UserDefinedShading( ThreadCount, pScene, RayCount, RayArray, outPixelData, &PhotonMappingShading );
+	// TODO: Error Check
+	Raytracer::UserDefinedShadingCPU( ThreadCount, pScene, AccelStructure->GetKDTree(), RayCount, RayArray, outPixelData, &PhotonMappingShading );
 	delete[] RayArray;
 }
 

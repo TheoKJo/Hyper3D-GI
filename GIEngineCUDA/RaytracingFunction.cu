@@ -3,15 +3,17 @@
 #pragma warning( disable : 4819 ) 
 
 #include <cuda_runtime.h>
+
+
+#include "cuKDTree.h"
+#include "cuKDTreeNode.h"
 #include "../GIEngineCore/Global.h"
 
 // 32 * 32 = 1024 <= 1024 (GTS 450)
 const int BLOCK_SIZE_X = 32;
 const int BLOCK_SIZE_Y = 32;
 
-class KDTreeGPU;
-
-__global__ void ShootRayCUDA( GIHit *outHits, RtTriAccel *TriAccelArray, KDTreeGPU *KDTree, const GIRay *RayArray )
+__global__ void ShootRay( GIHit *outHits, RtTriAccel *TriAccelArray, cuKDTree *KDTree, const GIRay *RayArray )
 {
 	int bx = blockIdx.x;
 	int by = blockIdx.y;
@@ -25,13 +27,32 @@ __global__ void ShootRayCUDA( GIHit *outHits, RtTriAccel *TriAccelArray, KDTreeG
 	
 	const GIRay &Ray = RayArray[index];
 	GIHit &result = outHits[index];
+
+	result.triNum = 1;
+	result.dist = 3.141592f;
 }
 
-__host__ void ShootRays( GIHit *outHits, RtTriAccel *TriAccelArray, KDTreeGPU *KDTree, const GIRay *RayArray, unsigned int RayCount )
+extern "C" __host__ void cuShootRays( cuKDTree *DeviceKDTree, unsigned int RayCount, const GIRay *RayArray, GIHit *outHits )
 {
+	GIRay *DeviceRayArray;
+	cudaMalloc( &DeviceRayArray, RayCount * sizeof(GIRay) );
+	cudaMemcpy( DeviceRayArray, RayArray, RayCount * sizeof(GIRay), cudaMemcpyHostToDevice );
+
+	GIHit *DeviceHitArray;
+	cudaMalloc( &DeviceHitArray, RayCount * sizeof(GIHit) );
+
+	//cudaMemcpy( RayArray, DeviceRayArray, RayCount * sizeof(cuKDTreeNode), cudaMemcpyHostToDevice );
+	
+
 	// TODO: 크기 비교 엄밀히!! 제대로 이해하고!!
 	dim3 dimGrid( RayCount/BLOCK_SIZE_X, 1, 1 );
 	dim3 dimBlock( BLOCK_SIZE_X, 1, 1 );
 
-	ShootRayCUDA<<<dimGrid, dimBlock>>>( outHits, TriAccelArray, KDTree, RayArray );
+	ShootRay<<<dimGrid, dimBlock>>>( DeviceHitArray, NULL, DeviceKDTree, DeviceRayArray );
+	
+	cudaMemcpy( outHits, DeviceHitArray, RayCount * sizeof(GIHit), cudaMemcpyDeviceToHost );
+
+	cudaFree( DeviceRayArray );
+	cudaFree( DeviceHitArray );
 }
+

@@ -78,19 +78,19 @@ public:
 
 		for( int i = 0; i < 3; i++ )
 		{
-			if( m_BoxMin.array[i] > Triangle->vg0.Vertex.array[i] )
-				m_BoxMin.array[i] = Triangle->vg0.Vertex.array[i];
-			if( m_BoxMin.array[i] > Triangle->vg1.Vertex.array[i] )
-				m_BoxMin.array[i] = Triangle->vg1.Vertex.array[i];
-			if( m_BoxMin.array[i] > Triangle->vg2.Vertex.array[i] )
-				m_BoxMin.array[i] = Triangle->vg2.Vertex.array[i];
+			if( m_BoxMin.array[i] > Triangle->vg0.Position.array[i] )
+				m_BoxMin.array[i] = Triangle->vg0.Position.array[i];
+			if( m_BoxMin.array[i] > Triangle->vg1.Position.array[i] )
+				m_BoxMin.array[i] = Triangle->vg1.Position.array[i];
+			if( m_BoxMin.array[i] > Triangle->vg2.Position.array[i] )
+				m_BoxMin.array[i] = Triangle->vg2.Position.array[i];
 
-			if( m_BoxMax.array[i] < Triangle->vg0.Vertex.array[i] )
-				m_BoxMax.array[i] = Triangle->vg0.Vertex.array[i];
-			if( m_BoxMax.array[i] < Triangle->vg1.Vertex.array[i] )
-				m_BoxMax.array[i] = Triangle->vg1.Vertex.array[i];
-			if( m_BoxMax.array[i] < Triangle->vg2.Vertex.array[i] )
-				m_BoxMax.array[i] = Triangle->vg2.Vertex.array[i];
+			if( m_BoxMax.array[i] < Triangle->vg0.Position.array[i] )
+				m_BoxMax.array[i] = Triangle->vg0.Position.array[i];
+			if( m_BoxMax.array[i] < Triangle->vg1.Position.array[i] )
+				m_BoxMax.array[i] = Triangle->vg1.Position.array[i];
+			if( m_BoxMax.array[i] < Triangle->vg2.Position.array[i] )
+				m_BoxMax.array[i] = Triangle->vg2.Position.array[i];
 			assert( m_BoxMin.array[i] <= m_BoxMax.array[i] );
 
 			bPlanar[i] = m_BoxMin.array[i] == m_BoxMax.array[i];
@@ -185,7 +185,7 @@ public:
 	int PlanarCount;
 };
 
-class KDTreeStructure : public RtAccelStructure
+class KDTreeStructure
 {
 public:
 	KDTreeStructure();
@@ -203,6 +203,11 @@ public:
 	RtKDTreeNode* GetRootNode() { return m_RootNode; }
 	int GetNodeSize() { return m_NodeSize; }
 
+	//! number of triangles in the scene
+	int GetTriangleCount() { return m_TriangleCount; }
+	//! sum of number of triangles in each (leaf) node
+	int GetTriangleIndexCount() { return m_TriangleIndexCount; }
+
 	GIBoundingBox GetBoundingBox() { return m_SceneBoundingBox; }
 	
 private:
@@ -216,6 +221,7 @@ public:
 	int m_MinimumTriangleCount;
 	float m_IntersectionCost;
 	float mTraversalCost;
+
 private:
 	int m_CurNodeTriangleIndex;	//!< 현재의 triangle index 들이 저장될 위치
 	int m_CurNodeSize; //!< for mKDTreeNodeSize
@@ -236,5 +242,6 @@ private:
 	TriangleBox *m_TriangleBoxArray;
 
 	int m_TriangleCount;
+	int m_TriangleIndexCount;
 	RtKDTreeNode *m_NodeArray;
 };

@@ -48,7 +48,9 @@ bool Radiosity::BuildFormFactors( RadiosityScene *pRadiosityScene, const Radiosi
 
 		// TODO: Backhit on
 		GenerateHemisphericalSampleArray( Quadrangle.CenterPosition, Quadrangle.CenterNormal, RaySampleArray );
-		SampleHit( Option.NumberOfThread, pScene, RaySampleArray->GetRayCount(), RaySampleArray->GetRayArray(), HitArray );
+		//Option.NumberOfThread
+		assert( false ); // NOT NULL!!!
+		SampleHit( pScene, NULL, RaySampleArray->GetRayCount(), RaySampleArray->GetRayArray(), HitArray );
 
 		for( unsigned int j = 0; j < RaySampleArray->GetRayCount(); j++ )
 		{

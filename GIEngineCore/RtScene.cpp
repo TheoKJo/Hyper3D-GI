@@ -24,11 +24,11 @@ void TriangleToTriAceel( GITriangle &Triangle, RtTriAccel &TriAccel )
 	const GIVertexGroup &vg1 = Triangle.vg1;
 	const GIVertexGroup &vg2 = Triangle.vg2;
 
-	/*float Au = vg0.Vertex.array[v]/vg0.Vertex.array[u];
-	float Av = vg0.Vertex.array[v]/vg0.Vertex.array[v];*/
+	/*float Au = vg0.Position.array[v]/vg0.Position.array[u];
+	float Av = vg0.Position.array[v]/vg0.Position.array[v];*/
 
-	const GIVector3 b = vg2.Vertex - vg0.Vertex;
-	const GIVector3 c = vg1.Vertex - vg0.Vertex;
+	const GIVector3 b = vg2.Position - vg0.Position;
+	const GIVector3 c = vg1.Position - vg0.Position;
 
 	GIVector3 TriangleNormal = c.CrossProduct( b );
 	TriangleNormal = TriangleNormal.GetNormalized();
@@ -49,7 +49,7 @@ void TriangleToTriAceel( GITriangle &Triangle, RtTriAccel &TriAccel )
 	assert( TriangleNormal.array[k] != 0.0f );
 	TriAccel.n_u = TriangleNormal.array[u]/TriangleNormal.array[k];
 	TriAccel.n_v = TriangleNormal.array[v]/TriangleNormal.array[k];
-	TriAccel.n_d = TriangleNormal.DotProduct( vg0.Vertex )/TriangleNormal.array[k]; //!<??, negative?
+	TriAccel.n_d = TriangleNormal.DotProduct( vg0.Position )/TriangleNormal.array[k]; //!<??, negative?
 	//=> N'u = Nu/Nk, N'k = 1
 
 	// beta
@@ -63,16 +63,16 @@ void TriangleToTriAceel( GITriangle &Triangle, RtTriAccel &TriAccel )
 	}*/
 	TriAccel.b_nu = -b.array[v]/denom;
 	TriAccel.b_nv = b.array[u]/denom;
-	TriAccel.b_d = (b.array[v] * vg0.Vertex.array[u] - b.array[u] * vg0.Vertex.array[v])/denom;
+	TriAccel.b_d = (b.array[v] * vg0.Position.array[u] - b.array[u] * vg0.Position.array[v])/denom;
 
 	// gamma
 	TriAccel.c_nu = c.array[v]/denom;
 	TriAccel.c_nv = -c.array[u]/denom;
-	TriAccel.c_d = (c.array[u] * vg0.Vertex.array[v] - c.array[v] * vg0.Vertex.array[u])/denom;
+	TriAccel.c_d = (c.array[u] * vg0.Position.array[v] - c.array[v] * vg0.Position.array[u])/denom;
 }
 
 RtScene::RtScene()
-	: m_TriangleCount(0), m_TriangleList(NULL), m_TriAccelList(NULL), m_AccelStructure(NULL), 
+	: m_TriangleCount(0), m_TriangleList(NULL), m_TriAccelList(NULL), //m_AccelStructure(NULL), 
 	m_VertexCount(0), m_VertexPositionList(NULL), m_VertexNormalList(NULL), 
 	m_SHList(NULL), m_SH_RGBList(NULL), 
 	m_LightCount(0), m_LightArray(NULL), 
@@ -280,15 +280,15 @@ int RtScene::FindMaterialIndex( const char *strMaterialName )
 	return -1;
 }
 
-void RtScene::SetAccStructure( RtAccelStructure *AccelStructure )
-{
-	m_AccelStructure = AccelStructure;
-}
-
-RtAccelStructure* RtScene::GetAccStructure()
-{
-	return m_AccelStructure;
-}
+//void RtScene::SetAccStructure( RtAccelStructure *AccelStructure )
+//{
+//	m_AccelStructure = AccelStructure;
+//}
+//
+//RtAccelStructure* RtScene::GetAccStructure()
+//{
+//	return m_AccelStructure;
+//}
 
 void RtScene::ConvertAll()
 {
@@ -331,19 +331,19 @@ void RtScene::EvaluateBoundingBox()
 		GITriangle *Triangle = &m_TriangleList[i];
 		for( int Axis = 0; Axis < 3; Axis++ )
 		{
-			if( Triangle->vg0.Vertex.array[Axis] < MinPositions.array[Axis] )
-				MinPositions.array[Axis] = Triangle->vg0.Vertex.array[Axis];
-			if( Triangle->vg1.Vertex.array[Axis] < MinPositions.array[Axis] )
-				MinPositions.array[Axis] = Triangle->vg1.Vertex.array[Axis];
-			if( Triangle->vg2.Vertex.array[Axis] < MinPositions.array[Axis] )
-				MinPositions.array[Axis] = Triangle->vg2.Vertex.array[Axis];
+			if( Triangle->vg0.Position.array[Axis] < MinPositions.array[Axis] )
+				MinPositions.array[Axis] = Triangle->vg0.Position.array[Axis];
+			if( Triangle->vg1.Position.array[Axis] < MinPositions.array[Axis] )
+				MinPositions.array[Axis] = Triangle->vg1.Position.array[Axis];
+			if( Triangle->vg2.Position.array[Axis] < MinPositions.array[Axis] )
+				MinPositions.array[Axis] = Triangle->vg2.Position.array[Axis];
 
-			if( MaxPositions.array[Axis] < Triangle->vg0.Vertex.array[Axis] )
-				MaxPositions.array[Axis] = Triangle->vg0.Vertex.array[Axis];
-			if( MaxPositions.array[Axis] < Triangle->vg1.Vertex.array[Axis] )
-				MaxPositions.array[Axis] = Triangle->vg1.Vertex.array[Axis];
-			if( MaxPositions.array[Axis] < Triangle->vg2.Vertex.array[Axis] )
-				MaxPositions.array[Axis] = Triangle->vg2.Vertex.array[Axis];
+			if( MaxPositions.array[Axis] < Triangle->vg0.Position.array[Axis] )
+				MaxPositions.array[Axis] = Triangle->vg0.Position.array[Axis];
+			if( MaxPositions.array[Axis] < Triangle->vg1.Position.array[Axis] )
+				MaxPositions.array[Axis] = Triangle->vg1.Position.array[Axis];
+			if( MaxPositions.array[Axis] < Triangle->vg2.Position.array[Axis] )
+				MaxPositions.array[Axis] = Triangle->vg2.Position.array[Axis];
 		}
 	}
 
@@ -361,9 +361,9 @@ GIVector3 RtScene::GetPosition( unsigned int TriangleNum, float u, float v )
 	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
 	GITriangle &Triangle = m_TriangleList[TriangleNum];
 
-	return Triangle.vg0.Vertex * (1.0f - u - v) + 
-		Triangle.vg1.Vertex * u + 
-		Triangle.vg2.Vertex * v;
+	return Triangle.vg0.Position * (1.0f - u - v) + 
+		Triangle.vg1.Position * u + 
+		Triangle.vg2.Position * v;
 }
 
 GIVector4 RtScene::GetColor( unsigned int TriangleNum, float u, float v )

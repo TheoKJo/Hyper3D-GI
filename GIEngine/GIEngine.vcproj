@@ -432,6 +432,10 @@
 				RelativePath=".\Raytracer\RaytracerProcedure.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Raytracer\SceneAccelStructure.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="PhotonMapping"

@@ -345,7 +345,7 @@ struct GIVertexGroup
 {
 	GIVertexGroup() :
 		VertexNum(-1), 
-		Vertex( 0.0f, 0.0f, 0.0f ), 
+		Position( 0.0f, 0.0f, 0.0f ), 
 		Normal( 0.0f, 0.0f, 1.0f ), 
 		Tangent( 1.0f, 0.0f, 0.0f ), 
 		Color( 0.0f, 0.0f, 0.0f, 1.0f ), 
@@ -353,7 +353,7 @@ struct GIVertexGroup
 	{}
 
 	int VertexNum;
-	GIVector3 Vertex;
+	GIVector3 Position;
 	GIVector3 Normal;
 	GIVector3 Tangent;
 	GIVector4 Color;
@@ -395,8 +395,8 @@ struct GITriangle
 
 		float det = u1*v2 - v2*u1;
 
-		const GIVector3 Vector1 = vg1.Vertex - vg0.Vertex;
-		const GIVector3 Vector2 = vg2.Vertex - vg0.Vertex;
+		const GIVector3 Vector1 = vg1.Position - vg0.Position;
+		const GIVector3 Vector2 = vg2.Position - vg0.Position;
 
 		GIVector3 Tangent = Vector1 * v2/det + Vector2 * -v1/det;
 		//GIVector3 Binormal = Vector1 * -u2/det + Vector2 * u1/det;
@@ -460,12 +460,6 @@ struct GIRay
 	float dir[3];
 	float NearDistance;
 	float FarDistance;
-};
-
-
-//! Acceleration Structure (KD-Tree)
-class RtAccelStructure
-{
 };
 
 struct RtTriAccel

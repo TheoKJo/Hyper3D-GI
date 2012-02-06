@@ -10,10 +10,13 @@
 
 #include "Raytracer.h"
 
-#include "Utility.h"
+#include <Utility.h>
+#include <RtScene.h>
 
 // inline
 #include "Intersect.h"
+
+#include "KDTreeStructure.h"
 
 #include <math.h>
 
@@ -21,9 +24,9 @@
 
 using namespace GIEngine;
 
-bool Raytracer::BuildStructure( RtScene *pScene, const char *strStructureFilename,  bool bLoadKDTree/*= true*/ )
+KDTreeStructure* Raytracer::BuildKDTree( RtScene *pScene, const char *strStructureFilename, bool bLoadKDTree/* = true*/ )
 {
-	KDTreeStructure* KDTree = new KDTreeStructure;
+	KDTreeStructure* KDTree = new KDTreeStructure();
 
 	KDTree->m_IntersectionCost = 20.0f;
 	KDTree->mTraversalCost = 1.5f;
@@ -42,14 +45,12 @@ bool Raytracer::BuildStructure( RtScene *pScene, const char *strStructureFilenam
 		delete KDTree;
 		KDTree = NULL;
 	}
-	pScene->SetAccStructure( KDTree );
-	return KDTree !=NULL;
+	return KDTree;
 }
 
-GIHit Raytracer::ShootRay( RtScene *rtScene, const GIRay &Ray )
+GIHit Raytracer::ShootRay( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray )
 {
-	KDTreeStructure *pKDTree = (KDTreeStructure*)rtScene->GetAccStructure();
-	assert( pKDTree->IsBuilt() );
+	assert( KDTree != NULL && KDTree->IsBuilt() );
 
 	// TODO : Boundary?, const Stack!!!! 가급적 모든걸 global 로!!! (각 thread 에 대해 가지고 있도록!)
 
@@ -89,7 +90,7 @@ GIHit Raytracer::ShootRay( RtScene *rtScene, const GIRay &Ray )
 		GIBoundingBox BoundingBox;
 	};
 
-	StackStruct RootStatkNode = { pKDTree->GetRootNode(), pKDTree->GetBoundingBox() };
+	StackStruct RootStatkNode = { KDTree->GetRootNode(), KDTree->GetBoundingBox() };
 
 	std::vector<StackStruct> StackStorage;
 	// TODO: 500?? 절대 안됨!!
@@ -309,7 +310,7 @@ void Raytracer::TraverseKDTree( RtScene *rtScene, const GIRay &Ray, RtKDTreeNode
 	}
 }
 
-void Raytracer::Shading( RtScene *rtScene, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor )
+void Raytracer::Shading( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor )
 {
 	if( Hit.triNum < 0 )
 	{
@@ -343,9 +344,9 @@ void Raytracer::Shading( RtScene *rtScene, const GIRay &Ray, const GIHit &Hit, i
 		Normal = -Normal;
 
 	GIVector3 Position = 
-		Triangle.vg0.Vertex * (1.0f - Hit.u - Hit.v) + 
-		Triangle.vg1.Vertex * Hit.u + 
-		Triangle.vg2.Vertex * Hit.v;
+		Triangle.vg0.Position * (1.0f - Hit.u - Hit.v) + 
+		Triangle.vg1.Position * Hit.u + 
+		Triangle.vg2.Position * Hit.v;
 
 	GIVector2 TexCoords = 
 		Triangle.vg0.TexCoords * (1.0f - Hit.u - Hit.v) + 
@@ -452,7 +453,7 @@ void Raytracer::Shading( RtScene *rtScene, const GIRay &Ray, const GIHit &Hit, i
 		if( ToLightDirection.DotProduct( Normal ) <= 0.0f )
 			continue;
 
-		GIHit ShadowHit = ShootRay( rtScene, ShadowRay );
+		GIHit ShadowHit = ShootRay( rtScene, KDTree, ShadowRay );
 
 		if( ShadowHit.isHit() == false )
 		{
@@ -483,11 +484,11 @@ void Raytracer::Shading( RtScene *rtScene, const GIRay &Ray, const GIHit &Hit, i
 
 			GIRay RefractionRay( Ray );
 			RayOrigin.CopyToFloatArray( RefractionRay.org );
-			GIHit RefractionHit = ShootRay( rtScene, RefractionRay );
+			GIHit RefractionHit = ShootRay( rtScene, KDTree, RefractionRay );
 			if( RefractionHit.isHit() )
 			{
 				GIVector4 RefractionColor;
-				Shading( rtScene, RefractionRay, RefractionHit, MaxDepth-1, &RefractionColor );
+				Shading( rtScene, KDTree, RefractionRay, RefractionHit, MaxDepth-1, &RefractionColor );
 				*outColor = *outColor * Alpha + RefractionColor * (1.0f - Alpha);
 			}
 		}
@@ -527,9 +528,9 @@ void Raytracer::Shading( RtScene *rtScene, const GIRay &Ray, const GIHit &Hit, i
 //	const GIVertexGroup &vg1 = pTriangleList[Hit.triNum].vg1;
 //	const GIVertexGroup &vg2 = pTriangleList[Hit.triNum].vg2;
 //
-//	const GIVector3 v0 = vg0.Vertex;
-//	const GIVector3 v1 = vg1.Vertex;
-//	const GIVector3 v2 = vg2.Vertex;
+//	const GIVector3 v0 = vg0.Position;
+//	const GIVector3 v1 = vg1.Position;
+//	const GIVector3 v2 = vg2.Position;
 //
 //	float tao = 1.0f - Hit.u - Hit.v;
 //	assert( 0.0f <= tao && tao <= 1.0f );

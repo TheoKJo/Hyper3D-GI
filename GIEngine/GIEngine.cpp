@@ -18,8 +18,12 @@
 #include "GIEngine.h"
 
 //#include "Raytracer/Raytracer.h"
+#include <Camera.h>
 
 #include "Raytracer/KDTreeStructure.h"
+#include "Raytracer/SceneAccelStructure.h"
+
+#include "../GIEngineCUDA/GIEngineCUDA.h"
 
 #include "Raytracer/RaytracerProcedure.h"
 #include "IrradianceCalcThread.h"
@@ -28,6 +32,18 @@ RtScene* RaytracerProcedure::mRtScene = NULL;
 KDTreeStructure* RaytracerProcedure::mKDTree = NULL;
 
 static float gRayShootEpsilon = 0.00001f;
+
+static GIEngine::RaytracerOption g_RaytracerGlobalOption;
+
+void GIEngine::SetGlobalOption( const GIEngine::RaytracerOption &Option )
+{
+	g_RaytracerGlobalOption = Option;
+}
+
+GIEngine::RaytracerOption GIEngine::GetGlobalOption()
+{
+	return g_RaytracerGlobalOption;
+}
 
 bool GIEngine::Initialize()
 {
@@ -219,19 +235,33 @@ void GIEngine::GenerateHemisphericalSampleArray( const GIVector3 &Position, cons
 	}
 }
 
-bool GIEngine::BuildAccStructure( GIScene *Scene, const char *strStructureFilename )
+SceneAccelStructure* GIEngine::BuildAccStructure( GIScene *Scene, const char *strStructureFilename )
 {
 	assert( Scene );
 
-	if( Scene->GetAccStructure() != NULL )
+	GIEngine::RaytracerOption Option = GetGlobalOption();
+
+	// always build kdtree for CPU 
+	KDTreeStructure *KDTree = Raytracer::BuildKDTree( (RtScene*)Scene, strStructureFilename, true );
+	if( KDTree == NULL )
+		return NULL;
+
+	KDTreeStructureCUDA* KDTreeCUDA = NULL;
+	// TODO: define 으로 추가? 항상 추가?? -_-;;;
+	if( Option.BuildDeviceTypeFlag |= RaytracerOption::RDT_CUDA > 0 )
 	{
-		delete Scene->GetAccStructure();
-		Scene->SetAccStructure( NULL );
+		KDTreeCUDA = Raytracer::ConvertIntoKDTreeCUDA( (RtScene*)Scene, KDTree );
+		// TODO: Error 처리
+		Raytracer::InitializeKDTreeForCUDA( KDTreeCUDA );
+			
 	}
-	return Raytracer::BuildStructure( (RtScene*)Scene, strStructureFilename, true );
+	SceneAccelStructure *AccelStructure = new SceneAccelStructure();
+	AccelStructure->SetKDTree( KDTree );
+	AccelStructure->SetKDTreeCUDA( KDTreeCUDA );
+	return AccelStructure;
 }
 
-void GIEngine::Render( unsigned int ThreadCount, GIScene *pScene, GICamera *pCamera, GIVector3 *outPixelData )
+void GIEngine::Render( GIScene *pScene, SceneAccelStructure *AccelStructure, GICamera *pCamera, GIVector3 *outPixelData )
 {
 	unsigned int Width = pCamera->Width;
 	unsigned int Height = pCamera->Height;
@@ -240,18 +270,60 @@ void GIEngine::Render( unsigned int ThreadCount, GIScene *pScene, GICamera *pCam
 	GIRay *RayArray = new GIRay[RayCount];
 	GenerateRays( pCamera, RayArray );
 
-	SampleColor( ThreadCount, pScene, RayCount, RayArray, outPixelData );
+	SampleColor( pScene, AccelStructure, RayCount, RayArray, outPixelData );
 	delete[] RayArray;
 }
 
-void GIEngine::SampleColor( unsigned int ThreadCount, GIScene *pScene, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray )
+void GIEngine::SampleColor( GIScene *pScene, SceneAccelStructure *AccelStructure, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray )
 {
-	
+	RaytracerOption Option = GetGlobalOption();
+	if( Option.RenderingDeviceType == RaytracerOption::RDT_CPU && AccelStructure->GetKDTree() )
+	{
+		Raytracer::SampleColorCPU( Option.NumberOfThreads, pScene, AccelStructure->GetKDTree(), RayCount, RayArray, outColorArray );
+	}
+}
+
+void GIEngine::SampleDistance( GIScene *pScene, SceneAccelStructure *AccelStructure, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray )
+{
+	RaytracerOption Option = GetGlobalOption();
+	if( Option.RenderingDeviceType == RaytracerOption::RDT_CPU && AccelStructure->GetKDTree() )
+	{
+		Raytracer::SampleDistanceCPU( Option.NumberOfThreads, pScene, AccelStructure->GetKDTree(), RayCount, RayArray, outDistanceArray );
+	}
+	/*else if( Option.RenderingDeviceType == RaytracerOption::RDT_CUDA && AccelStructure->GetKDTree() )
+	{
+		SampleDistanceCUDA( pScene, AccelStructure->GetKDTree(), RayCount, RayArray, outDistanceArray );
+	}*/
+	// TODO: Error
+}
+
+void GIEngine::SampleHit( GIScene *pScene, SceneAccelStructure *AccelStructure, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray )
+{
+	RaytracerOption Option = GetGlobalOption();
+	if( Option.RenderingDeviceType == RaytracerOption::RDT_CPU && AccelStructure->GetKDTree() )
+	{
+		Raytracer::SampleHitCPU( Option.NumberOfThreads, pScene, AccelStructure->GetKDTree(), RayCount, RayArray, outHitArray );
+	}
+	else if( Option.RenderingDeviceType == RaytracerOption::RDT_CUDA && AccelStructure->GetKDTree() )
+	{
+		Raytracer::SampleHitCUDA( pScene, AccelStructure->GetKDTreeCUDA(), RayCount, RayArray, outHitArray );
+	}
+}
+
+void GIEngine::UserDefinedShading( GIScene *pScene, SceneAccelStructure *AccelStructure, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray, ShadingFunction pfnShadingFunction )
+{
+	RaytracerOption Option = GetGlobalOption();
+	if( Option.RenderingDeviceType == RaytracerOption::RDT_CPU && AccelStructure->GetKDTree() )
+	{
+		Raytracer::UserDefinedShadingCPU( Option.NumberOfThreads, pScene, AccelStructure->GetKDTree(), RayCount, RayArray, outColorArray, pfnShadingFunction );
+	}
+}
+
+void GIEngine::Raytracer::SampleColorCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray )
+{
 	assert( pScene != NULL && RayArray != NULL && ThreadCount > 0 && outColorArray != NULL && RayCount > 0 );
 
-	KDTreeStructure *pKDTree = (KDTreeStructure*)pScene->GetAccStructure();
-
-	if( pKDTree == NULL || pKDTree->IsBuilt() == false )
+	if( KDTree == NULL || KDTree->IsBuilt() == false )
 	{
 		return;
 	}
@@ -263,8 +335,8 @@ void GIEngine::SampleColor( unsigned int ThreadCount, GIScene *pScene, unsigned 
 		for( unsigned int i = 0; i < RayCount; i++ )
 		{
 			// KD-Tree
-			GIHit Hit = Raytracer::ShootRay( pScene, RayArray[i] );
-			Raytracer::Shading( pScene, RayArray[i], Hit, 2, &RenderedColor );
+			GIHit Hit = Raytracer::ShootRay( pScene, KDTree, RayArray[i] );
+			Raytracer::Shading( pScene, KDTree, RayArray[i], Hit, 2, &RenderedColor );
 			outColorArray[i] = RenderedColor.ToVector3();
 		}
 		return;
@@ -279,7 +351,7 @@ void GIEngine::SampleColor( unsigned int ThreadCount, GIScene *pScene, unsigned 
 	assert( 0 <= RestRayCount );
 
 	RaytracerProcedure::mRtScene = pScene;
-	RaytracerProcedure::mKDTree = pKDTree;
+	RaytracerProcedure::mKDTree = KDTree;
 
 	// TODO: MAX_THREAD?
 	LPDWORD pThreadIdArray = new DWORD[ThreadCount];
@@ -323,14 +395,12 @@ void GIEngine::SampleColor( unsigned int ThreadCount, GIScene *pScene, unsigned 
 	delete[] pRaytracerProcedureArray;
 }
 
-void GIEngine::SampleDistance( unsigned int ThreadCount, GIScene *pScene, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray )
+void GIEngine::Raytracer::SampleDistanceCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray )
 {
 	
 	assert( pScene != NULL && RayArray != NULL && ThreadCount > 0 && outDistanceArray != NULL && RayCount > 0 );
 
-	KDTreeStructure *pKDTree = (KDTreeStructure*)pScene->GetAccStructure();
-
-	if( pKDTree == NULL || pKDTree->IsBuilt() == false )
+	if( KDTree == NULL || KDTree->IsBuilt() == false )
 	{
 		return;
 	}
@@ -342,7 +412,7 @@ void GIEngine::SampleDistance( unsigned int ThreadCount, GIScene *pScene, unsign
 		for( unsigned int i = 0; i < RayCount; i++ )
 		{
 			// KD-Tree
-			GIHit Hit = Raytracer::ShootRay( pScene, RayArray[i] );
+			GIHit Hit = Raytracer::ShootRay( pScene, KDTree, RayArray[i] );
 
 			float distance = Hit.dist;
 			bool hit = Hit.isHit();
@@ -369,7 +439,7 @@ void GIEngine::SampleDistance( unsigned int ThreadCount, GIScene *pScene, unsign
 	assert( 0 <= RestRayCount );
 
 	RaytracerProcedure::mRtScene = pScene;
-	RaytracerProcedure::mKDTree = pKDTree;
+	RaytracerProcedure::mKDTree = KDTree;
 
 	//GIVector3 *TempVector = new GIVector3[RayCount];
 	GIHit *HitArray = new GIHit[RayCount];
@@ -432,14 +502,12 @@ void GIEngine::SampleDistance( unsigned int ThreadCount, GIScene *pScene, unsign
 	delete[] pRaytracerProcedureArray;
 }
 
-void GIEngine::SampleHit( unsigned int ThreadCount, GIScene *pScene, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray )
+void GIEngine::Raytracer::SampleHitCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray )
 {
 	
 	assert( pScene != NULL && RayArray != NULL && ThreadCount > 0 && outHitArray != NULL && RayCount > 0 );
 
-	KDTreeStructure *pKDTree = (KDTreeStructure*)pScene->GetAccStructure();
-
-	if( pKDTree == NULL || pKDTree->IsBuilt() == false )
+	if( KDTree == NULL || KDTree->IsBuilt() == false )
 	{
 		return;
 	}
@@ -451,7 +519,7 @@ void GIEngine::SampleHit( unsigned int ThreadCount, GIScene *pScene, unsigned in
 		for( unsigned int i = 0; i < RayCount; i++ )
 		{
 			// KD-Tree
-			outHitArray[i] = Raytracer::ShootRay( pScene, RayArray[i] );
+			outHitArray[i] = Raytracer::ShootRay( pScene, KDTree, RayArray[i] );
 		}
 		return;
 	}
@@ -465,7 +533,7 @@ void GIEngine::SampleHit( unsigned int ThreadCount, GIScene *pScene, unsigned in
 	assert( 0 <= RestRayCount );
 
 	RaytracerProcedure::mRtScene = pScene;
-	RaytracerProcedure::mKDTree = pKDTree;
+	RaytracerProcedure::mKDTree = KDTree;
 
 	// TODO: MAX_THREAD?
 	LPDWORD pThreadIdArray = new DWORD[ThreadCount];
@@ -509,13 +577,13 @@ void GIEngine::SampleHit( unsigned int ThreadCount, GIScene *pScene, unsigned in
 	delete[] pRaytracerProcedureArray;
 }
 
-void GIEngine::UserDefinedShading( unsigned int ThreadCount, GIScene *pScene, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray, ShadingFunction pfnShadingFunction ) 
+void GIEngine::Raytracer::UserDefinedShadingCPU( unsigned int ThreadCount, 
+									 GIScene *pScene, KDTreeStructure *KDTree, 
+									 unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray, ShadingFunction pfnShadingFunction ) 
 {
 	assert( pScene != NULL && RayArray != NULL && ThreadCount > 0 && outColorArray != NULL && RayCount > 0 );
 
-	KDTreeStructure *pKDTree = (KDTreeStructure*)pScene->GetAccStructure();
-
-	if( pKDTree == NULL || pKDTree->IsBuilt() == false )
+	if( KDTree == NULL || KDTree->IsBuilt() == false )
 	{
 		return;
 	}
@@ -527,8 +595,8 @@ void GIEngine::UserDefinedShading( unsigned int ThreadCount, GIScene *pScene, un
 		for( unsigned int i = 0; i < RayCount; i++ )
 		{
 			// KD-Tree
-			GIHit Hit = Raytracer::ShootRay( pScene, RayArray[i] );
-			pfnShadingFunction( pScene, RayArray[i], Hit, 2, &RenderedColor );
+			GIHit Hit = Raytracer::ShootRay( pScene, KDTree, RayArray[i] );
+			pfnShadingFunction( pScene, KDTree, RayArray[i], Hit, 2, &RenderedColor );
 			outColorArray[i] = RenderedColor.ToVector3();
 		}
 		return;
@@ -543,7 +611,7 @@ void GIEngine::UserDefinedShading( unsigned int ThreadCount, GIScene *pScene, un
 	assert( 0 <= RestRayCount );
 
 	RaytracerProcedure::mRtScene = pScene;
-	RaytracerProcedure::mKDTree = pKDTree;
+	RaytracerProcedure::mKDTree = KDTree;
 
 	// TODO: MAX_THREAD?
 	LPDWORD pThreadIdArray = new DWORD[ThreadCount];
@@ -588,9 +656,8 @@ void GIEngine::UserDefinedShading( unsigned int ThreadCount, GIScene *pScene, un
 	delete[] pRaytracerProcedureArray;
 }
 
-GIVector3 GIEngine::CalcIrradiance( GIScene *Scene, const GIVector3 &Position, const GIVector3 &Normal, unsigned int RayCount, unsigned int ThreadCount )
+GIVector3 GIEngine::CalcIrradiance( GIScene *Scene, SceneAccelStructure *AccelStructure, const GIVector3 &Position, const GIVector3 &Normal, unsigned int RayCount )
 {
-	
 	assert( Scene );
 
 	SphericalSampleArray SampleArray( RayCount, SphericalSampleArray::SA_RAY_ARRAY|SphericalSampleArray::SA_WEIGHT_ARRAY );
@@ -600,7 +667,7 @@ GIVector3 GIEngine::CalcIrradiance( GIScene *Scene, const GIVector3 &Position, c
 	GenerateHemisphericalSampleArray( Position, Normal, &SampleArray );
 
 	GIVector3 *ColorArray = new GIVector3[RayCount];
-	SampleColor( ThreadCount, Scene, RayCount, SampleArray.GetRayArray(), ColorArray );
+	SampleColor( Scene, AccelStructure, RayCount, SampleArray.GetRayArray(), ColorArray );
 	float *WeightArray = SampleArray.GetWeightArray();
 	
 	float recRayCount = 1.0f/(float(RayCount));
@@ -616,7 +683,7 @@ GIVector3 GIEngine::CalcIrradiance( GIScene *Scene, const GIVector3 &Position, c
 	return ReturnColor;
 }
 
-void GIEngine::CalcAmbientCubeVolume( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *pScene, AmbientCubeIrradianceVolume *AmbientCubeVolume )
+void GIEngine::CalcAmbientCubeVolume( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *pScene, SceneAccelStructure *AccelStructure, AmbientCubeIrradianceVolume *AmbientCubeVolume )
 {
 	for( int z = 0; z < AmbientCubeVolume->GetSizeZ(); z++ )
 		for( int y = 0; y < AmbientCubeVolume->GetSizeY(); y++ )
@@ -624,23 +691,23 @@ void GIEngine::CalcAmbientCubeVolume( unsigned int SamplingCount, unsigned int T
 	{
 		GIVector3 Position = AmbientCubeVolume->GetPosition( x, y, z );
 		
-		CalcAmbientCube( SamplingCount, ThreadCount, pScene, Position, &AmbientCubeVolume->GetAmbientCube( AmbientCubeVolume->GetIndex( x, y, z ) ) );
+		CalcAmbientCube( SamplingCount, ThreadCount, pScene, AccelStructure, Position, &AmbientCubeVolume->GetAmbientCube( AmbientCubeVolume->GetIndex( x, y, z ) ) );
 	}
 }
 
-void GIEngine::CalcAmbientCube( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *Scene, const GIVector3 &Position, AmbientCube *ouAmbientCube )
+void GIEngine::CalcAmbientCube( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *Scene, SceneAccelStructure *AccelStructure, const GIVector3 &Position, AmbientCube *ouAmbientCube )
 {
 	assert( Scene );
 	
 	assert( ouAmbientCube );
 
-	ouAmbientCube->SetPosX( CalcIrradiance( Scene, Position, GIVector3( 1.0f, 0.0f, 0.0f ), SamplingCount, ThreadCount ) );
-	ouAmbientCube->SetPosY( CalcIrradiance( Scene, Position, GIVector3( 0.0f, 1.0f, 0.0f ), SamplingCount, ThreadCount ) );
-	ouAmbientCube->SetPosZ( CalcIrradiance( Scene, Position, GIVector3( 0.0f, 0.0f, 1.0f ), SamplingCount, ThreadCount ) );
+	ouAmbientCube->SetPosX( CalcIrradiance( Scene, AccelStructure, Position, GIVector3( 1.0f, 0.0f, 0.0f ), SamplingCount ) );
+	ouAmbientCube->SetPosY( CalcIrradiance( Scene, AccelStructure, Position, GIVector3( 0.0f, 1.0f, 0.0f ), SamplingCount ) );
+	ouAmbientCube->SetPosZ( CalcIrradiance( Scene, AccelStructure, Position, GIVector3( 0.0f, 0.0f, 1.0f ), SamplingCount ) );
 
-	ouAmbientCube->SetNegX( CalcIrradiance( Scene, Position, GIVector3( -1.0f, 0.0f, 0.0f ), SamplingCount, ThreadCount ) );
-	ouAmbientCube->SetNegY( CalcIrradiance( Scene, Position, GIVector3( 0.0f, -1.0f, 0.0f ), SamplingCount, ThreadCount ) );
-	ouAmbientCube->SetNegZ( CalcIrradiance( Scene, Position, GIVector3( 0.0f, 0.0f, -1.0f ), SamplingCount, ThreadCount ) );
+	ouAmbientCube->SetNegX( CalcIrradiance( Scene, AccelStructure, Position, GIVector3( -1.0f, 0.0f, 0.0f ), SamplingCount ) );
+	ouAmbientCube->SetNegY( CalcIrradiance( Scene, AccelStructure, Position, GIVector3( 0.0f, -1.0f, 0.0f ), SamplingCount ) );
+	ouAmbientCube->SetNegZ( CalcIrradiance( Scene, AccelStructure, Position, GIVector3( 0.0f, 0.0f, -1.0f ), SamplingCount ) );
 }
 
 //template void GIEngine::CalcInterrefelctionSH<1>( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *Scene, const GIVector3 &Position, const GIVector3 &Normal, const float LimitDistance, SphericalHarmonics<1> *outSHRed, SphericalHarmonics<1> *outSHGreen, SphericalHarmonics<1> *outSHBlue );

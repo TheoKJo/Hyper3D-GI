@@ -48,7 +48,10 @@ bool RadiosityScene::Initialize( GIScene *pScene )
 	for( unsigned int i = 0; i < m_MaterialCount; i++ )
 	{
 		GITexture *pTexture = MaterialArray[i]->GetAlbedoTexture();
-		m_LightMapMaterialList[i] = new RadiosityLightMapMaterial( pTexture->GetWidth(), pTexture->GetHeight() );
+		if( pTexture == NULL )
+			m_LightMapMaterialList[i] = NULL;
+		else
+			m_LightMapMaterialList[i] = new RadiosityLightMapMaterial( pTexture->GetWidth(), pTexture->GetHeight() );
 	}
 	return true;
 }

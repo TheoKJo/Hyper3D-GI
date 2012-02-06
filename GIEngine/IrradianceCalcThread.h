@@ -9,6 +9,7 @@
 #include "GIEnginePCH.h"
 
 class RtScene;
+class SceneAccelStructure;
 
 // TODO : PCH ·Î??
 #include <windows.h>
@@ -17,6 +18,7 @@ class IrradianceCalcThread
 {
 public:
 	static RtScene *mRtScene;
+	static SceneAccelStructure *mAccelStructure;
 
 	float *outPixel;
 
