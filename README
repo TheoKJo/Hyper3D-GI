@@ -1,1 +1,12 @@
-LGPL License
+Less General Public License(LGPL) License
+
+## Implemented
+
+* CPU Raytracer (not fully optimized)
+* Sherical Harmonics Calculating Functions
+
+## Working on...
+
+* Precomputed Radiance Transfer(PRT) Shadowed-Diffuse Method Sample
+* GPU Raytracer (CUDA first, then OpenCL)
+* Real-time Radiosity (without lightmap-baking)
