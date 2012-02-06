@@ -11,7 +11,7 @@
 
 //#include "../GIEngine/GIEngine.h"
 #include "../GIEngine/Raytracer/Raytracer.h"
-#include <RtScene.h>
+#include <Scene.h>
 
 #include "GIEngineCUDA.h"
 #include "../GIEngine/Raytracer/KDTreeStructure.h"
@@ -26,7 +26,7 @@ extern "C" cuKDTree* CreateDeviceKDTreeAllocateKDTreeMemory( unsigned int NodeCo
 															  unsigned int TriangleIndexCount, unsigned int *TriangleIndexArray );
 
 extern "C" void cuShootRays( cuKDTree *DeviceKDTree, unsigned int RayCount, const GIRay *RayArray, GIHit *outHits );
-//void cuShootRays( GIHit *outHits, RtTriAccel *TriAccelArray, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, const GIRay *RayArray );
+//void cuShootRays( GIHit *outHits, GITriAccel *TriAccelArray, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, const GIRay *RayArray );
 
 bool InitializeCUDA()
 {
@@ -503,7 +503,7 @@ void CheckPerformance()
 
 using namespace GIEngine;
 
-KDTreeStructureCUDA* Raytracer::ConvertIntoKDTreeCUDA( RtScene *rtScene, KDTreeStructure *KDTree )
+KDTreeStructureCUDA* Raytracer::ConvertIntoKDTreeCUDA( GIScene *rtScene, KDTreeStructure *KDTree )
 {
 	int NodeCount = KDTree->GetNodeSize();
 	int TriangleCount = KDTree->GetTriangleCount();
@@ -526,8 +526,8 @@ KDTreeStructureCUDA* Raytracer::ConvertIntoKDTreeCUDA( RtScene *rtScene, KDTreeS
 
 	struct traversalNode
 	{
-		traversalNode( RtKDTreeNode *_node, int _index ) { node = _node; index = _index; }
-		RtKDTreeNode* node;
+		traversalNode( GIKDTreeNode *_node, int _index ) { node = _node; index = _index; }
+		GIKDTreeNode* node;
 		int index;
 	};
 	
@@ -607,27 +607,27 @@ bool Raytracer::InitializeKDTreeForCUDA( KDTreeStructureCUDA* KDTreeCUDA )
 	return true;
 }
 
-void Raytracer::ShootRaysCUDA( GIHit *outHits, RtScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, const GIRay *RayArray )
-{
-	cuKDTree *DeviceKDTree = KDTreeCUDA->GetDeviceKDTree();
-	// TODO: 삼각형 포함, RtScene 도 바꿔야함! KDTree 그대로 당연히 못씀.
-	assert( DeviceKDTree != NULL );
-	if( DeviceKDTree == NULL )
-		return;
-	cuShootRays( DeviceKDTree, RayCount, RayArray, outHits );
-}
+//void Raytracer::ShootRaysCUDA( GIHit *outHits, GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, const GIRay *RayArray )
+//{
+//	cuKDTree *DeviceKDTree = KDTreeCUDA->GetDeviceKDTree();
+//	// TODO: 삼각형 포함, GIScene 도 바꿔야함! KDTree 그대로 당연히 못씀.
+//	assert( DeviceKDTree != NULL );
+//	if( DeviceKDTree == NULL )
+//		return;
+//	cuShootRays( DeviceKDTree, RayCount, RayArray, outHits );
+//}
 
 //void Raytracer::SampleColorCUDA( GIScene *pScene, KDTreeStructure *KDTree, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray )
 //{
 //	cuKDTree *DeviceKDTree = KDTreeCUDA->GetDeviceKDTree();
-//	// TODO: 삼각형 포함, RtScene 도 바꿔야함! KDTree 그대로 당연히 못씀.
+//	// TODO: 삼각형 포함, GIScene 도 바꿔야함! KDTree 그대로 당연히 못씀.
 //	assert( DeviceKDTree != NULL );
 //	if( DeviceKDTree == NULL )
 //		return;
 //	cuShootRays( DeviceKDTree, RayCount, RayArray, outHits );
 //}
 //
-//void Raytracer::SampleDistanceCUDA( RtScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray )
+//void Raytracer::SampleDistanceCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray )
 //{
 //	cuKDTree *DeviceKDTree = KDTreeCUDA->GetDeviceKDTree();
 //	assert( DeviceKDTree != NULL );
@@ -636,7 +636,7 @@ void Raytracer::ShootRaysCUDA( GIHit *outHits, RtScene *rtScene, KDTreeStructure
 //	cuShootRays( DeviceKDTree, RayCount, RayArray, outHits );
 //}
 //
-void Raytracer::SampleHitCUDA( RtScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray )
+void Raytracer::SampleHitCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray )
 {
 	cuKDTree *DeviceKDTree = KDTreeCUDA->GetDeviceKDTree();
 	assert( DeviceKDTree != NULL );

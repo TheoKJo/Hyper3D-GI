@@ -13,6 +13,7 @@
 
 namespace GIEngine { 
 	class GIScene;
+
 	namespace PhotonMapping {
 
 class GIPhotonMapKDTree;

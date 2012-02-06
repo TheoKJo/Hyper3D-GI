@@ -375,7 +375,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\RtScene.cpp"
+			RelativePath=".\Scene.cpp"
 			>
 			<FileConfiguration
 				Name="Release|Win32"
@@ -395,7 +395,7 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\RtScene.h"
+			RelativePath=".\Scene.h"
 			>
 		</File>
 		<File

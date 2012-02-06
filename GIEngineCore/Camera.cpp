@@ -10,6 +10,9 @@
 
 #include "Camera.h"
 
+using namespace GIEngine;
+
+
 GICamera::GICamera()
 {
 }

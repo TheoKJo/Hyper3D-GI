@@ -14,9 +14,12 @@
 // only for struct RtTriAcce?
 #include "../GIEngineCore/Global.h"
 
-typedef RtTriAccel cuKDTreeTriangle;
+typedef GITriAccel cuKDTreeTriangle;
 
 // TODO: 이게 사실상 Scene에 가까워져버렸는데;;
+/* 
+ * structures with prefix-"cu" are for (CUDA) device.
+ */
 struct cuKDTree
 {
 	unsigned int NodeCount;

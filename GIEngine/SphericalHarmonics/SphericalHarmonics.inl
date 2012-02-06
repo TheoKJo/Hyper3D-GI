@@ -6,6 +6,8 @@
  * created:		2011/11/22 21:16
  * copyright	Hybrid (creavol@gmail.com)
  */
+namespace GIEngine {
+
 template<unsigned int order>
 void SphericalHarmonics<order>::Reset()
 {
@@ -163,3 +165,4 @@ SphericalHarmonicsRGB<order> SphericalHarmonicsRGB<order>::operator*( float scal
 	}
 	return SphericalHarmonicsRGB<order>( r, g, b );
 }
+};

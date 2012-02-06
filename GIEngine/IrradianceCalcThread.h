@@ -8,16 +8,17 @@
  */
 #include "GIEnginePCH.h"
 
-class RtScene;
-class SceneAccelStructure;
-
-// TODO : PCH ·Î??
 #include <windows.h>
+
+namespace GIEngine {
+
+class GIScene;
+class SceneAccelStructure;
 
 class IrradianceCalcThread
 {
 public:
-	static RtScene *mRtScene;
+	static GIScene *mGIScene;
 	static SceneAccelStructure *mAccelStructure;
 
 	float *outPixel;
@@ -28,4 +29,5 @@ public:
 	float *CosWeightArray;
 
 	static DWORD WINAPI IrradianceCalcThreadFunction( LPVOID lpParam );
+};
 };

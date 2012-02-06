@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <string.h>
 
+namespace GIEngine {
 class GITexture
 {
 public:
@@ -168,4 +169,5 @@ private:
 	GIVector4 m_DiffuseColor;
 	GIVector4 m_SpecularColor;
 	float m_Shininess;
+};
 };

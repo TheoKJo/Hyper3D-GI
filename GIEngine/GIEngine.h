@@ -9,34 +9,16 @@
 #pragma once
 
 //#include "Raytracer/Raytracer.h"
-#include "GIScene.h"
-
-struct RaytracerOption;
-
-class SceneAccelStructure;
-class KDTreeStructure;
-
-template<class T>
-class IrradianceVolume;
-class AmbientCube;
-template<unsigned int order>
-class SphericalHarmonics;
-class AmbientCubeIrradianceVolume;
-
-class SampleArray;
-class SphericalSampleArray;
-class GICamera;
-struct GIHit;
-
-typedef void (*ShadingFunction)( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor );
-//typedef void (*ShadingFunction)( RtScene *rtScene, SceneAccelStructure *AccelStructure, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor );
+#include "Scene.h"
 
 ///*!
 // * NiNode의 Scene 은 외부에서 Raytracer로 포인터만 가르키는 aggregation 형태를 따른다.
-// * 반면 RtScene 타입의 mRTScene 는 외부에서 감춰지는 의도로 존재한다.
+// * 반면 GIScene 타입의 mRTScene 는 외부에서 감춰지는 의도로 존재한다.
 // * mRTScene 는 외부에서 받은 NiNode 타입의 Scene으로부터 정보를 만들어내며, 외부에서 개별적으로 생성하는 것은 금지한다.
 // */
 //void Initialize( NiNode *pScene );
+
+struct GIHit;
 
 /*!
  * GI 관련 계산을 담당하는 클래스
@@ -45,6 +27,26 @@ typedef void (*ShadingFunction)( RtScene *rtScene, KDTreeStructure *KDTree, cons
  */
 namespace GIEngine
 {
+	struct RaytracerOption;
+
+	class SceneAccelStructure;
+	class KDTreeStructure;
+
+	template<class T>
+	class IrradianceVolume;
+	class AmbientCube;
+	template<unsigned int order>
+	class SphericalHarmonics;
+	class AmbientCubeIrradianceVolume;
+
+	class SampleArray;
+	class SphericalSampleArray;
+	class GICamera;
+
+	typedef void (*ShadingFunction)( GIScene *pScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor );
+	//typedef void (*ShadingFunction)( GIScene *rtScene, SceneAccelStructure *AccelStructure, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor );
+
+
 	class GISceneManager
 	{
 	public:

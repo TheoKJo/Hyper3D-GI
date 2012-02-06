@@ -14,7 +14,7 @@
 //ALIGN(ALIGN_CACHELINE)
 static const int modulo[] = {0,1,2,0,1};
 
-inline bool RtIntersect( const RtTriAccel &acc,const GIRay &ray, GIHit &hit )
+inline bool RtIntersect( const GITriAccel &acc,const GIRay &ray, GIHit &hit )
 {
 
 	const int ku = modulo[acc.k+1];

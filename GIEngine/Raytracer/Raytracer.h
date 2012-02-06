@@ -8,18 +8,14 @@
  */
 #pragma once
 
-//#include <RtScene.h>
+//#include <Scene.h>
 //#include <Camera.h>
 //#include "Structures.h"
+// core
 #include <Utility.h>
 #include "../SampleArray.h"
 
 //#include "KDTreeStructure.h"
-
-class RtScene;
-class Camera;
-class RtKDTreeNode;
-class KDTreeStructure;
 
 //typedef void (*HitCollbackFunction)( const GIRay &Ray, const &GIHit Hit, GIVector4 *outColor );
 //typedef void (*HitCollbackFunction)( const GIRay&, const &GIHit, GIVector4* );
@@ -30,12 +26,18 @@ class KDTreeStructure;
  * \author Hybrid
  * \date  2010.10.18 ~
  */
-namespace GIEngine { namespace Raytracer {
+namespace GIEngine { 
+	class GIScene;
+	class Camera;
+	class GIKDTreeNode;
+	class KDTreeStructure;
+
+	namespace Raytracer {
 // Initializations
-	//void SetScene( RtScene *pScene ) { rtScene = pScene; }
+	//void SetScene( GIScene *pScene ) { rtScene = pScene; }
 	//! Ray Array is width first (left to right)
 
-	KDTreeStructure* BuildKDTree( RtScene *pScene, const char *strStructureFilename, bool bLoadKDTree = true );
+	KDTreeStructure* BuildKDTree( GIScene *pScene, const char *strStructureFilename, bool bLoadKDTree = true );
 
 // Rendering
 	//void RenderToMemory( RayArray, RtAccelStruct );
@@ -45,26 +47,26 @@ namespace GIEngine { namespace Raytracer {
 	//void InitializeHemisphericalRays( unsigned int RayCount, GIVector3 Position, GIVector3 Normal, DirectionalRaySample *DirectionalRaySampleArray );
 
 	//! With Acceleration Structure
-	GIHit ShootRay( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray/*, const RaytracerOption &Option*/ );
+	GIHit ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray/*, const RaytracerOption &Option*/ );
 	//, KDTreeStructure *pKDTree
 	////! Without Acceleration Structure (eg. KD-Tree)
-	//GIHit ShootRay( RtScene *rtScene, const GIRay &Ray );
+	//GIHit ShootRay( GIScene *rtScene, const GIRay &Ray );
 
 	// ╬х╬╡юс
-	void TraverseKDTree( RtScene *rtScene, const GIRay &Ray, RtKDTreeNode *pNode, GIHit &Hit );
+	void TraverseKDTree( GIScene *rtScene, const GIRay &Ray, GIKDTreeNode *pNode, GIHit &Hit );
 
-	void Shading( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor );
+	void Shading( GIScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor );
 	//void Shading( GIVector4 *outColor, const GIRay &Ray, const GIHit &Hit );
 
 // Implementations
-	void Intersection( RtScene *rtScene, unsigned int *TriangleIndexArray, const int &TriangleCount, const GIRay &Ray, GIHit &Hit );
-	void Intersection( const RtTriAccel *TriAccelArray, const int &TriangleCount, const GIRay &Ray, GIHit &Hit );
+	void Intersection( GIScene *rtScene, unsigned int *TriangleIndexArray, const int &TriangleCount, const GIRay &Ray, GIHit &Hit );
+	void Intersection( const GITriAccel *TriAccelArray, const int &TriangleCount, const GIRay &Ray, GIHit &Hit );
 
 // Implementations
 	void Intersection( const GITriangle &Triangle, const GIRay &Ray, GIHit &Hit );
-	void Intersection( const RtTriAccel &TriAccel, const GIRay &Ray, GIHit &Hit );
+	void Intersection( const GITriAccel &TriAccel, const GIRay &Ray, GIHit &Hit );
 
 // Global Setting
-	//RtScene *rtScene;
+	//GIScene *rtScene;
 	//GIVector4 BackgroundColor;
 };};

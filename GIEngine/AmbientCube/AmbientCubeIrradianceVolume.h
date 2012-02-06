@@ -9,6 +9,8 @@
 #include "AmbientCube.h"
 #include "../IrradianceVolume.h"
 
+namespace GIEngine {
+
 /*!
  * 
  * \date 2011.03.28
@@ -40,4 +42,5 @@ public:
 
 private:
 	AmbientCube *m_AmbientCubeArray;
+};
 };

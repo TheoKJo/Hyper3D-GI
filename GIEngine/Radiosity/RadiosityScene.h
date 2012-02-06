@@ -10,9 +10,10 @@
 
 //#include "RadiosityLightMapMaterial.h"
 
-namespace GIEngine {
 
-class GIScene;
+
+namespace GIEngine {
+	class GIScene;
 
 namespace Radiosity {
 

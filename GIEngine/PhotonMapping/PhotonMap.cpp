@@ -12,6 +12,8 @@
 #include "PhotonMap.h"
 #include "PhotonMapKDTree.h"
 
+#include <Scene.h>
+
 using namespace GIEngine::PhotonMapping;
 
 GIPhotonMap::GIPhotonMap( GIEngine::GIScene *Scene, unsigned int ApproxPhotonSize )

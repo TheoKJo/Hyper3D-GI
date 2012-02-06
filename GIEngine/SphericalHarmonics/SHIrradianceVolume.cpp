@@ -9,6 +9,9 @@
 #include "GIEnginePCH.h"
 #include "SHIrradianceVolume.h"
 
+using namespace GIEngine;
+
+
 SHIrradianceVolume* SHIrradianceVolume::CreateIrradianceVolume( float CellLength, const GIVector3 &MinVector, const GIVector3 &MaxVector )
 {
 	GIVector3 DeltaVector = MaxVector - MinVector;

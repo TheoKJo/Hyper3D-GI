@@ -12,7 +12,9 @@
 
 #define NULL_NODE_INDEX -1
 
-
+/* 
+ * structures with prefix-"cu" are for (CUDA) device.
+ */
 struct cuKDTreeNode
 {
 	enum NODE_TYPE {

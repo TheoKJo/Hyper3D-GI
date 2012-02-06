@@ -8,7 +8,7 @@
  */
 #include "GIEnginePCH.h"
 
-#include "GIScene.h"
+#include "Scene.h"
 
 #include "SphericalHarmonics/SphericalHarmonics.h"
 #include "AmbientCube/AmbientCube.h"
@@ -28,7 +28,7 @@
 #include "Raytracer/RaytracerProcedure.h"
 #include "IrradianceCalcThread.h"
 
-RtScene* RaytracerProcedure::mRtScene = NULL;
+GIScene* RaytracerProcedure::mGIScene = NULL;
 KDTreeStructure* RaytracerProcedure::mKDTree = NULL;
 
 static float gRayShootEpsilon = 0.00001f;
@@ -242,7 +242,7 @@ SceneAccelStructure* GIEngine::BuildAccStructure( GIScene *Scene, const char *st
 	GIEngine::RaytracerOption Option = GetGlobalOption();
 
 	// always build kdtree for CPU 
-	KDTreeStructure *KDTree = Raytracer::BuildKDTree( (RtScene*)Scene, strStructureFilename, true );
+	KDTreeStructure *KDTree = Raytracer::BuildKDTree( (GIScene*)Scene, strStructureFilename, true );
 	if( KDTree == NULL )
 		return NULL;
 
@@ -250,7 +250,7 @@ SceneAccelStructure* GIEngine::BuildAccStructure( GIScene *Scene, const char *st
 	// TODO: define 으로 추가? 항상 추가?? -_-;;;
 	if( Option.BuildDeviceTypeFlag |= RaytracerOption::RDT_CUDA > 0 )
 	{
-		KDTreeCUDA = Raytracer::ConvertIntoKDTreeCUDA( (RtScene*)Scene, KDTree );
+		KDTreeCUDA = Raytracer::ConvertIntoKDTreeCUDA( (GIScene*)Scene, KDTree );
 		// TODO: Error 처리
 		Raytracer::InitializeKDTreeForCUDA( KDTreeCUDA );
 			
@@ -350,7 +350,7 @@ void GIEngine::Raytracer::SampleColorCPU( unsigned int ThreadCount, GIScene *pSc
 	int RestRayCount = (int(RayCount) - int(RayCountPerThread * ThreadCount));
 	assert( 0 <= RestRayCount );
 
-	RaytracerProcedure::mRtScene = pScene;
+	RaytracerProcedure::mGIScene = pScene;
 	RaytracerProcedure::mKDTree = KDTree;
 
 	// TODO: MAX_THREAD?
@@ -438,7 +438,7 @@ void GIEngine::Raytracer::SampleDistanceCPU( unsigned int ThreadCount, GIScene *
 	int RestRayCount = (int(RayCount) - int(RayCountPerThread * ThreadCount));
 	assert( 0 <= RestRayCount );
 
-	RaytracerProcedure::mRtScene = pScene;
+	RaytracerProcedure::mGIScene = pScene;
 	RaytracerProcedure::mKDTree = KDTree;
 
 	//GIVector3 *TempVector = new GIVector3[RayCount];
@@ -532,7 +532,7 @@ void GIEngine::Raytracer::SampleHitCPU( unsigned int ThreadCount, GIScene *pScen
 	int RestRayCount = (int(RayCount) - int(RayCountPerThread * ThreadCount));
 	assert( 0 <= RestRayCount );
 
-	RaytracerProcedure::mRtScene = pScene;
+	RaytracerProcedure::mGIScene = pScene;
 	RaytracerProcedure::mKDTree = KDTree;
 
 	// TODO: MAX_THREAD?
@@ -610,7 +610,7 @@ void GIEngine::Raytracer::UserDefinedShadingCPU( unsigned int ThreadCount,
 	int RestRayCount = (int(RayCount) - int(RayCountPerThread * ThreadCount));
 	assert( 0 <= RestRayCount );
 
-	RaytracerProcedure::mRtScene = pScene;
+	RaytracerProcedure::mGIScene = pScene;
 	RaytracerProcedure::mKDTree = KDTree;
 
 	// TODO: MAX_THREAD?
@@ -683,7 +683,7 @@ GIVector3 GIEngine::CalcIrradiance( GIScene *Scene, SceneAccelStructure *AccelSt
 	return ReturnColor;
 }
 
-void GIEngine::CalcAmbientCubeVolume( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *pScene, SceneAccelStructure *AccelStructure, AmbientCubeIrradianceVolume *AmbientCubeVolume )
+void GIEngine::CalcAmbientCubeVolume( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *pScene, GIEngine::SceneAccelStructure *AccelStructure, GIEngine::AmbientCubeIrradianceVolume *AmbientCubeVolume )
 {
 	for( int z = 0; z < AmbientCubeVolume->GetSizeZ(); z++ )
 		for( int y = 0; y < AmbientCubeVolume->GetSizeY(); y++ )
@@ -695,7 +695,7 @@ void GIEngine::CalcAmbientCubeVolume( unsigned int SamplingCount, unsigned int T
 	}
 }
 
-void GIEngine::CalcAmbientCube( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *Scene, SceneAccelStructure *AccelStructure, const GIVector3 &Position, AmbientCube *ouAmbientCube )
+void GIEngine::CalcAmbientCube( unsigned int SamplingCount, unsigned int ThreadCount, GIScene *Scene, GIEngine::SceneAccelStructure *AccelStructure, const GIVector3 &Position, AmbientCube *ouAmbientCube )
 {
 	assert( Scene );
 	

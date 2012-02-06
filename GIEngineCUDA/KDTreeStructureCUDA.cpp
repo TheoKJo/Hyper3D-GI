@@ -4,7 +4,9 @@
 
 #include "cuKDTreeNode.h"
 
-typedef RtTriAccel cuKDTreeTriangle;
+using namespace GIEngine;
+
+typedef GITriAccel cuKDTreeTriangle;
 
 KDTreeStructureCUDA::KDTreeStructureCUDA()
 	: m_NodeCount(NULL), m_NodeArray(NULL), 

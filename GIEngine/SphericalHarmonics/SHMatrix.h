@@ -18,6 +18,8 @@
 
 #include <math.h>
 
+namespace GIEngine {
+
 template<unsigned int rowOrder, unsigned int columnOrder>
 class SHMatrix
 {
@@ -120,6 +122,7 @@ private:
 
 	// row-major order
 	float mElements[rowOrder*rowOrder * columnOrder*columnOrder];
+};
 };
 
 #endif

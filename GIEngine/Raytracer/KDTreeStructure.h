@@ -30,6 +30,8 @@
 //	unsigned int TriangleIndex;
 //};
 
+namespace GIEngine {
+
 struct RtEdge
 {
 	/*RtEdge& operator=( const RtEdge &edge )
@@ -104,17 +106,17 @@ public:
 	bool isPlanar( int Axis ) { return bPlanar[Axis]; }
 };
 
-class RtKDTreeNode
+class GIKDTreeNode
 {
 public:
-	RtKDTreeNode() 
+	GIKDTreeNode() 
 		: TriangleIndexArray(NULL), TriangleCount(0), NodeNum(-1), LeftNode(NULL), RightNode(NULL)
 	{
 	}
 	unsigned int *TriangleIndexArray;
 
-	RtKDTreeNode *LeftNode;
-	RtKDTreeNode *RightNode;
+	GIKDTreeNode *LeftNode;
+	GIKDTreeNode *RightNode;
 
 	int TriangleCount;
 	int NodeNum;
@@ -200,7 +202,7 @@ public:
 	bool IsBuilt();
 	void SetBuildParameters( const float &IntersectionCost, const float &TraversalCost, const int Minimum_TriangleCount );
 
-	RtKDTreeNode* GetRootNode() { return m_RootNode; }
+	GIKDTreeNode* GetRootNode() { return m_RootNode; }
 	int GetNodeSize() { return m_NodeSize; }
 
 	//! number of triangles in the scene
@@ -212,7 +214,7 @@ public:
 	
 private:
 	//! ConstructKDTree 용 내부 함수
-	RtKDTreeNode* CreateNode( int StartEdgeIndex, const std::vector<unsigned int> &TriangleList, const int TriangleCount, const GIBoundingBox &BoundingBox );
+	GIKDTreeNode* CreateNode( int StartEdgeIndex, const std::vector<unsigned int> &TriangleList, const int TriangleCount, const GIBoundingBox &BoundingBox );
 	void EvaluateCost( RtSAHCost &SAHCost, const std::vector<unsigned int> &TriangleList, const int TriangleCount, const GIBoundingBox &BoundingBox, int Axis );
 	int InitializeEdge( RtEdge *EdgeArray, const std::vector<unsigned int> &TriangleList, const int TriangleCount, int Axis );
 
@@ -227,7 +229,7 @@ private:
 	int m_CurNodeSize; //!< for mKDTreeNodeSize
 
 private:
-	RtKDTreeNode *m_RootNode;
+	GIKDTreeNode *m_RootNode;
 	int m_NodeSize;
 	GIBoundingBox m_SceneBoundingBox;
 	
@@ -243,5 +245,7 @@ private:
 
 	int m_TriangleCount;
 	int m_TriangleIndexCount;
-	RtKDTreeNode *m_NodeArray;
+	GIKDTreeNode *m_NodeArray;
+};
+
 };

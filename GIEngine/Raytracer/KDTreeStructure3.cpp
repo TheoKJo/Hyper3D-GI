@@ -17,8 +17,6 @@
 #include <fstream>
 #include <stack>
 
-using namespace GIEngine;
-
 KDTreeStructure::KDTreeStructure()
 	: m_RootNode(NULL), m_NodeSize(0), m_NodeArray(NULL), 
 	// For Build
@@ -128,7 +126,7 @@ bool KDTreeStructure::LoadFromFile( const char *Filename )
 	if( m_NodeSize <= 0 )
 		return false;
 
-	m_NodeArray = new GIKDTreeNode[m_NodeSize];
+	m_NodeArray = new RtKDTreeNode[m_NodeSize];
 	for( int i = 0; i < m_NodeSize; i++ )
 	{
 		fs >> m_NodeArray[i].NodeNum;
@@ -226,12 +224,12 @@ bool KDTreeStructure::SaveToFile( const char *Filename )
 		fs << "% For Leaf Node\n% NodeType\tTriangleCount" << std::endl;
 	fs << END_KDTREE_HEADER << std::endl << std::endl;
 
-	std::stack<GIKDTreeNode*> Stack;
+	std::stack<RtKDTreeNode*> Stack;
 	Stack.push( GetRootNode() );
 
 	while( Stack.empty() == false )
 	{
-		GIKDTreeNode *curNode = Stack.top();
+		RtKDTreeNode *curNode = Stack.top();
 		Stack.pop();
 
 		assert( curNode != NULL );
@@ -297,7 +295,7 @@ bool KDTreeStructure::SaveToFile( const char *Filename )
 	return true;
 }
 
-GIKDTreeNode* KDTreeStructure::CreateNode( int StartEdgeIndex, const std::vector<unsigned int> &TriangleList, const int TriangleCount, const GIBoundingBox &BoundingBox )
+RtKDTreeNode* KDTreeStructure::CreateNode( int StartEdgeIndex, const std::vector<unsigned int> &TriangleList, const int TriangleCount, const GIBoundingBox &BoundingBox )
 {
 	assert( TriangleCount > 0 );
 
@@ -308,7 +306,7 @@ GIKDTreeNode* KDTreeStructure::CreateNode( int StartEdgeIndex, const std::vector
 	LeftTriangleList.reserve( TriangleCount );
 	RightTriangleList.reserve( TriangleCount );
 
-	GIKDTreeNode *NewNode = new GIKDTreeNode;
+	RtKDTreeNode *NewNode = new RtKDTreeNode;
 	NewNode->NodeNum = m_CurNodeSize++;
 
 	RtSAHCost SAHCost;

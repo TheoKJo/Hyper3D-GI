@@ -1,5 +1,5 @@
 /*!
- * \file		RtScene.cpp
+ * \file		GIScene.cpp
  * \brief		
  * \author		Hybrid (creavol@gmail.com)
  * \date		2011/11/22
@@ -8,13 +8,15 @@
  */
 #include "GIEngineCorePCH.h"
 
-#include "RtScene.h"
+#include "Scene.h"
 
 #include <fstream>
 
 static const unsigned int modulo[] = {0,1,2,0,1};
 
-void TriangleToTriAceel( GITriangle &Triangle, RtTriAccel &TriAccel )
+using namespace GIEngine;
+
+void TriangleToTriAceel( GITriangle &Triangle, GITriAccel &TriAccel )
 {
 	// triNum
 	assert( Triangle.TriangleNumber != -1 );
@@ -71,7 +73,7 @@ void TriangleToTriAceel( GITriangle &Triangle, RtTriAccel &TriAccel )
 	TriAccel.c_d = (c.array[u] * vg0.Position.array[v] - c.array[v] * vg0.Position.array[u])/denom;
 }
 
-RtScene::RtScene()
+GIScene::GIScene()
 	: m_TriangleCount(0), m_TriangleList(NULL), m_TriAccelList(NULL), //m_AccelStructure(NULL), 
 	m_VertexCount(0), m_VertexPositionList(NULL), m_VertexNormalList(NULL), 
 	m_SHList(NULL), m_SH_RGBList(NULL), 
@@ -83,33 +85,33 @@ RtScene::RtScene()
 	m_SceneName[0] = 0;
 }
 
-RtScene::~RtScene()
+GIScene::~GIScene()
 {
 	Destroy();
 }
 
-void RtScene::SetName( const char *SceneName )
+void GIScene::SetName( const char *SceneName )
 {
 	strcpy_s( m_SceneName, 255, SceneName );
 }
 
-const char* RtScene::GetName()
+const char* GIScene::GetName()
 {
 	//strcpy_s( m_SceneName, 255, SceneName );
 	return m_SceneName;
 }
 
-void RtScene::InitializeTriangle( unsigned int TriangleCount )
+void GIScene::InitializeTriangle( unsigned int TriangleCount )
 {
 	assert( TriangleCount > 0 );
 	m_TriangleCount = TriangleCount;
 	m_TriangleList = new GITriangle[m_TriangleCount];
-	m_TriAccelList = new RtTriAccel[m_TriangleCount];
+	m_TriAccelList = new GITriAccel[m_TriangleCount];
 
 	// TODO : ÃÊ±âÈ­
 }
 
-void RtScene::InitializeVertex( unsigned int VertexCount )
+void GIScene::InitializeVertex( unsigned int VertexCount )
 {
 	assert( VertexCount > 0 );
 	m_VertexCount = VertexCount;
@@ -118,7 +120,7 @@ void RtScene::InitializeVertex( unsigned int VertexCount )
 	m_VertexNormalList = new GIVector3[m_VertexCount];
 }
 
-void RtScene::InitializeTriangleSH( unsigned int order )
+void GIScene::InitializeTriangleSH( unsigned int order )
 {
 	assert( m_VertexCount > 0 && m_SHList == NULL );
 	switch( order )
@@ -144,7 +146,7 @@ void RtScene::InitializeTriangleSH( unsigned int order )
 	}
 }
 
-void RtScene::InitializeTriangleSH_RGB( unsigned int order )
+void GIScene::InitializeTriangleSH_RGB( unsigned int order )
 {
 	assert( m_VertexCount > 0 && m_SH_RGBList == NULL );
 	switch( order )
@@ -170,7 +172,7 @@ void RtScene::InitializeTriangleSH_RGB( unsigned int order )
 	}
 }
 
-void RtScene::InitializeLight( unsigned int LightCount )
+void GIScene::InitializeLight( unsigned int LightCount )
 {
 	if( LightCount == 0 )
 		return;
@@ -182,7 +184,7 @@ void RtScene::InitializeLight( unsigned int LightCount )
 		m_LightArray[i] = NULL;
 }
 
-void RtScene::InitializeMaterial( unsigned int MaterialCount )
+void GIScene::InitializeMaterial( unsigned int MaterialCount )
 {
 	if( MaterialCount == 0 )
 		return;
@@ -194,7 +196,7 @@ void RtScene::InitializeMaterial( unsigned int MaterialCount )
 		m_MaterialArray[i] = NULL;
 }
 
-bool RtScene::SaveToFile( const char *filename )
+bool GIScene::SaveToFile( const char *filename )
 {
 	int memNULL = NULL;
 	std::fstream fs( filename, std::ios::out | std::ios::binary );
@@ -248,12 +250,12 @@ bool RtScene::SaveToFile( const char *filename )
 	return true;
 }
 
-bool RtScene::LoadFromFile( const char *filename )
+bool GIScene::LoadFromFile( const char *filename )
 {
 	return false;
 }
 
-GIMaterial* RtScene::FindMaterial( const char *strMaterialName )
+GIMaterial* GIScene::FindMaterial( const char *strMaterialName )
 {
 	int foundIndex = -1;
 	for( unsigned int i = 0; i < m_MaterialCount; i++ )
@@ -267,7 +269,7 @@ GIMaterial* RtScene::FindMaterial( const char *strMaterialName )
 	return NULL;
 }
 
-int RtScene::FindMaterialIndex( const char *strMaterialName )
+int GIScene::FindMaterialIndex( const char *strMaterialName )
 {
 	for( unsigned int i = 0; i < m_MaterialCount; i++ )
 	{
@@ -280,17 +282,17 @@ int RtScene::FindMaterialIndex( const char *strMaterialName )
 	return -1;
 }
 
-//void RtScene::SetAccStructure( RtAccelStructure *AccelStructure )
+//void GIScene::SetAccStructure( RtAccelStructure *AccelStructure )
 //{
 //	m_AccelStructure = AccelStructure;
 //}
 //
-//RtAccelStructure* RtScene::GetAccStructure()
+//RtAccelStructure* GIScene::GetAccStructure()
 //{
 //	return m_AccelStructure;
 //}
 
-void RtScene::ConvertAll()
+void GIScene::ConvertAll()
 {
 	for( unsigned int i = 0; i < m_TriangleCount; i++ )
 	{
@@ -300,28 +302,28 @@ void RtScene::ConvertAll()
 	EvaluateBoundingBox();
 }
 
-void RtScene::SetBackgroundColor( const GIVector4 &BackgroundColor )
+void GIScene::SetBackgroundColor( const GIVector4 &BackgroundColor )
 {
 	m_BackgroundColor = BackgroundColor;
 }
 
-const GIVector4& RtScene::GetBackgroundColor()
+const GIVector4& GIScene::GetBackgroundColor()
 {
 	return m_BackgroundColor;
 }
 
-void RtScene::SetSceneEpsilon( float Epslion )
+void GIScene::SetSceneEpsilon( float Epslion )
 {
 	m_SceneEpsilon = Epslion;
 }
 
-float RtScene::GetSceneEpsilon()
+float GIScene::GetSceneEpsilon()
 {
 	return m_SceneEpsilon;
 }
 
 
-void RtScene::EvaluateBoundingBox()
+void GIScene::EvaluateBoundingBox()
 {
 	GIVector3 MinPositions = GIVector3( 1e15f, 1e15f, 1e15f );
 	GIVector3 MaxPositions = GIVector3( -1e15f, -1e15f, -1e15f );
@@ -351,12 +353,12 @@ void RtScene::EvaluateBoundingBox()
 	m_BoundingBox.MaxPositions = MaxPositions;
 }
 
-GIBoundingBox RtScene::GetBoundingBox()
+GIBoundingBox GIScene::GetBoundingBox()
 {
 	return m_BoundingBox;
 }
 
-GIVector3 RtScene::GetPosition( unsigned int TriangleNum, float u, float v )
+GIVector3 GIScene::GetPosition( unsigned int TriangleNum, float u, float v )
 {
 	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
 	GITriangle &Triangle = m_TriangleList[TriangleNum];
@@ -366,7 +368,7 @@ GIVector3 RtScene::GetPosition( unsigned int TriangleNum, float u, float v )
 		Triangle.vg2.Position * v;
 }
 
-GIVector4 RtScene::GetColor( unsigned int TriangleNum, float u, float v )
+GIVector4 GIScene::GetColor( unsigned int TriangleNum, float u, float v )
 {
 	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
 	GITriangle &Triangle = m_TriangleList[TriangleNum];
@@ -376,7 +378,7 @@ GIVector4 RtScene::GetColor( unsigned int TriangleNum, float u, float v )
 		Triangle.vg2.Color * v;
 }
 
-GIVector3 RtScene::GetNormal( unsigned int TriangleNum, float u, float v )
+GIVector3 GIScene::GetNormal( unsigned int TriangleNum, float u, float v )
 {
 	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
 	GITriangle &Triangle = m_TriangleList[TriangleNum];
@@ -387,7 +389,7 @@ GIVector3 RtScene::GetNormal( unsigned int TriangleNum, float u, float v )
 		Triangle.vg2.Normal * v;
 }
 
-GIVector3 RtScene::GetTangent( unsigned int TriangleNum, float u, float v )
+GIVector3 GIScene::GetTangent( unsigned int TriangleNum, float u, float v )
 {
 	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
 	GITriangle &Triangle = m_TriangleList[TriangleNum];
@@ -398,7 +400,7 @@ GIVector3 RtScene::GetTangent( unsigned int TriangleNum, float u, float v )
 		Triangle.vg2.Tangent * v;
 }
 
-GIVector2 RtScene::GetTexCoords( unsigned int TriangleNum, float u, float v )
+GIVector2 GIScene::GetTexCoords( unsigned int TriangleNum, float u, float v )
 {
 	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
 	GITriangle &Triangle = m_TriangleList[TriangleNum];
@@ -408,7 +410,7 @@ GIVector2 RtScene::GetTexCoords( unsigned int TriangleNum, float u, float v )
 		Triangle.vg2.TexCoords * v;
 }
 
-GIVector4 RtScene::GetAlbedo( unsigned int TriangleNum, float u, float v )
+GIVector4 GIScene::GetAlbedo( unsigned int TriangleNum, float u, float v )
 {
 	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
 	GITriangle &Triangle = m_TriangleList[TriangleNum];
@@ -437,7 +439,7 @@ GIVector4 RtScene::GetAlbedo( unsigned int TriangleNum, float u, float v )
 }
 
 template<unsigned int order>
-SphericalHarmonics<order> RtScene::GetSH( unsigned int TriangleNum, float u, float v )
+SphericalHarmonics<order> GIScene::GetSH( unsigned int TriangleNum, float u, float v )
 {
 	assert( GetSHList<order>() != NULL );
 	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
@@ -454,7 +456,7 @@ SphericalHarmonics<order> RtScene::GetSH( unsigned int TriangleNum, float u, flo
 }
 
 template<unsigned int order>
-SphericalHarmonicsRGB<order> RtScene::GetSH_RGB( unsigned int TriangleNum, float u, float v )
+SphericalHarmonicsRGB<order> GIScene::GetSH_RGB( unsigned int TriangleNum, float u, float v )
 {
 	assert( GetSH_RGBList<order>() != NULL );
 	assert( 0 <= TriangleNum && TriangleNum < m_TriangleCount );
@@ -467,7 +469,7 @@ SphericalHarmonicsRGB<order> RtScene::GetSH_RGB( unsigned int TriangleNum, float
 		GetSH_RGBList<order>()[Triangle.vg2.VertexNum] * v;
 }
 
-void RtScene::Destroy()
+void GIScene::Destroy()
 {
 	m_TriangleCount = 0;
 	SafeDeleteArray( &m_TriangleList );

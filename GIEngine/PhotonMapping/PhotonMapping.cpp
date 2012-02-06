@@ -13,13 +13,12 @@
 #include "PhotonMapping.h"
 
 #include "GIEngine/GIEngine.h"
-#include "GIEngine/GIScene.h"
 #include "GIEngine/Raytracer/Raytracer.h"
 
 #include "GIEngine/Raytracer/SceneAccelStructure.h"
 #include "GIEngine/Raytracer/KDTreeStructure.h"
 
-//#include <RtScene.h>
+#include <Scene.h>
 #include <Camera.h>
 
 #include <vector>
@@ -58,7 +57,7 @@ void PhotonMapping::GeneratePhotons( const GIVector3 &Position, const GIColor3 &
 	}
 }
 
-PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene, SceneAccelStructure *AccelStructure )
+PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene, GIEngine::SceneAccelStructure *AccelStructure )
 {
 	if( !g_PhotonMappingOption.IsValid() )
 		return NULL;
@@ -301,7 +300,7 @@ GIColor3 PhotonMapping::FinalGatheringCPU( GIScene *inScene, KDTreeStructure *KD
 
 PhotonMapping::GIPhotonMap *gPhotonMap = NULL;
 
-void PhotonMappingShading( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor )
+void PhotonMappingShading( GIScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor )
 {
 	GIColor4 DirectIlluminationColor;
 	Raytracer::Shading( rtScene, KDTree, Ray, Hit, MaxDepth, &DirectIlluminationColor );

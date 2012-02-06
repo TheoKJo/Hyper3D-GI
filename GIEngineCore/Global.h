@@ -462,7 +462,7 @@ struct GIRay
 	float FarDistance;
 };
 
-struct RtTriAccel
+struct GITriAccel
 {
 	float n_u;	//!< normal.u/normal.k
 	float n_v;	//!< normal.v/normal.k
@@ -482,7 +482,7 @@ struct RtTriAccel
 
 struct GIHit
 {
-	GIHit() : triNum(-1), dist(1e16f), hit(false), backHit(false) {}
+	//GIHit() : triNum(-1), dist(1e16f), hit(false), backHit(false) {}
 	//GIHit( const GIRay &_ray ) : triNum(-1), dist(1e16f), hit(false), backHit(false), ray(_ray) {}
 
 	void Reset()

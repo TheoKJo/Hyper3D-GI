@@ -7,6 +7,8 @@
  * copyright	Hybrid (creavol@gmail.com)
  */
 #include "GIEnginePCH.h"
+#include "../GIEnginePCH.h"
+
 
 #include "SHEngine.h"
 #include "../GIEngine.h"
@@ -68,7 +70,7 @@ static float X3_plus90[] =
 	0.0f, 0.0f, 0.0f, 0.0f, 0.0f,  0.0f, -0.866f, 0.0f, 0.5f
 };
 
-static const SHMatrix<3,3> IdentityMatrix33( identity );
+static const SHMatrix<3,3> GIEngine::IdentityMatrix33( identity );
 static SHMatrix<3,3> RotationMatrix33_X_m90( X3_minus90 );
 static SHMatrix<3,3> RotationMatrix33_X_p90( X3_plus90 );
 

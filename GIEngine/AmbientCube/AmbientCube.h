@@ -10,6 +10,8 @@
 
 #include "../GIEnginePCH.h"
 
+namespace GIEngine {
+
 /*!
  * Valve 의 방법을 따름
  * \date 2010.12.06
@@ -43,4 +45,5 @@ public:
 
 private:
 	GIVector3 m_Irradiances[6];
+};
 };

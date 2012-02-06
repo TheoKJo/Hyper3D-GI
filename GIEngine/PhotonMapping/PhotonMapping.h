@@ -17,10 +17,6 @@
 // 여기까지 도달할 경우 이론(확률)과 맞지 않는 문제가 있다고 가정함.
 #define MAX_PHOTON_SHOOTING_PASS 10
 
-class GICamera;
-class SceneAccelStructure;
-class KDTreeStructure;
-
 /*! \namespace  PhotonMapping
  * \brief 
  * 
@@ -28,7 +24,11 @@ class KDTreeStructure;
  * \date  2011.08.22 ~
  */
 namespace GIEngine {
-	class GIScene;	
+	class GIScene;
+	class GICamera;
+	class SceneAccelStructure;
+	class KDTreeStructure;
+
 	namespace PhotonMapping {
 
 struct PhotonMappingOption

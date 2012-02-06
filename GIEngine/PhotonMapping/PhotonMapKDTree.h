@@ -15,7 +15,6 @@
 #include <assert.h>
 
 namespace GIEngine { 
-	class GIScene;
 	namespace PhotonMapping {
 
 class GIPhoton;

@@ -7,10 +7,10 @@
  * copyright	Hybrid (creavol@gmail.com)
  */
 
+namespace GIEngine { 
+
 class KDTreeStructure;
 class KDTreeStructureCUDA;
-
-namespace GIEngine { 
 
 bool InitializeCUDA();
 
@@ -18,19 +18,19 @@ bool InitializeCUDA();
 void CheckPerformance();
 
 namespace Raytracer {
-	//cuKDTree* BuildKDTreeCUDA( RtScene *rtScene );
+	//cuKDTree* BuildKDTreeCUDA( GIScene *rtScene );
 
 	// TODO: Convert 라는 이름이 적절하지 않음.
-	KDTreeStructureCUDA* ConvertIntoKDTreeCUDA( RtScene *rtScene, KDTreeStructure *KDTree );
+	KDTreeStructureCUDA* ConvertIntoKDTreeCUDA( GIScene *rtScene, KDTreeStructure *KDTree );
 
 	bool InitializeKDTreeForCUDA( KDTreeStructureCUDA* KDTreeCUDA );
 
 	// TODO: Get, Set GPU Options (동시 실행 불가? MultiGPU에서는 가능한가?)
-	void ShootRaysCUDA( GIHit *outHits, RtScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, const GIRay *RayArray );
+	//void ShootRaysCUDA( GIHit *outHits, GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, const GIRay *RayArray );
 
-	//void SampleColorCUDA( RtScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray );
-	//void SampleDistanceCUDA( RtScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray );
-	void SampleHitCUDA( RtScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray );
+	//void SampleColorCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray );
+	//void SampleDistanceCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray );
+	void SampleHitCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray );
 
 	// TODO: 아마도 외부로부터 감추지 않을까?
 	//char* ErrorStringFromCURAError( cudaError );

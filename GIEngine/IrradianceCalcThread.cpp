@@ -12,26 +12,26 @@
 #include "Raytracer/Raytracer.h"
 #include "Raytracer/SceneAccelStructure.h"
 
-#include <RtScene.h>
-
-RtScene* IrradianceCalcThread::mRtScene = NULL;
+#include <Scene.h>
 
 using namespace GIEngine;
+
+GIScene* IrradianceCalcThread::mGIScene = NULL;
 
 DWORD WINAPI IrradianceCalcThread::IrradianceCalcThreadFunction( LPVOID lpParam )
 {
 	IrradianceCalcThread *pThreadData = (IrradianceCalcThread*)lpParam;
 
 	/*RaytracerOption Option;
-	Option.RayEpsilon = mRtScene->GetSceneEpsilon();
+	Option.RayEpsilon = mGIScene->GetSceneEpsilon();
 	Option.PassThroughBackHit = true;
 	Option.PassThroughSelfHit = true;*/
 
 	for( unsigned int i = 0; i < pThreadData->RayCount; i++ )
 	{
 		GIVector4 RenderedColor;
-		GIHit Hit = Raytracer::ShootRay( pThreadData->mRtScene, mAccelStructure->GetKDTree(), pThreadData->RayArray[i] );
-		Raytracer::Shading( pThreadData->mRtScene, mAccelStructure->GetKDTree(), pThreadData->RayArray[i], Hit, 2, &RenderedColor );
+		GIHit Hit = Raytracer::ShootRay( pThreadData->mGIScene, mAccelStructure->GetKDTree(), pThreadData->RayArray[i] );
+		Raytracer::Shading( pThreadData->mGIScene, mAccelStructure->GetKDTree(), pThreadData->RayArray[i], Hit, 2, &RenderedColor );
 
 		pThreadData->outPixel[0] += pThreadData->CosWeightArray[i] * RenderedColor.x;
 		pThreadData->outPixel[1] += pThreadData->CosWeightArray[i] * RenderedColor.y;

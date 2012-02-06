@@ -10,6 +10,7 @@
 
 #include "Global.h"
 
+namespace GIEngine {
 class GICamera
 {
 public:
@@ -27,4 +28,5 @@ public:
 	// Default : [0, \inf)
 	float NearDistance;
 	float FarDistance;
+};
 };

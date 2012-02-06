@@ -11,7 +11,7 @@
 #include "Raytracer.h"
 
 #include <Utility.h>
-#include <RtScene.h>
+#include <Scene.h>
 
 // inline
 #include "Intersect.h"
@@ -24,7 +24,7 @@
 
 using namespace GIEngine;
 
-KDTreeStructure* Raytracer::BuildKDTree( RtScene *pScene, const char *strStructureFilename, bool bLoadKDTree/* = true*/ )
+KDTreeStructure* Raytracer::BuildKDTree( GIScene *pScene, const char *strStructureFilename, bool bLoadKDTree/* = true*/ )
 {
 	KDTreeStructure* KDTree = new KDTreeStructure();
 
@@ -38,7 +38,7 @@ KDTreeStructure* Raytracer::BuildKDTree( RtScene *pScene, const char *strStructu
 	{
 		KDTree->ConstructKDTree( pScene->GetTriangleList(), pScene->GetTriangleCount(), pScene->GetBoundingBox() );
 		KDTree->SaveToFile( strStructureFilename );
-		RtKDTreeNode *RootNode = KDTree->GetRootNode();
+		GIKDTreeNode *RootNode = KDTree->GetRootNode();
 	}
 	if( KDTree->IsBuilt() == false )
 	{
@@ -48,7 +48,7 @@ KDTreeStructure* Raytracer::BuildKDTree( RtScene *pScene, const char *strStructu
 	return KDTree;
 }
 
-GIHit Raytracer::ShootRay( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray )
+GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray )
 {
 	assert( KDTree != NULL && KDTree->IsBuilt() );
 
@@ -86,7 +86,7 @@ GIHit Raytracer::ShootRay( RtScene *rtScene, KDTreeStructure *KDTree, const GIRa
 
 	// TODO: 속도 문제가 좀 있을 수 있음.
 	struct StackStruct {
-		RtKDTreeNode *pNode;
+		GIKDTreeNode *pNode;
 		GIBoundingBox BoundingBox;
 	};
 
@@ -105,7 +105,7 @@ GIHit Raytracer::ShootRay( RtScene *rtScene, KDTreeStructure *KDTree, const GIRa
 	while( Stack.empty() == false )
 	{
 		StackStruct CurStatkNode = Stack.top();
-		RtKDTreeNode *curNode = CurStatkNode.pNode;
+		GIKDTreeNode *curNode = CurStatkNode.pNode;
 		Stack.pop();
 
 		assert( curNode != NULL );
@@ -278,16 +278,16 @@ GIHit Raytracer::ShootRay( RtScene *rtScene, KDTreeStructure *KDTree, const GIRa
 	_CrtMemDumpStatistics( &difference );*/
 }
 
-//GIHit Raytracer::ShootRay( RtScene *rtScene, const GIRay &Ray )
+//GIHit Raytracer::ShootRay( GIScene *rtScene, const GIRay &Ray )
 //{
-//	RtTriAccel *TriAccelList = rtScene->GetTriAccelList();
+//	GITriAccel *TriAccelList = rtScene->GetTriAccelList();
 //
 //	GIHit Hit;
 //	Intersection( TriAccelList, rtScene->GetTriangleCount(), Ray, Hit );
 //	return Hit;
 //}
 
-void Raytracer::TraverseKDTree( RtScene *rtScene, const GIRay &Ray, RtKDTreeNode *pNode, GIHit &Hit )
+void Raytracer::TraverseKDTree( GIScene *rtScene, const GIRay &Ray, GIKDTreeNode *pNode, GIHit &Hit )
 {	
 	assert( pNode != NULL );
 
@@ -310,7 +310,7 @@ void Raytracer::TraverseKDTree( RtScene *rtScene, const GIRay &Ray, RtKDTreeNode
 	}
 }
 
-void Raytracer::Shading( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor )
+void Raytracer::Shading( GIScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray, const GIHit &Hit, int MaxDepth, GIVector4 *outColor )
 {
 	if( Hit.triNum < 0 )
 	{
@@ -546,20 +546,20 @@ void Raytracer::Shading( RtScene *rtScene, KDTreeStructure *KDTree, const GIRay 
 
 //static const unsigned int modulo[] = {0,1,2,0,1};
 
-void Raytracer::Intersection( RtScene *rtScene, unsigned int *TriangleIndexArray, const int &TriangleCount, const GIRay &Ray, GIHit &Hit )
+void Raytracer::Intersection( GIScene *rtScene, unsigned int *TriangleIndexArray, const int &TriangleCount, const GIRay &Ray, GIHit &Hit )
 {
-	const RtTriAccel *TriAccelArray = rtScene->GetTriAccelList();
+	const GITriAccel *TriAccelArray = rtScene->GetTriAccelList();
 	assert( TriAccelArray != NULL );
 
 	for( int i = 0; i < TriangleCount; i++ )
 	{
 		unsigned int &TriangleIndex = TriangleIndexArray[i];
-		const RtTriAccel &TriAcc = TriAccelArray[TriangleIndex];
+		const GITriAccel &TriAcc = TriAccelArray[TriangleIndex];
 		Intersection( TriAcc, Ray, Hit );
 	}
 }
 
-void Raytracer::Intersection( const RtTriAccel *TriAccelArray, const int &TriangleCount, const GIRay &Ray, GIHit &Hit )
+void Raytracer::Intersection( const GITriAccel *TriAccelArray, const int &TriangleCount, const GIRay &Ray, GIHit &Hit )
 {
 	// hit check!
 	for( int i = 0; i < TriangleCount; i++ )
@@ -571,7 +571,7 @@ void Raytracer::Intersection( const GITriangle &Triangle, const GIRay &Ray, GIHi
 	assert( false );
 }
 
-void Raytracer::Intersection( const RtTriAccel &TriAccel, const GIRay &Ray, GIHit &Hit )
+void Raytracer::Intersection( const GITriAccel &TriAccel, const GIRay &Ray, GIHit &Hit )
 {
 	RtIntersect( TriAccel, Ray, Hit );
 }

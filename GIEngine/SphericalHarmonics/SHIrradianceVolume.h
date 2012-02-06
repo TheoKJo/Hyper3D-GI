@@ -10,6 +10,8 @@
 #include "../IrradianceVolume.h"
 //#include "IrradianceVolume.h"
 
+namespace GIEngine {
+
 /*!
  * 
  * \date 2011.03.28
@@ -35,4 +37,6 @@ private:
 private:
 	unsigned int m_MaxSHOrder;
 	SphericalHarmonicsRGB<3> *mSH;
+};
+
 };

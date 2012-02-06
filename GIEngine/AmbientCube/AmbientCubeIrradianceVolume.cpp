@@ -11,6 +11,8 @@
 #include <assert.h>
 #include "AmbientcubeIrradianceVolume.h"
 
+using namespace GIEngine;
+
 AmbientCubeIrradianceVolume* AmbientCubeIrradianceVolume::CreateIrradianceVolume( float CellLength, const GIVector3 &MinVector, const GIVector3 &MaxVector )
 {
 	GIVector3 DeltaVector = MaxVector - MinVector;

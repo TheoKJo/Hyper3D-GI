@@ -1,5 +1,5 @@
 /*!
- * \file		RtScene.h
+ * \file		GIScene.h
  * \brief		
  * \author		Hybrid (creavol@gmail.com)
  * \date		2011/11/22
@@ -17,18 +17,19 @@
 
 // Convert Functions
 //! Convert to Barycentric
-static void TriangleToTriAceel( GITriangle &Triangle, RtTriAccel &TriAccel );
+static void TriangleToTriAceel( GITriangle &Triangle, GITriAccel &TriAccel );
 
 /*!
  * Refine 된 삼각형들을 가지고 있음. (Array 구조.)
  * @warning 이곳에서 NIF->GITriangle 을 수행하지는 않음. (NIF의 존재를 모름)
  * @warning 렌더링시의 편의를 위해 모든 개수는 변경되지 않는다고 가정(즉, 삼각형, 조명, 재질 등을 추가/삭제할 수 없음).
  */
-class RtScene
+namespace GIEngine {
+class GIScene
 {
 public:
-	RtScene();
-	virtual ~RtScene();
+	GIScene();
+	virtual ~GIScene();
 
 	void SetName( const char *SceneName );
 	const char* GetName();
@@ -71,7 +72,7 @@ public:
 	GITriangle GetTriangle( unsigned int TriangleIndex ) { return m_TriangleList[TriangleIndex]; }
 	const GITriangle& GetTriangle( unsigned int TriangleIndex ) const { return m_TriangleList[TriangleIndex]; }
 	GITriangle* GetTriangleList() { return m_TriangleList; }
-	RtTriAccel* GetTriAccelList() { return m_TriAccelList; }
+	GITriAccel* GetTriAccelList() { return m_TriAccelList; }
 
 	// Vertices (not-refined)
 	unsigned int GetVertexCount() { return m_VertexCount; }
@@ -130,7 +131,7 @@ private:
 	char m_SceneName[255];
 	unsigned int m_TriangleCount;
 	GITriangle *m_TriangleList;
-	RtTriAccel *m_TriAccelList;
+	GITriAccel *m_TriAccelList;
 
 	// 
 	unsigned int m_VertexCount;
@@ -153,30 +154,31 @@ private:
 	float m_SceneEpsilon;
 };
 
-template SphericalHarmonics<1> RtScene::GetSH<1>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonics<2> RtScene::GetSH<2>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonics<3> RtScene::GetSH<3>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonics<4> RtScene::GetSH<4>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonics<5> RtScene::GetSH<5>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonics<6> RtScene::GetSH<6>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonics<1> GIScene::GetSH<1>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonics<2> GIScene::GetSH<2>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonics<3> GIScene::GetSH<3>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonics<4> GIScene::GetSH<4>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonics<5> GIScene::GetSH<5>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonics<6> GIScene::GetSH<6>( unsigned int TriangleNum, float u, float v );
 
-template SphericalHarmonicsRGB<1> RtScene::GetSH_RGB<1>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonicsRGB<2> RtScene::GetSH_RGB<2>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonicsRGB<3> RtScene::GetSH_RGB<3>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonicsRGB<4> RtScene::GetSH_RGB<4>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonicsRGB<5> RtScene::GetSH_RGB<5>( unsigned int TriangleNum, float u, float v );
-template SphericalHarmonicsRGB<6> RtScene::GetSH_RGB<6>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonicsRGB<1> GIScene::GetSH_RGB<1>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonicsRGB<2> GIScene::GetSH_RGB<2>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonicsRGB<3> GIScene::GetSH_RGB<3>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonicsRGB<4> GIScene::GetSH_RGB<4>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonicsRGB<5> GIScene::GetSH_RGB<5>( unsigned int TriangleNum, float u, float v );
+template SphericalHarmonicsRGB<6> GIScene::GetSH_RGB<6>( unsigned int TriangleNum, float u, float v );
 
-//template void RtScene::InitializeTriangleSH<1>();
-//template void RtScene::InitializeTriangleSH<2>();
-//template void RtScene::InitializeTriangleSH<3>();
-//template void RtScene::InitializeTriangleSH<4>();
-//template void RtScene::InitializeTriangleSH<5>();
-//template void RtScene::InitializeTriangleSH<6>();
+};
+//template void GIScene::InitializeTriangleSH<1>();
+//template void GIScene::InitializeTriangleSH<2>();
+//template void GIScene::InitializeTriangleSH<3>();
+//template void GIScene::InitializeTriangleSH<4>();
+//template void GIScene::InitializeTriangleSH<5>();
+//template void GIScene::InitializeTriangleSH<6>();
 //
-//template void RtScene::InitializeTriangleSH_RGB<1>();
-//template void RtScene::InitializeTriangleSH_RGB<2>();
-//template void RtScene::InitializeTriangleSH_RGB<3>();
-//template void RtScene::InitializeTriangleSH_RGB<4>();
-//template void RtScene::InitializeTriangleSH_RGB<5>();
-//template void RtScene::InitializeTriangleSH_RGB<6>();
+//template void GIScene::InitializeTriangleSH_RGB<1>();
+//template void GIScene::InitializeTriangleSH_RGB<2>();
+//template void GIScene::InitializeTriangleSH_RGB<3>();
+//template void GIScene::InitializeTriangleSH_RGB<4>();
+//template void GIScene::InitializeTriangleSH_RGB<5>();
+//template void GIScene::InitializeTriangleSH_RGB<6>();

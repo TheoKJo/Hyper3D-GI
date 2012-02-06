@@ -7,11 +7,12 @@
  * copyright	Hybrid (creavol@gmail.com)
  */
 
-class KDTreeStructure;
-class KDTreeStructureCUDA;
 
+namespace GIEngine { 
+//namespace Raytracer {
 
-//namespace GIEngine { namespace Raytracer {
+	class KDTreeStructure;
+	class KDTreeStructureCUDA;
 
 class SceneAccelStructure
 {
@@ -34,4 +35,5 @@ private:
 	KDTreeStructureCUDA *m_KDTreeCUDA;
 };
 
-//};};
+};
+//};

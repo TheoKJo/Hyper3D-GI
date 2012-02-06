@@ -12,6 +12,8 @@
 
 #include "../GIEngine/SphericalHarmonics/SphericalHarmonics.h"
 
+namespace GIEngine {
+
 class SampleArray
 {
 public:
@@ -102,4 +104,5 @@ public:
 
 private:
 	SphericalHarmonics<order> *mSphericalHarmonicsArray;
+};
 };

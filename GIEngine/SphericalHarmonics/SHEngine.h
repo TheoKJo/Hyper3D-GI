@@ -14,11 +14,13 @@
 
 #define SH_MAX_ORDER 6
 
-extern const SHMatrix<3,3> IdentityMatrix33;
-extern SHMatrix<3,3> RotationMatrix_X33_m90;
-extern SHMatrix<3,3> RotationMatrix_X33_p90;
 
-namespace GIEngine { namespace SHEngine {
+namespace GIEngine { 
+	extern const SHMatrix<3,3> IdentityMatrix33;
+	extern SHMatrix<3,3> RotationMatrix_X33_m90;
+	extern SHMatrix<3,3> RotationMatrix_X33_p90;
+	
+	namespace SHEngine {
 
 	template<unsigned int order>
 	void GenerateSphericalHarmonicsSampleArray( const GIVector3 &Position, SphericalHarmonicsSampleArray<order> *inoutSHSampleArray );

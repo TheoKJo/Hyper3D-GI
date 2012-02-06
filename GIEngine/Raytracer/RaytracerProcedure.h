@@ -16,13 +16,15 @@
 
 // TODO : 파일 삭제
 
+using namespace GIEngine;
+
 class RaytracerProcedure
 {
 public:
 	RaytracerProcedure() : mShadingFunction(NULL) {}
 	virtual ~RaytracerProcedure() {}
 
-	static RtScene *mRtScene;
+	static GIScene *mGIScene;
 	static KDTreeStructure *mKDTree;
 
 	GIRay *mRayArray;
@@ -41,11 +43,11 @@ public:
 
 	/*unsigned int ThreadProcedure( void *pData )
 	{
-		KDTreeStructure *pKDTree = (KDTreeStructure*)mRtScene->GetAccStructure();
+		KDTreeStructure *pKDTree = (KDTreeStructure*)mGIScene->GetAccStructure();
 		for( unsigned int i = 0; i < RayCount; i++ )
 		{
 			GIVector4 RenderedColor = GetRaytracer()->BackgroundColor;
-			GetRaytracer()->ShootRay( mRtScene, RayArray[i], &RenderedColor, pKDTree );
+			GetRaytracer()->ShootRay( mGIScene, RayArray[i], &RenderedColor, pKDTree );
 			RenderedColor.CopyToFloatArray( &outPixel[i*4] );
 		}
 		return 0;
@@ -59,9 +61,9 @@ public:
 		for( unsigned int i = 0; i < pRaytracerProcedure->mRayCount; i++ )
 		{
 			GIVector4 RenderedColor;
-			GIHit Hit = GIEngine::Raytracer::ShootRay( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
+			GIHit Hit = GIEngine::Raytracer::ShootRay( mGIScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
 
-			GIEngine::Raytracer::Shading( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
+			GIEngine::Raytracer::Shading( mGIScene, mKDTree, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
 			ColorData[i] = RenderedColor.ToVector3();
 		}
 		return 0;
@@ -75,7 +77,7 @@ public:
 		for( unsigned int i = 0; i < pRaytracerProcedure->mRayCount; i++ )
 		{
 			GIVector4 RenderedColor;
-			HitData[i] = GIEngine::Raytracer::ShootRay( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
+			HitData[i] = GIEngine::Raytracer::ShootRay( mGIScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
 		}
 		return 0;
 	}
@@ -88,10 +90,10 @@ public:
 		for( unsigned int i = 0; i < pRaytracerProcedure->mRayCount; i++ )
 		{
 			GIVector4 RenderedColor;
-			GIHit Hit = GIEngine::Raytracer::ShootRay( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
+			GIHit Hit = GIEngine::Raytracer::ShootRay( mGIScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
 
 			assert( pRaytracerProcedure->mShadingFunction != NULL );
-			pRaytracerProcedure->mShadingFunction( mRtScene, mKDTree, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
+			pRaytracerProcedure->mShadingFunction( mGIScene, mKDTree, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
 			ColorData[i] = RenderedColor.ToVector3();
 		}
 		return 0;

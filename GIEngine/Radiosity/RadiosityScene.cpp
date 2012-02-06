@@ -11,7 +11,7 @@
 #include "RadiosityScene.h"
 #include "RadiosityLightMapMaterial.h"
 
-#include <GIEngine/GIScene.h>
+#include <Scene.h>
 
 #include <assert.h>
 

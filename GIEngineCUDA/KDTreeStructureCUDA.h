@@ -9,7 +9,10 @@
 
 struct cuKDTree;
 struct cuKDTreeNode;
-typedef RtTriAccel cuKDTreeTriangle;
+
+typedef GITriAccel cuKDTreeTriangle;
+
+namespace GIEngine {
 
 class KDTreeStructureCUDA
 {
@@ -49,4 +52,5 @@ private:
 
 	// for CUDA
 	cuKDTree *m_DeviceKDTree;
+};
 };

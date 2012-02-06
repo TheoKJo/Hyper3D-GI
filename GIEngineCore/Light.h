@@ -13,6 +13,7 @@
 
 #include <memory.h>
 
+namespace GIEngine {
 class GILight : public BinaryDataStreamRequired
 {
 public:
@@ -139,4 +140,5 @@ public:
 
 		return out->AddBinaryDataStream( bds );		
 	}
+};
 };

@@ -13,7 +13,7 @@
 const int BLOCK_SIZE_X = 32;
 const int BLOCK_SIZE_Y = 32;
 
-__global__ void ShootRay( GIHit *outHits, RtTriAccel *TriAccelArray, cuKDTree *KDTree, const GIRay *RayArray )
+__global__ void ShootRay( GIHit *outHits, GITriAccel *TriAccelArray, cuKDTree *KDTree, const GIRay *RayArray )
 {
 	int bx = blockIdx.x;
 	int by = blockIdx.y;

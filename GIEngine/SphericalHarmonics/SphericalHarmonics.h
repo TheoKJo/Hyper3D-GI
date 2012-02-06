@@ -13,6 +13,8 @@
 
 #include <assert.h>
 
+namespace GIEngine {
+
 class SphericalHarmonicsAbs
 {
 public:
@@ -113,6 +115,7 @@ public:
 	SphericalHarmonics<order> r;
 	SphericalHarmonics<order> g;
 	SphericalHarmonics<order> b;
+};
 };
 
 #include "SphericalHarmonics.inl"

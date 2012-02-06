@@ -400,14 +400,6 @@
 				RelativePath=".\GIEnginePCH.h"
 				>
 			</File>
-			<File
-				RelativePath=".\GIScene.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GIScene.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Raytracer"
