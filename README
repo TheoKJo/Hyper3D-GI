@@ -1,4 +1,4 @@
-Less General Public License(LGPL) License v3.0
+
 
 ## Implemented
 
@@ -17,3 +17,6 @@ Less General Public License(LGPL) License v3.0
 * Lightmap baking
 * Many interesting techniques mainly about spherical harmonics
 * Interactive photon mapping
+
+Copyright (C) 2011 Hybrid (creavol@gmail.com)
+Distributed under the Less General Public License(LGPL) License v3.0
