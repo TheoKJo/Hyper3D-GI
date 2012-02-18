@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GIEngineOpenCL", "GIEngineO
 		{10DD6C1D-D9C1-45B6-8108-5BA02EE21AC7} = {10DD6C1D-D9C1-45B6-8108-5BA02EE21AC7}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcproj", "{27FC394F-9345-4B87-9EB8-FD92621619B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug DLL|Win32 = Debug DLL|Win32
@@ -59,6 +61,14 @@ Global
 		{79058051-CC66-4C30-B917-1C7FF3350E52}.Release DLL|Win32.Build.0 = Release|Win32
 		{79058051-CC66-4C30-B917-1C7FF3350E52}.Release|Win32.ActiveCfg = Release|Win32
 		{79058051-CC66-4C30-B917-1C7FF3350E52}.Release|Win32.Build.0 = Release|Win32
+		{27FC394F-9345-4B87-9EB8-FD92621619B1}.Debug DLL|Win32.ActiveCfg = Debug|Win32
+		{27FC394F-9345-4B87-9EB8-FD92621619B1}.Debug DLL|Win32.Build.0 = Debug|Win32
+		{27FC394F-9345-4B87-9EB8-FD92621619B1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{27FC394F-9345-4B87-9EB8-FD92621619B1}.Debug|Win32.Build.0 = Debug|Win32
+		{27FC394F-9345-4B87-9EB8-FD92621619B1}.Release DLL|Win32.ActiveCfg = Release|Win32
+		{27FC394F-9345-4B87-9EB8-FD92621619B1}.Release DLL|Win32.Build.0 = Release|Win32
+		{27FC394F-9345-4B87-9EB8-FD92621619B1}.Release|Win32.ActiveCfg = Release|Win32
+		{27FC394F-9345-4B87-9EB8-FD92621619B1}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

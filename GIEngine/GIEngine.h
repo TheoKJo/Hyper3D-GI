@@ -51,7 +51,7 @@ namespace GIEngine
 	{
 	public:
 		virtual ~GISceneManager() {}
-		virtual GIScene* CreateScene() = 0;
+		//virtual GIScene* CreateScene() = 0;
 	};
 
 	struct RaytracerOption
