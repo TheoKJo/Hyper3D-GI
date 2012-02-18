@@ -69,6 +69,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\$(ProjectName)D.lib"
 				IgnoreDefaultLibraryNames="libdmt libdmtd"
 			/>
 			<Tool
