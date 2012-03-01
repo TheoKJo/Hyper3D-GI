@@ -32,12 +32,13 @@ KDTreeStructure* Raytracer::BuildKDTree( GIScene *pScene, const char *strStructu
 	KDTree->mTraversalCost = 1.5f;
 
 	bool Loaded = false;
-	if( bLoadKDTree )
+	if( bLoadKDTree && strStructureFilename != NULL )
 		Loaded = KDTree->LoadFromFile( strStructureFilename );
 	if( Loaded == false )
 	{
 		KDTree->ConstructKDTree( pScene->GetTriangleList(), pScene->GetTriangleCount(), pScene->GetBoundingBox() );
-		KDTree->SaveToFile( strStructureFilename );
+		if( strStructureFilename != NULL )
+			KDTree->SaveToFile( strStructureFilename );
 		GIKDTreeNode *RootNode = KDTree->GetRootNode();
 	}
 	if( KDTree->IsBuilt() == false )
@@ -50,14 +51,22 @@ KDTreeStructure* Raytracer::BuildKDTree( GIScene *pScene, const char *strStructu
 
 GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray )
 {
+	if( KDTree == NULL )
+		return ShootRay( rtScene, Ray );
+
 	assert( KDTree != NULL && KDTree->IsBuilt() );
 
-	// TODO : Boundary?, const Stack!!!! 가급적 모든걸 global 로!!! (각 thread 에 대해 가지고 있도록!)
+	// TODO: Boundary?, const Stack!!!! 가급적 모든걸 global 로!!! (각 thread 에 대해 가지고 있도록!)
+	// TODO: 무한대가 나오는 부분에 대한 확실한 처리. (무한대를 알맞게 처리하거나, 무한대가 나와도 아무 문제가 없는 것을 확인할 것)
 
 	//_CrtMemState s1, s2, difference;
 	//_CrtMemCheckpoint( &s1 );
 
+	GIVector3 RayOrg( Ray.org );
+	GIVector3 RayDirection( Ray.dir );
+
 	GIHit Hit;
+	Hit.Reset();
 	Hit.dist = Ray.FarDistance;
 
 	/*int MajorAxis = 0;
@@ -80,23 +89,35 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 	};
 	TRAVERSAL_FLAG TraversalFlag[3];
 	for( int i = 0; i < 3; i++ )
-	{
-		TraversalFlag[i] = Ray.dir[i]>0.0f?LEFT_FIRST:(Ray.dir[i]<0.0f)?RIGHT_FIRST:BOTH;
-	}
+		TraversalFlag[i] = Ray.dir[i]>0.0f?LEFT_FIRST:((Ray.dir[i]<0.0f)?RIGHT_FIRST:BOTH);
 
 	// TODO: 속도 문제가 좀 있을 수 있음.
 	struct StackStruct {
 		GIKDTreeNode *pNode;
 		GIBoundingBox BoundingBox;
+		//bool InBox;
 	};
+
+	/*bool InBox = false;
+	if( CurStatkNode.BoundingBox.MinPositions.x <= RayOrg.x && RayOrg.x <= CurStatkNode.BoundingBox.MaxPositions.x &&
+		CurStatkNode.BoundingBox.MinPositions.y <= RayOrg.y && RayOrg.y <= CurStatkNode.BoundingBox.MaxPositions.y &&
+		CurStatkNode.BoundingBox.MinPositions.z <= RayOrg.z && RayOrg.z <= CurStatkNode.BoundingBox.MaxPositions.z )
+		InBox = true;*/
 
 	StackStruct RootStatkNode = { KDTree->GetRootNode(), KDTree->GetBoundingBox() };
 
-	std::vector<StackStruct> StackStorage;
 	// TODO: 500?? 절대 안됨!!
+	std::vector<StackStruct> StackStorage;
 	StackStorage.reserve( 500 );
 	std::stack<StackStruct, std::vector<StackStruct> > Stack( StackStorage );
+
 	Stack.push( RootStatkNode );
+
+	std::vector<StackStruct> DebuggingStackStorage;
+	DebuggingStackStorage.reserve( 500 );
+	std::stack<StackStruct, std::vector<StackStruct> > DebuggingStack( DebuggingStackStorage );
+
+	GIBoundingBox prevBB;
 
 	// assume Ray hit pNode
 
@@ -108,39 +129,83 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 		GIKDTreeNode *curNode = CurStatkNode.pNode;
 		Stack.pop();
 
+		//InBox = CurStatkNode.InBox;
+
 		assert( curNode != NULL );
+
+		//DebuggingStack.push( CurStatkNode );
+		DebuggingStackStorage.push_back( CurStatkNode );
 
 		if( curNode->IsLeafNode() )
 		{
-			// TODO: 이게 뭐야!
-			GIHit oldHit = Hit;
-			Intersection( rtScene, curNode->TriangleIndexArray, curNode->TriangleCount, Ray, Hit );
-			if( Hit.isHit() )
+			GIHit curHit;
+			Intersection( rtScene, curNode->TriangleIndexArray, curNode->TriangleCount, Ray, curHit );
+			if( curHit.isHit() )
 			{
-				const GITriangle &Triangle = rtScene->GetTriangleList()[Hit.triNum];
+				assert( curHit.triNum > 0 );
+
+				const GITriangle &Triangle = rtScene->GetTriangleList()[curHit.triNum];
 				GIVector4 Color = 
-					Triangle.vg0.Color * (1.0f - Hit.u - Hit.v) + 
-					Triangle.vg1.Color * Hit.u + 
-					Triangle.vg2.Color * Hit.v;
+					Triangle.vg0.Color * (1.0f - curHit.u - curHit.v) + 
+					Triangle.vg1.Color * curHit.u + 
+					Triangle.vg2.Color * curHit.v;
 				if( Color.w == 0.0f )
 				{
-					Hit.hit = false;
+					curHit.hit = false;
 					continue;
 				}
 
 				GIVector3 Normal = 
-					Triangle.vg0.Normal * (1.0f - Hit.u - Hit.v) + 
-					Triangle.vg1.Normal * Hit.u + 
-					Triangle.vg2.Normal * Hit.v;
-				if( Normal.DotProduct( Ray.dir ) > 0.0f )
-				{
-					Hit.backHit = true;
-					//Hit = oldHit;
-				}
-			}
+					Triangle.vg0.Normal * (1.0f - curHit.u - curHit.v) + 
+					Triangle.vg1.Normal * curHit.u + 
+					Triangle.vg2.Normal * curHit.v;
+				//if( Normal.DotProduct( Ray.dir ) > 0.0f )
+				//	curHit.backHit = true;
 
-			if( Hit.isHit() )
+				if( !Hit.hit || curHit.dist < Hit.dist )
+				{
+					if( Hit.hit )
+					{
+						//const GITriangle &hitTriangle = rtScene->GetTriangleList()[Hit.triNum];
+						const GIVector3 hitPosition = (GIVector3( Ray.dir ) - GIVector3( Ray.org )) * curHit.dist;
+						const GIVector3 hitPosition2 = (GIVector3( Ray.dir ) - GIVector3( Ray.org )) * Hit.dist;
+
+						float dot = hitPosition.GetNormalized().DotProduct( hitPosition2.GetNormalized() );
+						assert( fabs(dot - 1.0f) < 0.001f );
+						const GIBoundingBox bb = TriangleToBoundingBox( Triangle );
+
+						/*const GIBoundingBox bb = TriangleToBoundingBox( hitTriangle );
+						if( !(bb.MinPositions.x - FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x  + FLOAT_EPSILON&& 
+							bb.MinPositions.y - FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + FLOAT_EPSILON &&
+							bb.MinPositions.z - FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + FLOAT_EPSILON) )
+							int a = 0;
+						assert( bb.MinPositions.x - FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x + FLOAT_EPSILON&& 
+							bb.MinPositions.y - FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + FLOAT_EPSILON&&
+							bb.MinPositions.z - FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + FLOAT_EPSILON );*/
+
+						/*for( unsigned int i = 0; i < DebuggingStackStorage.size(); i++ )
+						{
+							if( DebuggingStackStorage[i].pNode->TriangleIndexArray == NULL )
+								continue;
+							printf( "%d: ", DebuggingStackStorage[i].pNode->TriangleCount );
+							for( int j = 0; j < DebuggingStackStorage[i].pNode->TriangleCount; j++ )
+							{
+								printf( "%d, ",		DebuggingStackStorage[i].pNode->TriangleIndexArray[j] );
+							}
+							printf( "\n" );
+						}*/
+
+						int a = 0;
+					}
+					Hit = curHit;
+					prevBB = CurStatkNode.BoundingBox;
+				}
 				break;
+			}
+			else
+			{
+				int a = 0;
+			}
 			continue;
 		}
 		else
@@ -148,14 +213,37 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 			int k = curNode->SplitAxis;
 			int k1 = modulo[k+1];
 			int k2 = modulo[k+2];
-			//assert( Ray.dir[k] != 0.0f );
+
+			assert( Ray.dir[k] > 0.0f );
+			// TODO: 
+			assert( Ray.dir[k] != 0.0f );
+			assert( Ray.dir[k1] != 0.0f );
+			assert( Ray.dir[k2] != 0.0f );
 
 			enum ENodeType { 
 				FRONT_NODE = 1, 
 				BACK_NODE = 2
 			};
+
+			assert( CurStatkNode.BoundingBox.MinPositions.array[k] <= curNode->SplitPosition
+				&& curNode->SplitPosition <= CurStatkNode.BoundingBox.MaxPositions.array[k] );
+
+			for( int i = 0; i < 3; i++ )
+			{
+				if( CurStatkNode.BoundingBox.MinPositions.array[i] >= CurStatkNode.BoundingBox.MaxPositions.array[i] )
+				{
+					int a = 0;
+				}
+				if( fabs( CurStatkNode.BoundingBox.MinPositions.array[i] - CurStatkNode.BoundingBox.MaxPositions.array[i] ) <= 0.0001f )
+					int a = 0;
+
+				assert( CurStatkNode.BoundingBox.MinPositions.array[i] < CurStatkNode.BoundingBox.MaxPositions.array[i] );
+			}
+
+			assert( CurStatkNode.BoundingBox.MinPositions.array[k] < curNode->SplitPosition
+				&& curNode->SplitPosition < CurStatkNode.BoundingBox.MaxPositions.array[k] );
 			
-			// 상대 거리
+			// relative distances
 			float distance_near;
 			float distance_far;
 			/*float distance_near = BoundingBox.MinPositions.array[k1] - Ray.org[k1];
@@ -171,59 +259,92 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 			float boxMin2 = CurStatkNode.BoundingBox.MinPositions.array[k2] - Ray.org[k2];
 			float boxMax2 = CurStatkNode.BoundingBox.MaxPositions.array[k2] - Ray.org[k2];
 
-			assert( CurStatkNode.BoundingBox.MinPositions.array[k] <= curNode->SplitPosition );
-			assert( curNode->SplitPosition <= CurStatkNode.BoundingBox.MaxPositions.array[k] );
-
 			GIBoundingBox LeftBox = CurStatkNode.BoundingBox;
 			GIBoundingBox RightBox = CurStatkNode.BoundingBox;
 
 			LeftBox.MaxPositions.array[k] = curNode->SplitPosition;
 			RightBox.MinPositions.array[k] = curNode->SplitPosition;
 
-			distance_split = distance_split/Ray.dir[k];
-			boxMin0 = boxMin0/Ray.dir[k];
-			boxMax0 = boxMax0/Ray.dir[k];
-			boxMin1 = boxMin1/Ray.dir[k1];
-			boxMax1 = boxMax1/Ray.dir[k1];
-			boxMin2 = boxMin2/Ray.dir[k2];
-			boxMax2 = boxMax2/Ray.dir[k2];
-
-			if( boxMin0 > boxMax0 )
-			{
-				float temp = boxMin0;
-				boxMin0 = boxMax0;
-				boxMax0 = temp;
-			}
-			if( boxMin1 > boxMax1 )
-			{
-				float temp = boxMin1;
-				boxMin1 = boxMax1;
-				boxMax1 = temp;
-			}
-			if( boxMin2 > boxMax2 )
-			{
-				float temp = boxMin2;
-				boxMin2 = boxMax2;
-				boxMax2 = temp;
-			}
-
-			distance_near = boxMin1>=boxMin2?boxMin1:boxMin2;
-			distance_near = distance_near>=boxMin0?distance_near:boxMin0;
-			distance_far = boxMax1<=boxMax2?boxMax1:boxMax2;
-			distance_far = distance_far<=boxMax0?distance_far:boxMax0;
-
-			// 박스와 겹치지 않음
-			if( distance_far < distance_near )
-				continue;
-
 			int Node = 0;
-			if( distance_near <= distance_split )
-				Node |= FRONT_NODE;
-			if( distance_split <= distance_far )
-				Node |= BACK_NODE;
-			//Node = FRONT_NODE | BACK_NODE;
+			// both can be true
+			/*bool InLeftBox = false;
+			bool InRightBox = false;*/
+			/*if( InBox )
+			{
+				if( RayOrg.array[k] <= curNode->SplitPosition )
+				{
+					InLeftBox = true;
+					Node |= FRONT_NODE;
+					if( TraversalFlag[k] == LEFT_FIRST )
+						Node |= BACK_NODE;
+				}
+				if( curNode->SplitPosition <= RayOrg.array[k] )
+				{
+					InRightBox = true;
+					Node |= BACK_NODE;
+					if( TraversalFlag[k] == RIGHT_FIRST )
+						Node |= FRONT_NODE;
+				}
+			}
+			else*/
+			{
+				distance_split = distance_split/Ray.dir[k];
+				boxMin0 = boxMin0/Ray.dir[k];
+				boxMax0 = boxMax0/Ray.dir[k];
+				boxMin1 = boxMin1/Ray.dir[k1];
+				boxMax1 = boxMax1/Ray.dir[k1];
+				boxMin2 = boxMin2/Ray.dir[k2];
+				boxMax2 = boxMax2/Ray.dir[k2];
 
-			if( TraversalFlag[curNode->SplitAxis] == LEFT_FIRST )
+				if( boxMin0 > boxMax0 )
+				{
+					float temp = boxMin0;
+					boxMin0 = boxMax0;
+					boxMax0 = temp;
+				}
+				if( boxMin1 > boxMax1 )
+				{
+					float temp = boxMin1;
+					boxMin1 = boxMax1;
+					boxMax1 = temp;
+				}
+				if( boxMin2 > boxMax2 )
+				{
+					float temp = boxMin2;
+					boxMin2 = boxMax2;
+					boxMax2 = temp;
+				}
+
+				distance_near = boxMin1>=boxMin2?boxMin1:boxMin2;
+				distance_near = distance_near>=boxMin0?distance_near:boxMin0;
+				distance_far = boxMax1<=boxMax2?boxMax1:boxMax2;
+				distance_far = distance_far<=boxMax0?distance_far:boxMax0;
+
+				// 박스와 겹치지 않음
+				if( distance_far < distance_near )
+					continue;
+
+				// front box is behind ray's origin when distance_split < 0.0f
+				if( distance_near <= distance_split && distance_split >= 0.0f )
+					Node |= FRONT_NODE;
+				if( distance_split <= distance_far  )//&& distance_split >= 0.0f
+				{
+					Node |= BACK_NODE;
+				}
+			}
+
+			if( curNode->LeftNode != NULL && curNode->RightNode != NULL )
+			{
+				if( !(LeftBox.MaxPositions.x <= RightBox.MaxPositions.x && 
+					LeftBox.MaxPositions.y <= RightBox.MaxPositions.y && 
+					LeftBox.MaxPositions.z <= RightBox.MaxPositions.z) )
+				{
+					int a = 0;
+					assert( false );
+				}
+			}
+
+			if( TraversalFlag[k] == LEFT_FIRST )
 			{
 				// 왼쪽부터 Traverse : 오른쪽부터 Push
 				if( (Node & BACK_NODE) && curNode->RightNode != NULL )
@@ -254,18 +375,6 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 		}
 	}
 	return Hit;
-	/*if( Hit.isHit() )
-	{		
-		Shading( rtScene, outColor, Ray, Hit );
-	}
-	else
-	{
-		outColor->x = 0.0f;
-		outColor->y = 0.0f;
-		outColor->z = 0.0f;
-		outColor->w = 0.0f;
-	}*/
-
 
 	/*StackStorage.reserve( 0 );
 	StackStorage.clear();
@@ -278,14 +387,14 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 	_CrtMemDumpStatistics( &difference );*/
 }
 
-//GIHit Raytracer::ShootRay( GIScene *rtScene, const GIRay &Ray )
-//{
-//	GITriAccel *TriAccelList = rtScene->GetTriAccelList();
-//
-//	GIHit Hit;
-//	Intersection( TriAccelList, rtScene->GetTriangleCount(), Ray, Hit );
-//	return Hit;
-//}
+GIHit Raytracer::ShootRay( GIScene *rtScene, const GIRay &Ray )
+{
+	GITriAccel *TriAccelList = rtScene->GetTriAccelList();
+
+	GIHit Hit;
+	Intersection( TriAccelList, rtScene->GetTriangleCount(), Ray, Hit );
+	return Hit;
+}
 
 void Raytracer::TraverseKDTree( GIScene *rtScene, const GIRay &Ray, GIKDTreeNode *pNode, GIHit &Hit )
 {	
@@ -551,19 +660,46 @@ void Raytracer::Intersection( GIScene *rtScene, unsigned int *TriangleIndexArray
 	const GITriAccel *TriAccelArray = rtScene->GetTriAccelList();
 	assert( TriAccelArray != NULL );
 
+	Hit.Reset();
 	for( int i = 0; i < TriangleCount; i++ )
 	{
 		unsigned int &TriangleIndex = TriangleIndexArray[i];
+
+		GIHit curHit;
 		const GITriAccel &TriAcc = TriAccelArray[TriangleIndex];
-		Intersection( TriAcc, Ray, Hit );
+		Intersection( TriAcc, Ray, curHit );
+		if( curHit.hit && Ray.NearDistance <= curHit.dist && curHit.dist <= Ray.FarDistance )
+		{
+			const GITriangle &hitTriangle = rtScene->GetTriangleList()[TriangleIndex];
+			const GIVector3 hitPosition = (GIVector3( Ray.dir ) - GIVector3( Ray.org )) * curHit.dist;
+			const GIBoundingBox bb = TriangleToBoundingBox( hitTriangle );
+			if( !(bb.MinPositions.x - FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x  + FLOAT_EPSILON&& 
+				bb.MinPositions.y - FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + FLOAT_EPSILON &&
+				bb.MinPositions.z - FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + FLOAT_EPSILON) )
+				int a = 0;
+			assert( bb.MinPositions.x - FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x + FLOAT_EPSILON&& 
+					bb.MinPositions.y - FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + FLOAT_EPSILON&&
+					bb.MinPositions.z - FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + FLOAT_EPSILON );
+			if( !Hit.hit || curHit.dist < Hit.dist )
+				Hit = curHit;
+		}
 	}
 }
 
 void Raytracer::Intersection( const GITriAccel *TriAccelArray, const int &TriangleCount, const GIRay &Ray, GIHit &Hit )
 {
-	// hit check!
+	Hit.Reset();
 	for( int i = 0; i < TriangleCount; i++ )
-		Intersection( TriAccelArray[i], Ray, Hit );
+	{
+		//Intersection( TriAccelArray[i], Ray, Hit );
+		GIHit curHit;
+		Intersection( TriAccelArray[i], Ray, curHit );
+		if( curHit.hit && Ray.NearDistance <= curHit.dist && curHit.dist <= Ray.FarDistance )
+		{
+			if( !Hit.hit || curHit.dist < Hit.dist )
+				Hit = curHit;
+		}
+	}
 }
 
 void Raytracer::Intersection( const GITriangle &Triangle, const GIRay &Ray, GIHit &Hit )
@@ -573,5 +709,6 @@ void Raytracer::Intersection( const GITriangle &Triangle, const GIRay &Ray, GIHi
 
 void Raytracer::Intersection( const GITriAccel &TriAccel, const GIRay &Ray, GIHit &Hit )
 {
+	// TODO: 이름이 그닥.
 	RtIntersect( TriAccel, Ray, Hit );
 }
