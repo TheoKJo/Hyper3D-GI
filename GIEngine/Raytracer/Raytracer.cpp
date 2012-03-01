@@ -95,14 +95,7 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 	struct StackStruct {
 		GIKDTreeNode *pNode;
 		GIBoundingBox BoundingBox;
-		//bool InBox;
 	};
-
-	/*bool InBox = false;
-	if( CurStatkNode.BoundingBox.MinPositions.x <= RayOrg.x && RayOrg.x <= CurStatkNode.BoundingBox.MaxPositions.x &&
-		CurStatkNode.BoundingBox.MinPositions.y <= RayOrg.y && RayOrg.y <= CurStatkNode.BoundingBox.MaxPositions.y &&
-		CurStatkNode.BoundingBox.MinPositions.z <= RayOrg.z && RayOrg.z <= CurStatkNode.BoundingBox.MaxPositions.z )
-		InBox = true;*/
 
 	StackStruct RootStatkNode = { KDTree->GetRootNode(), KDTree->GetBoundingBox() };
 
@@ -112,10 +105,6 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 	std::stack<StackStruct, std::vector<StackStruct> > Stack( StackStorage );
 
 	Stack.push( RootStatkNode );
-
-	std::vector<StackStruct> DebuggingStackStorage;
-	DebuggingStackStorage.reserve( 500 );
-	std::stack<StackStruct, std::vector<StackStruct> > DebuggingStack( DebuggingStackStorage );
 
 	GIBoundingBox prevBB;
 
@@ -129,12 +118,7 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 		GIKDTreeNode *curNode = CurStatkNode.pNode;
 		Stack.pop();
 
-		//InBox = CurStatkNode.InBox;
-
 		assert( curNode != NULL );
-
-		//DebuggingStack.push( CurStatkNode );
-		DebuggingStackStorage.push_back( CurStatkNode );
 
 		if( curNode->IsLeafNode() )
 		{
@@ -163,43 +147,7 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 				//	curHit.backHit = true;
 
 				if( !Hit.hit || curHit.dist < Hit.dist )
-				{
-					if( Hit.hit )
-					{
-						//const GITriangle &hitTriangle = rtScene->GetTriangleList()[Hit.triNum];
-						const GIVector3 hitPosition = (GIVector3( Ray.dir ) - GIVector3( Ray.org )) * curHit.dist;
-						const GIVector3 hitPosition2 = (GIVector3( Ray.dir ) - GIVector3( Ray.org )) * Hit.dist;
-
-						float dot = hitPosition.GetNormalized().DotProduct( hitPosition2.GetNormalized() );
-						assert( fabs(dot - 1.0f) < 0.001f );
-						const GIBoundingBox bb = TriangleToBoundingBox( Triangle );
-
-						/*const GIBoundingBox bb = TriangleToBoundingBox( hitTriangle );
-						if( !(bb.MinPositions.x - FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x  + FLOAT_EPSILON&& 
-							bb.MinPositions.y - FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + FLOAT_EPSILON &&
-							bb.MinPositions.z - FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + FLOAT_EPSILON) )
-							int a = 0;
-						assert( bb.MinPositions.x - FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x + FLOAT_EPSILON&& 
-							bb.MinPositions.y - FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + FLOAT_EPSILON&&
-							bb.MinPositions.z - FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + FLOAT_EPSILON );*/
-
-						/*for( unsigned int i = 0; i < DebuggingStackStorage.size(); i++ )
-						{
-							if( DebuggingStackStorage[i].pNode->TriangleIndexArray == NULL )
-								continue;
-							printf( "%d: ", DebuggingStackStorage[i].pNode->TriangleCount );
-							for( int j = 0; j < DebuggingStackStorage[i].pNode->TriangleCount; j++ )
-							{
-								printf( "%d, ",		DebuggingStackStorage[i].pNode->TriangleIndexArray[j] );
-							}
-							printf( "\n" );
-						}*/
-
-						int a = 0;
-					}
 					Hit = curHit;
-					prevBB = CurStatkNode.BoundingBox;
-				}
 				break;
 			}
 			else
