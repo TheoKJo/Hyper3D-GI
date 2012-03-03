@@ -10,23 +10,27 @@
 
 #include "Structures.h"
 
+// source code from Ingo Wald's PhD Thesis, Realtime Ray Tracing and Interactive Global Illumination (2004)
+
 // lookup table for the modulo operation
 //ALIGN(ALIGN_CACHELINE)
 static const int modulo[] = {0,1,2,0,1};
 
-inline bool RtIntersect( const GITriAccel &acc,const GIRay &ray, GIHit &hit )
+inline bool RtIntersect( const GITriAccel &acc,const GIRay &ray, GIHit &outHit, float nearDist = GI_FLOAT_EPSILON, float farDist = GI_FLOAT_INFINITY )
 {
+	outHit.hit = false;
 
 	const int ku = modulo[acc.k+1];
 	const int kv = modulo[acc.k+2];
+	// don' t prefetch here, assume data has already been prefetched
 
-	// don¡¯t prefetch here, assume data has already been prefetched
 	// start high-latency division as early as possible
-	const float nd = 1.0f/( ray.dir[acc.k] + acc.n_u * ray.dir[ku] + acc.n_v * ray.dir[kv] );
+	const float nd = 1.0f/( ray.dir[acc.k] + 
+		acc.n_u * ray.dir[ku] + acc.n_v * ray.dir[kv] );
 	const float f = (acc.n_d - ray.org[acc.k] - acc.n_u * ray.org[ku] - acc.n_v * ray.org[kv]) * nd;
 
 	// check for valid distance.
-	if( !( hit.dist > f && f > FLOAT_EPSILON ) )
+	if( !( nearDist <= f && f < GI_FLOAT_INFINITY ) )
 		return false;
 
 	// compute hitpoint positions on uv plane
@@ -49,10 +53,10 @@ inline bool RtIntersect( const GITriAccel &acc,const GIRay &ray, GIHit &hit )
 		return false;
 
 	// have a valid hitpoint here. store it.
-	hit.hit = true;
-	hit.dist = f;
-	hit.triNum = acc.triNum;
-	hit.u = lambda;
-	hit.v = mue;
+	outHit.hit = true;
+	outHit.dist = f;
+	outHit.triNum = acc.triNum;
+	outHit.u = lambda;
+	outHit.v = mue;
 	return true;
 }

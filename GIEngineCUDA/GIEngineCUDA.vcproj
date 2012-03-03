@@ -52,7 +52,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="1"
 				PrecompiledHeaderThrough="GIEngineCUDA_PCH.h"
 				WarningLevel="3"
@@ -70,7 +70,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile="$(OutDir)\$(ProjectName)D.lib"
-				IgnoreDefaultLibraryNames="libdmt libdmtd"
+				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -120,7 +120,7 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\GIEngineCore"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -137,6 +137,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				IgnoreDefaultLibraryNames=""
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -175,6 +176,10 @@
 				RelativePath=".\KDTreeStructureCUDA.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\RaytracingFunction.cu"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -199,10 +204,6 @@
 			</File>
 			<File
 				RelativePath=".\KDTreeStructureCUDA.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RaytracingFunction.cu"
 				>
 			</File>
 		</Filter>

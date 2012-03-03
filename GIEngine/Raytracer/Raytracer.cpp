@@ -58,6 +58,7 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 
 	// TODO: Boundary?, const Stack!!!! 가급적 모든걸 global 로!!! (각 thread 에 대해 가지고 있도록!)
 	// TODO: 무한대가 나오는 부분에 대한 확실한 처리. (무한대를 알맞게 처리하거나, 무한대가 나와도 아무 문제가 없는 것을 확인할 것)
+	// i.e. Ray.dir[i] 가 0.0f 일 경우에 대한 대처...
 
 	//_CrtMemState s1, s2, difference;
 	//_CrtMemCheckpoint( &s1 );
@@ -78,9 +79,6 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 	assert( Ray.dir[MajorAxis] != 0.0f );
 	if( Ray.dir[MajorAxis] < 0.0f )
 		MajorAxis *= -1;*/
-
-	// TODO: Both Check 도 해야할듯?
-	// Ray.dir[i] 가 0.0f 일 경우에 대한 대처는...
 
 	enum TRAVERSAL_FLAG {
 		LEFT_FIRST,
@@ -106,12 +104,9 @@ GIHit Raytracer::ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 
 	Stack.push( RootStatkNode );
 
-	GIBoundingBox prevBB;
-
-	// assume Ray hit pNode
-
 	static int modulo[5] = { 0, 1, 2, 0, 1 };
 
+	// assume Ray hit pNode
 	while( Stack.empty() == false )
 	{
 		StackStruct CurStatkNode = Stack.top();
@@ -621,13 +616,13 @@ void Raytracer::Intersection( GIScene *rtScene, unsigned int *TriangleIndexArray
 			const GITriangle &hitTriangle = rtScene->GetTriangleList()[TriangleIndex];
 			const GIVector3 hitPosition = (GIVector3( Ray.dir ) - GIVector3( Ray.org )) * curHit.dist;
 			const GIBoundingBox bb = TriangleToBoundingBox( hitTriangle );
-			if( !(bb.MinPositions.x - FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x  + FLOAT_EPSILON&& 
-				bb.MinPositions.y - FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + FLOAT_EPSILON &&
-				bb.MinPositions.z - FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + FLOAT_EPSILON) )
+			if( !(bb.MinPositions.x - GI_FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x  + GI_FLOAT_EPSILON&& 
+				bb.MinPositions.y - GI_FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + GI_FLOAT_EPSILON &&
+				bb.MinPositions.z - GI_FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + GI_FLOAT_EPSILON) )
 				int a = 0;
-			assert( bb.MinPositions.x - FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x + FLOAT_EPSILON&& 
-					bb.MinPositions.y - FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + FLOAT_EPSILON&&
-					bb.MinPositions.z - FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + FLOAT_EPSILON );
+			assert( bb.MinPositions.x - GI_FLOAT_EPSILON <= hitPosition.x && hitPosition.x <= bb.MaxPositions.x + GI_FLOAT_EPSILON&& 
+					bb.MinPositions.y - GI_FLOAT_EPSILON <= hitPosition.y && hitPosition.y <= bb.MaxPositions.y + GI_FLOAT_EPSILON&&
+					bb.MinPositions.z - GI_FLOAT_EPSILON <= hitPosition.z && hitPosition.z <= bb.MaxPositions.z + GI_FLOAT_EPSILON );
 			if( !Hit.hit || curHit.dist < Hit.dist )
 				Hit = curHit;
 		}

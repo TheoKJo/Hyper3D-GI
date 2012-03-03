@@ -18,9 +18,13 @@
 #define NULL 0
 #endif
 
-#define FLOAT_EPSILON 0.001f
-#define FLOAT_PI 3.141592f
-#define GI_INFINITY 1e15f
+// TODO: 컨벤션 엉망
+#define GI_FLOAT_EPSILON 0.001f
+#define GI_FLOAT_PI 3.141592f
+#define GI_FLOAT_INFINITY 1e15f
+
+#define TO_RADIAN( degree ) (degree*GI_FLOAT_PI/180.0f)
+#define TO_DEGREE( radian ) (radian*180.0f/GI_FLOAT_PI)
 
 #include <math.h>
 
@@ -211,6 +215,16 @@ struct GIVector3
 			);
 	};
 
+	// TODO: ..
+	friend float* GIVector3::operator<<( float FloatArray[3], GIVector3 &vec )
+	{
+		FloatArray[0] = vec.x;
+		FloatArray[1] = vec.y;
+		FloatArray[2] = vec.z;
+		return FloatArray;
+	}
+
+	// deprecated
 	inline void CopyToFloatArray( float *FloatArray ) const
 	{
 		FloatArray[0] = x;
@@ -360,14 +374,10 @@ struct GIVertexGroup
 	GIVector2 TexCoords;
 };
 
+// TODO: stream 순서를 달리 해야함.
 struct GITriangle
 {
 	GITriangle() : TriangleNumber(-1), MaterialIndex(-1), mFlag(0) {}
-	//union {
-	//	//GIVertexGroup array[3];
-	//	//struct { GIVertexGroup vg0, vg1, vg2; };
-	//	
-	//};
 
 	GIVertexGroup vg0;
 	GIVertexGroup vg1;
@@ -390,7 +400,7 @@ struct GITriangle
 		float v1 = TexCoords1.v - TexCoords0.v;
 
 		// vertex0 to vertex2
-		float u2 = TexCoords2.u - TexCoords0.u;
+		//float u2 = TexCoords2.u - TexCoords0.u;
 		float v2 = TexCoords2.v - TexCoords0.v;
 
 		float det = u1*v2 - v2*u1;
@@ -434,6 +444,35 @@ private:
 	};
 	unsigned int mFlag;
 };
+
+inline GIBoundingBox TriangleToBoundingBox( const GITriangle &Triangle )
+{
+	GIBoundingBox bb;
+	GIVector3 &BoxMin = bb.MinPositions;
+	GIVector3 &BoxMax = bb.MaxPositions;
+
+	BoxMin = GIVector3( 1e15f, 1e15f, 1e15f );
+	BoxMax = GIVector3( -1e15f, -1e15f, -1e15f );
+
+	for( int i = 0; i < 3; i++ )
+	{
+		if( BoxMin.array[i] > Triangle.vg0.Position.array[i] )
+			BoxMin.array[i] = Triangle.vg0.Position.array[i];
+		if( BoxMin.array[i] > Triangle.vg1.Position.array[i] )
+			BoxMin.array[i] = Triangle.vg1.Position.array[i];
+		if( BoxMin.array[i] > Triangle.vg2.Position.array[i] )
+			BoxMin.array[i] = Triangle.vg2.Position.array[i];
+
+		if( BoxMax.array[i] < Triangle.vg0.Position.array[i] )
+			BoxMax.array[i] = Triangle.vg0.Position.array[i];
+		if( BoxMax.array[i] < Triangle.vg1.Position.array[i] )
+			BoxMax.array[i] = Triangle.vg1.Position.array[i];
+		if( BoxMax.array[i] < Triangle.vg2.Position.array[i] )
+			BoxMax.array[i] = Triangle.vg2.Position.array[i];
+	}
+	return bb;
+}
+
 
 struct GIQuadrangle
 {
@@ -488,7 +527,7 @@ struct GIHit
 	void Reset()
 	{
 		triNum = -1;
-		dist = 1e16f;
+		dist = GI_FLOAT_INFINITY;
 		hit = false;
 	}
 

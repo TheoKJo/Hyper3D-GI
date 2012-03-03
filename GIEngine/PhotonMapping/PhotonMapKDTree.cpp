@@ -47,9 +47,9 @@ void GIPhotonMapKDTree::ConstructKDTree( const std::vector<GIPhoton> &PhotonArra
 
 	m_PhotonArray = &PhotonArray;
 
-	//m_PhotonMapBoundingBox.MaxPositions = GIVector3( -GI_INFINITY, -GI_INFINITY, -GI_INFINITY );
-	m_PhotonMapBoundingBox.MaxPositions = GIVector3( -GI_INFINITY,  -GI_INFINITY,  -GI_INFINITY );
-	m_PhotonMapBoundingBox.MinPositions = GIVector3(  GI_INFINITY,  GI_INFINITY,  GI_INFINITY );
+	//m_PhotonMapBoundingBox.MaxPositions = GIVector3( -GI_FLOAT_INFINITY, -GI_FLOAT_INFINITY, -GI_FLOAT_INFINITY );
+	m_PhotonMapBoundingBox.MaxPositions = GIVector3( -GI_FLOAT_INFINITY,  -GI_FLOAT_INFINITY,  -GI_FLOAT_INFINITY );
+	m_PhotonMapBoundingBox.MinPositions = GIVector3(  GI_FLOAT_INFINITY,  GI_FLOAT_INFINITY,  GI_FLOAT_INFINITY );
 
 	// Build KD-Tree
 	std::vector<unsigned int> PhotonIndexList;

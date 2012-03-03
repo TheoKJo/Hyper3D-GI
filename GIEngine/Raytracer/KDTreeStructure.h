@@ -161,14 +161,14 @@ public:
 	RtSAHCost() : IsSplit(false), Axis(-1), SplitEdgeIndex(-1), 
 		LeftCount(0), CrossTriangleCount(0), RightCount(0), 
 		SplitPosition(0.0f), //!< TODO: \infty
-		SplitCost(1e16f)		//!< TODO: \infty
+		SplitCost(GI_FLOAT_INFINITY)
 	{}
 
 	// 필요 없음.
 	void ResetInvalid()
 	{
 		IsSplit = false; Axis = -1; SplitEdgeIndex = -1; LeftCount = 0; CrossTriangleCount = 0; RightCount = 0;
-		SplitPosition = 0.0f; SplitCost = 1e16f;
+		SplitPosition = 0.0f; SplitCost = GI_FLOAT_INFINITY;
 	}
 
 	bool IsSplit;

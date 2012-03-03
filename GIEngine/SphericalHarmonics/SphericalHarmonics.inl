@@ -76,7 +76,7 @@ inline float K( int l, int m )
 	assert( m >= 0 ); //!< 원래는 m을 받아, |m|으로 계산하지만, 여기서는 |m|이 들어온다고 가정함.
 
 	float temp = (2.0f*l+1.0f) * factorial( l - m );
-	temp = temp/( 4.0f * FLOAT_PI * factorial( l + m ) );
+	temp = temp/( 4.0f * GI_FLOAT_PI * factorial( l + m ) );
 	return sqrt( temp );
 }
 
@@ -114,8 +114,8 @@ inline float P( int l, int m, float x )
 template<unsigned int order>
 float SphericalHarmonics<order>::SH( int l, int m, float theta, float phi )
 {
-	assert( 0.0f <= theta && theta <= FLOAT_PI + 1e-5f );
-	assert( 0.0f <= phi && phi < 2.0f * FLOAT_PI + 1e-5f );
+	assert( 0.0f <= theta && theta <= GI_FLOAT_PI + 1e-5f );
+	assert( 0.0f <= phi && phi < 2.0f * GI_FLOAT_PI + 1e-5f );
 
 	float sh = -1.0f;
 	// reference: Spherical Harmonics Lighting by Robert Green

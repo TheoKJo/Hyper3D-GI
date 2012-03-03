@@ -25,7 +25,7 @@ extern "C" cuKDTree* CreateDeviceKDTreeAllocateKDTreeMemory( unsigned int NodeCo
 															  unsigned int TriangleCount, cuKDTreeTriangle *TriangleArray, 
 															  unsigned int TriangleIndexCount, unsigned int *TriangleIndexArray );
 
-extern "C" void cuShootRays( cuKDTree *DeviceKDTree, unsigned int RayCount, const GIRay *RayArray, GIHit *outHits );
+extern "C" void cuShootRays( cuKDTree *DeviceKDTree, const GIRay *RayArray, unsigned int RayCount, GIHit *outHits );
 //void cuShootRays( GIHit *outHits, GITriAccel *TriAccelArray, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, const GIRay *RayArray );
 
 bool InitializeCUDA()
@@ -581,6 +581,9 @@ KDTreeStructureCUDA* Raytracer::ConvertIntoKDTreeCUDA( GIScene *rtScene, KDTreeS
 			curCudaNode->SetInternalNode( leftNodeIndex, rightNodeIndex );
 			//curCudaNode->SetInternalNode( leftNodeIndex, rightNodeIndex );
 
+			curCudaNode->SplitAxis = curTravNode.node->SplitAxis;
+			curCudaNode->SplitPosition = curTravNode.node->SplitPosition;
+
 			if( curTravNode.node->LeftNode != NULL )
 				TraversalQueue.push( traversalNode( curTravNode.node->LeftNode, leftNodeIndex ) );
 			if( curTravNode.node->RightNode != NULL )
@@ -614,33 +617,33 @@ bool Raytracer::InitializeKDTreeForCUDA( KDTreeStructureCUDA* KDTreeCUDA )
 //	assert( DeviceKDTree != NULL );
 //	if( DeviceKDTree == NULL )
 //		return;
-//	cuShootRays( DeviceKDTree, RayCount, RayArray, outHits );
+//	cuShootRays( DeviceKDTree, RayArray, RayCount, outHits );
 //}
 
-//void Raytracer::SampleColorCUDA( GIScene *pScene, KDTreeStructure *KDTree, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray )
+//void Raytracer::SampleColorCUDA( GIScene *pScene, KDTreeStructure *KDTree, GIRay *RayArray, unsigned int RayCount, GIVector3 *outColorArray )
 //{
 //	cuKDTree *DeviceKDTree = KDTreeCUDA->GetDeviceKDTree();
 //	// TODO: 삼각형 포함, GIScene 도 바꿔야함! KDTree 그대로 당연히 못씀.
 //	assert( DeviceKDTree != NULL );
 //	if( DeviceKDTree == NULL )
 //		return;
-//	cuShootRays( DeviceKDTree, RayCount, RayArray, outHits );
+//	cuShootRays( DeviceKDTree, RayArray, RayCount, outHits );
 //}
 //
-//void Raytracer::SampleDistanceCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray )
+//void Raytracer::SampleDistanceCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, GIRay *RayArray, unsigned int RayCount, float *outDistanceArray )
 //{
 //	cuKDTree *DeviceKDTree = KDTreeCUDA->GetDeviceKDTree();
 //	assert( DeviceKDTree != NULL );
 //	if( DeviceKDTree == NULL )
 //		return;
-//	cuShootRays( DeviceKDTree, RayCount, RayArray, outHits );
+//	cuShootRays( DeviceKDTree, RayArray, RayCount, outHits );
 //}
 //
-void Raytracer::SampleHitCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray )
+void Raytracer::SampleHitCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, GIRay *RayArray, unsigned int RayCount, GIHit *outHitArray )
 {
 	cuKDTree *DeviceKDTree = KDTreeCUDA->GetDeviceKDTree();
 	assert( DeviceKDTree != NULL );
 	if( DeviceKDTree == NULL )
 		return;
-	cuShootRays( DeviceKDTree, RayCount, RayArray, outHitArray );
+	cuShootRays( DeviceKDTree, RayArray, RayCount, outHitArray );
 }

@@ -338,6 +338,8 @@ GIKDTreeNode* KDTreeStructure::CreateNode( int StartEdgeIndex, const std::vector
 		const int Axis = SAHCost.Axis;
 		const float SplitPosition = SAHCost.SplitPosition;
 
+		assert( BoundingBox.MinPositions.array[Axis] < SAHCost.SplitPosition && SAHCost.SplitPosition < BoundingBox.MaxPositions.array[Axis] );
+
 		GIBoundingBox LeftBox = BoundingBox;
 		GIBoundingBox RightBox = BoundingBox;
 		LeftBox.MaxPositions.array[SAHCost.Axis] = SplitPosition;
@@ -550,8 +552,8 @@ void KDTreeStructure::EvaluateCost( RtSAHCost &SAHCost, const std::vector<unsign
 		ASSERtRANGE( rightOnlyCount, 0, TriangleCount );
 		ASSERtRANGE( crossTriangleCount, 0, TriangleCount );
 
-		// Plane 는 무조건 왼쪽으로 가정.
-		// TODO: [2] 로 두번 계산해서 비교해야함.
+		// TODO: 현재 Planar 는 무조건 왼쪽으로 가정하고 있음.
+		// 원래는 두번 계산해서 왼쪽에 넣을지 오른쪽에 넣을지 결정해야함.
 		float SAH = mTraversalCost + m_IntersectionCost * float(leftTriangleCount) * leftProbability + m_IntersectionCost * float(rightTriangleCount) * rightProbability;
 		if( SAH < SAHCost.SplitCost )
 		{
@@ -820,6 +822,7 @@ void KDTreeStructure::SortEdgeArray( RtEdge *EdgeArray, int EdgeSize )
 		assert( EdgeArray[i].position <= EdgeArray[i+1].position );
 }
 
+// TODO: 삭제 예정
 void KDTreeStructure::TriangleToBoundingBox( GIVector3 &BoxMin, GIVector3 &BoxMax, const GITriangle *Triangle )
 {
 	BoxMin = GIVector3( 1e15f, 1e15f, 1e15f );

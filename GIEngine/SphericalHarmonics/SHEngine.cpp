@@ -106,7 +106,7 @@ SphericalHarmonics<order>* SHEngine::CreateCircleLight( float radius )
 	assert( SampleArray.GetThetaArray() != NULL );
 	assert( SampleArray.GetPhiArray() != NULL );
 
-	float WeightFactor = 4.0f * FLOAT_PI / float(CREATING_LIGHT_SAMPLE_COUNT);
+	float WeightFactor = 4.0f * GI_FLOAT_PI / float(CREATING_LIGHT_SAMPLE_COUNT);
 
 	int l = 0;
 	int m = 0;
@@ -156,14 +156,14 @@ void SHEngine::CalcSH_RGB( unsigned int SamplingCount, GIScene *Scene, SceneAcce
 	assert( SampleArray.GetPhiArray() != NULL );	
 
 	// TODO: 0.5는 없애고, 제대로 된 조명을 넣어야함.(albedo를 낮춘셈)
-	float WeightFactor = 4.0f * FLOAT_PI / float(RayCount) * 0.5f;
+	float WeightFactor = 4.0f * GI_FLOAT_PI / float(RayCount) * 0.5f;
 
 	// TODO: 샘플링 미리 계산
 
 	// TODO: Coordinate 확인???
 
 	// Depth 설정
-	SampleColor( Scene, AccelStructure, RayCount, SampleArray.GetRayArray(), RenderedColor );
+	SampleColor( Scene, AccelStructure, SampleArray.GetRayArray(), RayCount, RenderedColor );
 
 	int l = 0;
 	int m = 0;
@@ -217,9 +217,9 @@ void SHEngine::CalcAmbientOcclusionSH( unsigned int SamplingCount, GIScene *Scen
 		//SampleArray.GetWeightArray()[i] = dot>0.0f?dot:0.0f;
 	}
 
-	SampleDistance( Scene, AccelStructure, RayCount, SampleArray.GetRayArray(), SampledDistanceArray );
+	SampleDistance( Scene, AccelStructure, SampleArray.GetRayArray(), RayCount, SampledDistanceArray );
 
-	const float WeightFactor = 4.0f * FLOAT_PI / float(SamplingCount);
+	const float WeightFactor = 4.0f * GI_FLOAT_PI / float(SamplingCount);
 
 	int l = 0;
 	int m = 0;
@@ -246,7 +246,7 @@ void SHEngine::CalcAmbientOcclusionSH( unsigned int SamplingCount, GIScene *Scen
 		//	float weight = SampleArray.GetWeightArray()[ray];
 		//	coefficient += visibility * weight;
 		//}
-		//coefficient *= WeightFactor/FLOAT_PI;
+		//coefficient *= WeightFactor/GI_FLOAT_PI;
 
 		outSH->coefficients[sh_i] = coefficient;
 
@@ -288,8 +288,8 @@ void SHEngine::CalcDiffuseShadowedSH( unsigned int SamplingCount,
 	assert( SampleArray.GetPhiArray() != NULL );
 	assert( SampleArray.GetWeightArray() != NULL );
 
-	float WeightFactor = 4.0f * FLOAT_PI / float(SamplingCount);
-	WeightFactor /= FLOAT_PI;
+	float WeightFactor = 4.0f * GI_FLOAT_PI / float(SamplingCount);
+	WeightFactor /= GI_FLOAT_PI;
 
 	// TODO: cache 생각해서 최적화 해야함
 	for( unsigned int vertex_i = 0; vertex_i < Scene->GetVertexCount(); vertex_i++ )
@@ -299,7 +299,7 @@ void SHEngine::CalcDiffuseShadowedSH( unsigned int SamplingCount,
 		//GenerateHemisphericalSampleArray( origin, normal, &SampleArray );
 		GenerateSphericalSampleArray( origin, normal, &SampleArray );
 
-		SampleDistance( Scene, AccelStructure, RayCount, SampleArray.GetRayArray(), SampledDistanceArray );
+		SampleDistance( Scene, AccelStructure, SampleArray.GetRayArray(), RayCount, SampledDistanceArray );
 
 		int l = 0;
 		int m = 0;
@@ -364,8 +364,8 @@ void SHEngine::CalcDiffuseInterrefelctionSH( unsigned int SamplingCount, unsigne
 
 	GIHit *HitArray = new GIHit[RayCount];
 
-	float WeightFactor = 2.0f * FLOAT_PI / float(SamplingCount);
-	//WeightFactor /= FLOAT_PI;
+	float WeightFactor = 2.0f * GI_FLOAT_PI / float(SamplingCount);
+	//WeightFactor /= GI_FLOAT_PI;
 
 	unsigned int COEFFICIENT_COUNT = SphericalHarmonicsRGB<order>::GetNumberOfCoefficients();
 
@@ -392,7 +392,7 @@ void SHEngine::CalcDiffuseInterrefelctionSH( unsigned int SamplingCount, unsigne
 
 			GenerateHemisphericalSampleArray( origin, normal, &SampleArray );
 
-			SampleHit( Scene, AccelStructure, RayCount, SampleArray.GetRayArray(), HitArray );
+			SampleHit( Scene, AccelStructure, SampleArray.GetRayArray(), RayCount, HitArray );
 
 			//DI_Dest[vertex_i].Reset();
 

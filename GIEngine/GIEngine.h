@@ -11,13 +11,6 @@
 //#include "Raytracer/Raytracer.h"
 #include "Scene.h"
 
-///*!
-// * NiNode의 Scene 은 외부에서 Raytracer로 포인터만 가르키는 aggregation 형태를 따른다.
-// * 반면 GIScene 타입의 mRTScene 는 외부에서 감춰지는 의도로 존재한다.
-// * mRTScene 는 외부에서 받은 NiNode 타입의 Scene으로부터 정보를 만들어내며, 외부에서 개별적으로 생성하는 것은 금지한다.
-// */
-//void Initialize( NiNode *pScene );
-
 struct GIHit;
 
 /*!
@@ -74,11 +67,11 @@ namespace GIEngine
 			RDT_OPENCL = 1<<2
 		};
 
-		// TODO: Display Ouput도 고려.
+		// TODO: Display Output도 고려.
 		int BuildDeviceTypeFlag;
 		RAYTRACER_DEVICE_TYPE RenderingDeviceType;
 
-		// for CPU
+		// for CPU only
 		unsigned int NumberOfThreads;
 	};
 
@@ -101,16 +94,16 @@ namespace GIEngine
 	void RenderCPU( unsigned int ThreadCount, GIScene *pScene, SceneAccelStructure *AccelStructure, GICamera *pCamera, GIVector3 *outPixelData );
 
 // Sampling
-	void SampleColor( GIScene *pScene, SceneAccelStructure *AccelStructure, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray );
-	void SampleDistance( GIScene *pScene, SceneAccelStructure *AccelStructure, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray );
-	void SampleHit( GIScene *pScene, SceneAccelStructure *AccelStructure, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray );
-	void UserDefinedShading( GIScene *pScene, SceneAccelStructure *AccelStructure, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray, ShadingFunction pfnShadingFunction );
+	void SampleColor( GIScene *pScene, SceneAccelStructure *AccelStructure, GIRay *RayArray, unsigned int RayCount, GIVector3 *outColorArray );
+	void SampleDistance( GIScene *pScene, SceneAccelStructure *AccelStructure, GIRay *RayArray, unsigned int RayCount, float *outDistanceArray );
+	void SampleHit( GIScene *pScene, SceneAccelStructure *AccelStructure, GIRay *RayArray, unsigned int RayCount, GIHit *outHitArray );
+	void UserDefinedShading( GIScene *pScene, SceneAccelStructure *AccelStructure, GIRay *RayArray, unsigned int RayCount, GIVector3 *outColorArray, ShadingFunction pfnShadingFunction );
 
 	namespace Raytracer {
-		void SampleColorCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray );
-		void SampleDistanceCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray );
-		void SampleHitCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray );
-		void UserDefinedShadingCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray, ShadingFunction pfnShadingFunction );
+		void SampleColorCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, GIRay *RayArray, unsigned int RayCount, GIVector3 *outColorArray );
+		void SampleDistanceCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, GIRay *RayArray, unsigned int RayCount, float *outDistanceArray );
+		void SampleHitCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, GIRay *RayArray, unsigned int RayCount, GIHit *outHitArray );
+		void UserDefinedShadingCPU( unsigned int ThreadCount, GIScene *pScene, KDTreeStructure *KDTree, GIRay *RayArray, unsigned int RayCount, GIVector3 *outColorArray, ShadingFunction pfnShadingFunction );
 	};
 
 // Irradiance

@@ -28,9 +28,9 @@ namespace Raytracer {
 	// TODO: Get, Set GPU Options (동시 실행 불가? MultiGPU에서는 가능한가?)
 	//void ShootRaysCUDA( GIHit *outHits, GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, const GIRay *RayArray );
 
-	//void SampleColorCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, GIVector3 *outColorArray );
-	//void SampleDistanceCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, float *outDistanceArray );
-	void SampleHitCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, unsigned int RayCount, GIRay *RayArray, GIHit *outHitArray );
+	//void SampleColorCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, GIRay *RayArray, unsigned int RayCount, GIVector3 *outColorArray );
+	//void SampleDistanceCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, GIRay *RayArray, unsigned int RayCount, float *outDistanceArray );
+	void SampleHitCUDA( GIScene *rtScene, KDTreeStructureCUDA *KDTreeCUDA, GIRay *RayArray, unsigned int RayCount, GIHit *outHitArray );
 
 	// TODO: 아마도 외부로부터 감추지 않을까?
 	//char* ErrorStringFromCURAError( cudaError );

@@ -132,7 +132,7 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene, KDTreeStr
 			// 시작 지점에서 epsilon 만큼 이동함.
 			// 바꿔야 할 수도 있음.
 			ray.NearDistance = 0.0f;
-			ray.FarDistance = GI_INFINITY;
+			ray.FarDistance = GI_FLOAT_INFINITY;
 			
 			GIHit hitResult = Raytracer::ShootRay( inScene, KDTree, ray );
 
@@ -259,7 +259,7 @@ GIColor3 PhotonMapping::FinalGatheringCPU( GIScene *inScene, KDTreeStructure *KD
 	// 가장 무식한 방법. KDTree도 없고, Sphere로 거리 계산.
 	const float SphereRadius = g_PhotonMappingOption.GatheringRadius;
 	const float SphereRadiusSquared = SphereRadius * SphereRadius;
-	const float SphereArea = 4.0f/3.0f*FLOAT_PI*SphereRadius*SphereRadius;
+	const float SphereArea = 4.0f/3.0f*GI_FLOAT_PI*SphereRadius*SphereRadius;
 	
 	std::vector<unsigned int> PhotonList;
 	PhotonList.reserve( g_PhotonMappingOption.MaximumGatheringPhotonCount );
@@ -333,7 +333,7 @@ void PhotonMapping::Render( unsigned int ThreadCount, GIScene *pScene, SceneAcce
 	GenerateRays( pCamera, RayArray );
 
 	// TODO: Error Check
-	Raytracer::UserDefinedShadingCPU( ThreadCount, pScene, AccelStructure->GetKDTree(), RayCount, RayArray, outPixelData, &PhotonMappingShading );
+	Raytracer::UserDefinedShadingCPU( ThreadCount, pScene, AccelStructure->GetKDTree(), RayArray, RayCount, outPixelData, &PhotonMappingShading );
 	delete[] RayArray;
 }
 

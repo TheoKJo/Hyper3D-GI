@@ -50,7 +50,7 @@ namespace GIEngine {
 	GIHit ShootRay( GIScene *rtScene, KDTreeStructure *KDTree, const GIRay &Ray/*, const RaytracerOption &Option*/ );
 	//, KDTreeStructure *pKDTree
 	////! Without Acceleration Structure (eg. KD-Tree)
-	//GIHit ShootRay( GIScene *rtScene, const GIRay &Ray );
+	GIHit ShootRay( GIScene *rtScene, const GIRay &Ray );
 
 	// ╬х╬╡юс
 	void TraverseKDTree( GIScene *rtScene, const GIRay &Ray, GIKDTreeNode *pNode, GIHit &Hit );
