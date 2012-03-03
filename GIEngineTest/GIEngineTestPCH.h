@@ -1,0 +1,3 @@
+
+
+#define RAYTRACER_TEST_RUN_COUNT 10
