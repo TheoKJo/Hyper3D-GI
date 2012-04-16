@@ -53,7 +53,7 @@ public:
 		return 0;
 	}*/
 
-	static DWORD WINAPI ShadingProcedure( LPVOID lpParam )
+	static DWORD WINAPI ShootAndShadingProcedure( LPVOID lpParam )
 	{
 		RaytracerProcedure *pRaytracerProcedure = (RaytracerProcedure*)lpParam;
 		GIVector3 *ColorData = (GIVector3*)pRaytracerProcedure->mOutData;
@@ -64,7 +64,7 @@ public:
 			GIHit Hit = GIEngine::Raytracer::ShootRay( mGIScene, mKDTree, pRaytracerProcedure->mRayArray[i] );
 
 			GIEngine::Raytracer::Shading( mGIScene, mKDTree, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
-			ColorData[i] = RenderedColor.ToVector3();
+			ColorData[i] = RenderedColor.xyz();
 		}
 		return 0;
 	}
@@ -94,7 +94,7 @@ public:
 
 			assert( pRaytracerProcedure->mShadingFunction != NULL );
 			pRaytracerProcedure->mShadingFunction( mGIScene, mKDTree, pRaytracerProcedure->mRayArray[i], Hit, 2, &RenderedColor );
-			ColorData[i] = RenderedColor.ToVector3();
+			ColorData[i] = RenderedColor.xyz();
 		}
 		return 0;
 	}

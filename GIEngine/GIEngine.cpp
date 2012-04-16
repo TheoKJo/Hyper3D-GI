@@ -252,7 +252,7 @@ SceneAccelStructure* GIEngine::BuildAccStructure( GIScene *Scene, const char *st
 	{
 		KDTreeCUDA = Raytracer::ConvertIntoKDTreeCUDA( (GIScene*)Scene, KDTree );
 		// TODO: Error 처리
-		Raytracer::InitializeKDTreeForCUDA( KDTreeCUDA );
+		Raytracer::InitializeKDTreeForCUDA( (GIScene*)Scene, KDTreeCUDA );
 	}
 	SceneAccelStructure *AccelStructure = new SceneAccelStructure();
 	AccelStructure->SetKDTree( KDTree );
@@ -336,7 +336,7 @@ void GIEngine::Raytracer::SampleColorCPU( unsigned int ThreadCount, GIScene *pSc
 			// KD-Tree
 			GIHit Hit = Raytracer::ShootRay( pScene, KDTree, RayArray[i] );
 			Raytracer::Shading( pScene, KDTree, RayArray[i], Hit, 2, &RenderedColor );
-			outColorArray[i] = RenderedColor.ToVector3();
+			outColorArray[i] = RenderedColor.xyz();
 		}
 		return;
 	}
@@ -368,7 +368,7 @@ void GIEngine::Raytracer::SampleColorCPU( unsigned int ThreadCount, GIScene *pSc
 		pThreadArray[i] = CreateThread( 
 			NULL,							// default security attributes
 			0,								// use default stack size  
-			RaytracerProcedure::ShadingProcedure,       // thread function name
+			RaytracerProcedure::ShootAndShadingProcedure,       // thread function name
 			//NULL, 
 			(LPVOID)pRaytracerProcedure,  // argument to thread function 
 			CREATE_SUSPENDED,
@@ -414,7 +414,7 @@ void GIEngine::Raytracer::SampleDistanceCPU( unsigned int ThreadCount, GIScene *
 			GIHit Hit = Raytracer::ShootRay( pScene, KDTree, RayArray[i] );
 
 			float distance = Hit.dist;
-			bool hit = Hit.isHit();
+			bool hit = Hit.hit;
 			bool frontHit = !Hit.backHit;
 			if( hit )
 			{
@@ -484,7 +484,7 @@ void GIEngine::Raytracer::SampleDistanceCPU( unsigned int ThreadCount, GIScene *
 	// backhit일 경우 0에서 hit했다고 가정
 	for( unsigned int i = 0; i < RayCount; i++ )
 	{
-		if( HitArray[i].isHit() )
+		if( HitArray[i].hit )
 		{
 			if( !HitArray[i].backHit )
 				outDistanceArray[i] = HitArray[i].dist;
@@ -517,6 +517,7 @@ void GIEngine::Raytracer::SampleHitCPU( unsigned int ThreadCount, GIScene *pScen
 		for( unsigned int i = 0; i < RayCount; i++ )
 		{
 			// KD-Tree
+
 			outHitArray[i] = Raytracer::ShootRay( pScene, KDTree, RayArray[i] );
 		}
 		return;
@@ -595,7 +596,7 @@ void GIEngine::Raytracer::UserDefinedShadingCPU( unsigned int ThreadCount,
 			// KD-Tree
 			GIHit Hit = Raytracer::ShootRay( pScene, KDTree, RayArray[i] );
 			pfnShadingFunction( pScene, KDTree, RayArray[i], Hit, 2, &RenderedColor );
-			outColorArray[i] = RenderedColor.ToVector3();
+			outColorArray[i] = RenderedColor.xyz();
 		}
 		return;
 	}

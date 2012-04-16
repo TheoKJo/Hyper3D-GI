@@ -406,7 +406,7 @@ void SHEngine::CalcDiffuseInterrefelctionSH( unsigned int SamplingCount, unsigne
 					continue;
 
 				// V == 0 ( 1-V == 1 )
-				if( HitArray[ray].isHit() && HitArray[ray].backHit == false )
+				if( HitArray[ray].hit && HitArray[ray].backHit == false )
 				{
 					assert( HitArray[ray].dist > 0.001f );
 					if( HitArray[ray].dist <= 0.001f )

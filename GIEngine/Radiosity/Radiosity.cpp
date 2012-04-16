@@ -54,7 +54,7 @@ bool Radiosity::BuildFormFactors( RadiosityScene *pRadiosityScene, const Radiosi
 
 		for( unsigned int j = 0; j < RaySampleArray->GetRayCount(); j++ )
 		{
-			if( HitArray[j].isHit() && !HitArray[j].backHit )
+			if( HitArray[j].hit && !HitArray[j].backHit )
 			{
 				// TODO: 실패시는??
 				unsigned int DestQuadNum;

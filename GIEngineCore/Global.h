@@ -18,7 +18,8 @@
 #define NULL 0
 #endif
 
-// TODO: ÄÁº¥¼Ç ¾û¸Á
+#define optional
+
 #define GI_FLOAT_EPSILON 0.001f
 #define GI_FLOAT_PI 3.141592f
 #define GI_FLOAT_INFINITY 1e15f
@@ -238,6 +239,7 @@ struct GIVector4
 	union {
 		float array[4];
 		struct { float x, y, z, w; };
+		struct { float r, g, b, a; };
 		//struct { float u, v, q, r; };
 		//struct { float s, t, q, r; };
 	};
@@ -253,7 +255,12 @@ struct GIVector4
 		: x(FloatArray[0]), y(FloatArray[1]), z(FloatArray[2]), w(FloatArray[3])
 	{}
 
-	inline GIVector3 ToVector3()
+	inline GIVector3 xyz() const
+	{
+		return GIVector3( x, y, z);
+	}
+
+	inline GIVector3 ToVector3() const
 	{
 		if( w == 0.0f )
 			return GIVector3( x, y, z);
@@ -295,7 +302,6 @@ struct GIVector4
 		w += vec.w;
 		return *this;
 	}
-
 
 	inline GIVector4 operator=( const GIVector4 &vec )
 	{
@@ -530,8 +536,6 @@ struct GIHit
 		dist = GI_FLOAT_INFINITY;
 		hit = false;
 	}
-
-	bool isHit() const { return hit; }
 
 	bool hit;
 	float dist;

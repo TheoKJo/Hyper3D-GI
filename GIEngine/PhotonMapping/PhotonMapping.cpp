@@ -79,7 +79,7 @@ PhotonMapping::GIPhotonMap* PhotonMapping::CreatePhotonMap( GIScene *inScene, GI
 		for( unsigned int samplingPass = 0; samplingPass < 2; samplingPass++ )
 		{
 			// TODO: DiffuseColor를 그대로 쓰는건 말도 안되는 방식
-			GeneratePhotons( PointLight->Position, PointLight->DiffuseColor.ToVector3(), g_PhotonMappingOption.PhotonCountPerLight, PhotonArray, &UniformSphericalCoordinateSamplingFunction );
+			GeneratePhotons( PointLight->Position, PointLight->DiffuseColor.xyz(), g_PhotonMappingOption.PhotonCountPerLight, PhotonArray, &UniformSphericalCoordinateSamplingFunction );
 
 			// TODO: Refactoring 해야함. 죽은 포톤을 계속 loop에서 관리함. 살아 있는 것들만 관리해야함.
 			for( unsigned int Pass = 0; Pass <= g_PhotonMappingOption.MaxPhotonPass; Pass++ )
@@ -150,7 +150,7 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene, KDTreeStr
 				outPhoton = &outPhotonArray[i];
 			}
 
-			if( hitResult.isHit() )
+			if( hitResult.hit )
 			{
 				assert( inScene->GetSceneEpsilon() <= hitResult.dist );
 				//const GITriangle &hitTriangle = inScene->GetTriangle( hitResult.triNum );
@@ -161,9 +161,9 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene, KDTreeStr
 				// 들어가는 방향
 				outPhoton->Direction = GIVector3( ray.dir );
 				outPhoton->Position = inPhoton.Position + GIVector3( ray.dir ) * hitResult.dist + normal * inScene->GetSceneEpsilon();
-				//outPhoton->Color = outPhoton->Color * albedo.ToVector3();
+				//outPhoton->Color = outPhoton->Color * albedo.xyz();
 
-				//outPhoton->Color *= albedo.ToVector3();//GIVector3( 0.0f, 0.0f, 0.0f );
+				//outPhoton->Color *= albedo.xyz();//GIVector3( 0.0f, 0.0f, 0.0f );
 
 				//
 				// Russian Roulette
@@ -216,12 +216,12 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene, KDTreeStr
 						normal * cos(theta);
 
 					// 살아 나갈 경우만 누적
-					outPhoton->Color.r *= albedo.ToVector3().r;
-					outPhoton->Color.g *= albedo.ToVector3().g;
-					outPhoton->Color.b *= albedo.ToVector3().b;
+					outPhoton->Color.r *= albedo.xyz().r;
+					outPhoton->Color.g *= albedo.xyz().g;
+					outPhoton->Color.b *= albedo.xyz().b;
 
 					//if( Pass == 0 )
-					//	outPhoton->Color = albedo.ToVector3();
+					//	outPhoton->Color = albedo.xyz();
 				}
 				else
 				{
@@ -251,7 +251,7 @@ bool PhotonMapping::ShootPhotons( unsigned int Pass, GIScene *inScene, KDTreeStr
 GIColor3 PhotonMapping::FinalGatheringCPU( GIScene *inScene, KDTreeStructure *KDTree, GIPhotonMap *inPhotonMap, const GIVector3 &Position, const GIVector3 &RayDirection/*, const GIHit &hitResult*/ )
 {
 	assert( g_PhotonMappingOption.IsValid() );
-	//assert( hitResult.isHit() );
+	//assert( hitResult.hit );
 	assert( inPhotonMap != NULL );
 
 	//const GITriangle &hitTriangle = inScene->GetTriangle( hitResult.triNum );
@@ -305,7 +305,7 @@ void PhotonMappingShading( GIScene *rtScene, KDTreeStructure *KDTree, const GIRa
 	GIColor4 DirectIlluminationColor;
 	Raytracer::Shading( rtScene, KDTree, Ray, Hit, MaxDepth, &DirectIlluminationColor );
 	GIColor3 IndirectIlluminationColor( 0.0f, 0.0f, 0.0f );
-	if( Hit.isHit() )
+	if( Hit.hit )
 		IndirectIlluminationColor = PhotonMapping::FinalGatheringCPU( (GIScene*)rtScene, KDTree, gPhotonMap, GIVector3( Ray.org ) + GIVector3( Ray.dir ) * Hit.dist, GIVector3( Ray.dir ) );;
 	
 	// TODO: Clamp
