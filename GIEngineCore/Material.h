@@ -104,6 +104,8 @@ public:
 		
 	}
 
+	ETextureFormat GetTextureFormat() const { return mTextureFormat; }
+
 private:
 	unsigned int m_Width;
 	unsigned int m_Height;
@@ -126,6 +128,15 @@ private:
 	unsigned char *m_Data;
 };
 
+class GIMaterialSet
+{
+public:
+	GIVector4 AmbientColor;
+	GIVector4 DiffuseColor;
+	GIVector4 SpecularColor;
+	float Shininess;
+};
+
 class GIMaterial
 {
 public:
@@ -144,15 +155,15 @@ public:
 	void SetAlbedoTexture( GITexture *pTexture ) { m_AlbedoTexture = pTexture; }
 	GITexture* GetAlbedoTexture() { return m_AlbedoTexture; }
 
-	void SetAmbientColor( GIVector4 AmbientColor ) { m_AmbientColor = AmbientColor; }
-	void SetDiffuseColor( GIVector4 DiffuseColor ) { m_DiffuseColor = DiffuseColor; }
-	void SetSpecularColor( GIVector4 SpecularColor ) { m_SpecularColor = SpecularColor; }
-	void SetShininess( float Shininess ) { m_Shininess = Shininess; }
+	void SetAmbientColor( GIVector4 AmbientColor ) { m_MaterialSet.AmbientColor = AmbientColor; }
+	void SetDiffuseColor( GIVector4 DiffuseColor ) { m_MaterialSet.DiffuseColor = DiffuseColor; }
+	void SetSpecularColor( GIVector4 SpecularColor ) { m_MaterialSet.SpecularColor = SpecularColor; }
+	void SetShininess( float Shininess ) { m_MaterialSet.Shininess = Shininess; }
 
-	GIVector4 GetAmbientColor() { return m_AmbientColor; }
-	GIVector4 GetDiffuseColor() { return m_DiffuseColor; }
-	GIVector4 GetSpecularColor() { return m_SpecularColor; }
-	float GetShininess() { return m_Shininess; }
+	GIVector4 GetAmbientColor() { return m_MaterialSet.AmbientColor; }
+	GIVector4 GetDiffuseColor() { return m_MaterialSet.DiffuseColor; }
+	GIVector4 GetSpecularColor() { return m_MaterialSet.SpecularColor; }
+	float GetShininess() { return m_MaterialSet.Shininess; }
 
 	
 	enum ETexturingType {
@@ -164,10 +175,6 @@ public:
 private:
 	GITexture *m_AlbedoTexture;
 	char *m_MaterialName;
-
-	GIVector4 m_AmbientColor;
-	GIVector4 m_DiffuseColor;
-	GIVector4 m_SpecularColor;
-	float m_Shininess;
+	GIMaterialSet m_MaterialSet;
 };
 };
